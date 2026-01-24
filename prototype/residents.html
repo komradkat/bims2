@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="emerald">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Residents - BIMS</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Taildwind & DaisyUI -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body>
+
+    <div id="app">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold">Residents Masterlist</h1>
+            <button class="btn btn-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                Add Resident
+            </button>
+        </div>
+
+        <!-- Search & Filter -->
+        <div class="card bg-base-100 shadow-sm border border-base-200 mb-6">
+            <div class="card-body p-4">
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="flex-1 form-control relative">
+                        <input type="text" placeholder="Search by name, alias, or ID..." class="input input-bordered w-full pl-10" />
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute left-3 top-3.5 text-base-content/50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                    </div>
+                    <select class="select select-bordered w-full md:w-48">
+                        <option disabled selected>Filter by Purok</option>
+                        <option>All Puroks</option>
+                        <option>Purok 1</option>
+                        <option>Purok 2</option>
+                        <option>Purok 3</option>
+                    </select>
+                    <select class="select select-bordered w-full md:w-48">
+                        <option disabled selected>Sector</option>
+                        <option>All</option>
+                        <option>Senior Citizen</option>
+                        <option>PWD</option>
+                        <option>Solo Parent</option>
+                        <option>4Ps</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="card bg-base-100 shadow-sm border border-base-200 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="table table-zebra w-full">
+                    <!-- head -->
+                    <thead>
+                        <tr>
+                            <th>Resident</th>
+                            <th>Age / Sex</th>
+                            <th>Address</th>
+                            <th>Sector</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Row 1 -->
+                        <tr class="hover">
+                            <td>
+                                <div class="flex items-center gap-3">
+                                    <div class="avatar">
+                                        <div class="mask mask-squircle w-12 h-12 bg-base-300">
+                                            <img src="https://ui-avatars.com/api/?name=Juan+Dela+Cruz" alt="Avatar" />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="font-bold">Juan Dela Cruz</div>
+                                        <div class="text-sm opacity-50">BID-2026-001</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                45 / M
+                                <br/>
+                                <span class="badge badge-ghost badge-sm">Married</span>
+                            </td>
+                            <td>
+                                123 Kalye Serye, Purok 1
+                            </td>
+                            <td>
+                                <div class="flex gap-1">
+                                     <span class="badge badge-error badge-outline badge-sm">Indigent</span>
+                                </div>
+                            </td>
+                            <th>
+                                <button class="btn btn-ghost btn-xs">Details</button>
+                            </th>
+                        </tr>
+                        <!-- Row 2 -->
+                        <tr class="hover">
+                            <td>
+                                <div class="flex items-center gap-3">
+                                    <div class="avatar">
+                                        <div class="mask mask-squircle w-12 h-12 bg-base-300">
+                                            <img src="https://ui-avatars.com/api/?name=Maria+Santos" alt="Avatar" />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="font-bold">Maria Santos</div>
+                                        <div class="text-sm opacity-50">BID-2026-005</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                68 / F
+                                <br/>
+                                <span class="badge badge-ghost badge-sm">Widowed</span>
+                            </td>
+                             <td>
+                                45 Mabini St, Purok 2
+                            </td>
+                             <td>
+                                <div class="flex gap-1">
+                                     <span class="badge badge-warning badge-outline badge-sm">Senior</span>
+                                     <span class="badge badge-info badge-outline badge-sm">PWD</span>
+                                </div>
+                            </td>
+                            <th>
+                                <button class="btn btn-ghost btn-xs">Details</button>
+                            </th>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <!-- Pagination -->
+            <div class="flex justify-center p-4">
+                <div class="join">
+                    <button class="join-item btn">«</button>
+                    <button class="join-item btn">Page 1</button>
+                    <button class="join-item btn">»</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="layout.js"></script>
+</body>
+</html>

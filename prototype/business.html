@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="emerald">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business - BIMS</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Taildwind & DaisyUI -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body>
+
+    <div id="app">
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h1 class="text-2xl font-bold">Business Permits</h1>
+                <p class="text-sm opacity-60">Manage barangay business clearances and revenue</p>
+            </div>
+             <div class="flex gap-2">
+                <button class="btn btn-outline">Renewals (5)</button>
+                <button class="btn btn-primary">New Business</button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="stat bg-base-100 shadow-sm border border-base-200 rounded-box p-4">
+                <div class="stat-title">Active Permits</div>
+                <div class="stat-value text-success">245</div>
+            </div>
+            <div class="stat bg-base-100 shadow-sm border border-base-200 rounded-box p-4">
+                <div class="stat-title">Expired</div>
+                <div class="stat-value text-error">12</div>
+            </div>
+             <div class="stat bg-base-100 shadow-sm border border-base-200 rounded-box p-4">
+                <div class="stat-title">Pending</div>
+                <div class="stat-value text-warning">8</div>
+            </div>
+             <div class="stat bg-base-100 shadow-sm border border-base-200 rounded-box p-4">
+                <div class="stat-title">Total Revenue</div>
+                <div class="stat-value text-secondary">₱125k</div>
+            </div>
+        </div>
+
+        <div class="card bg-base-100 shadow-sm border border-base-200 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="table table-zebra w-full">
+                    <thead>
+                        <tr>
+                            <th>Business Name</th>
+                            <th>Owner</th>
+                            <th>Permit #</th>
+                            <th>Expiration</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="font-bold">Aling Nena's Sari-Sari Store</td>
+                            <td>Nena Magalona</td>
+                            <td>BP-2025-001</td>
+                            <td>Dec 31, 2025</td>
+                            <td><span class="badge badge-success badge-sm">Active</span></td>
+                            <td><button class="btn btn-xs btn-ghost">View</button></td>
+                        </tr>
+                        <tr>
+                            <td class="font-bold">Mang Inasal 2</td>
+                            <td>Edgar Sia II</td>
+                            <td>BP-2025-042</td>
+                            <td>Dec 31, 2025</td>
+                            <td><span class="badge badge-success badge-sm">Active</span></td>
+                            <td><button class="btn btn-xs btn-ghost">View</button></td>
+                        </tr>
+                         <tr>
+                            <td class="font-bold">Computer Shop 143</td>
+                            <td>Mark Zuckerberg</td>
+                            <td>BP-2024-112</td>
+                            <td class="text-error font-semibold">Dec 31, 2024</td>
+                            <td><span class="badge badge-error badge-sm">Expired</span></td>
+                            <td><button class="btn btn-xs btn-primary">Renew</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="layout.js"></script>
+</body>
+</html>

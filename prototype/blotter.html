@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="emerald">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blotter - BIMS</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Taildwind & DaisyUI -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body>
+
+    <div id="app">
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h1 class="text-2xl font-bold">Katarungang Pambarangay</h1>
+                <p class="text-sm opacity-60">Blotter and Incident Management</p>
+            </div>
+            <button class="btn btn-error text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                New Incident
+            </button>
+        </div>
+
+        <div class="flex gap-4 mb-6 overflow-x-auto pb-2">
+            <button class="btn btn-active">All Cases</button>
+            <button class="btn">Mediation (3)</button>
+            <button class="btn">Conciliation (1)</button>
+            <button class="btn">Arbitration (0)</button>
+            <button class="btn">Settled</button>
+            <button class="btn">Dismissed</button>
+        </div>
+
+        <div class="card bg-base-100 shadow-sm border border-base-200 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="table table-zebra w-full">
+                    <thead>
+                        <tr>
+                            <th>Case #</th>
+                            <th>Complainant vs Respondent</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Hearing Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Row 1 -->
+                        <tr class="hover">
+                            <td class="font-mono text-xs">2026-003</td>
+                            <td>
+                                <div class="font-bold">Jose Ryan vs. Cardo Dalisay</div>
+                                <div class="text-xs opacity-50">Property Boundary Dispute</div>
+                            </td>
+                            <td><span class="badge badge-ghost badge-sm">Civil</span></td>
+                            <td><span class="badge badge-warning badge-sm">Mediation</span></td>
+                            <td class="text-error font-medium">Tomorrow, 2:00 PM</td>
+                            <td>
+                                <div class="join">
+                                    <button class="btn btn-xs join-item">Docs</button>
+                                    <button class="btn btn-xs join-item">Update</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <!-- Row 2 -->
+                        <tr class="hover">
+                            <td class="font-mono text-xs">2026-004</td>
+                            <td>
+                                <div class="font-bold">Marites Chismosa vs. Barangay</div>
+                                <div class="text-xs opacity-50">Unjust Vexation</div>
+                            </td>
+                            <td><span class="badge badge-ghost badge-sm">Criminal</span></td>
+                            <td><span class="badge badge-info badge-sm">Conciliation</span></td>
+                             <td>Jan 26, 2026</td>
+                            <td>
+                                <div class="join">
+                                    <button class="btn btn-xs join-item">Docs</button>
+                                    <button class="btn btn-xs join-item">Update</button>
+                                </div>
+                            </td>
+                        </tr>
+                         <!-- Row 3 -->
+                        <tr class="hover opacity-50">
+                            <td class="font-mono text-xs">2026-001</td>
+                            <td>
+                                <div class="font-bold">Tito Sotto vs. Vic Sotto</div>
+                                <div class="text-xs opacity-50">Collection of Sum of Money</div>
+                            </td>
+                            <td><span class="badge badge-ghost badge-sm">Civil</span></td>
+                            <td><span class="badge badge-success badge-sm">Settled</span></td>
+                             <td>--</td>
+                            <td>
+                                <div class="join">
+                                    <button class="btn btn-xs join-item">Docs</button>
+                                    <button class="btn btn-xs join-item">View</button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="layout.js"></script>
+</body>
+</html>
