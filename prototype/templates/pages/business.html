@@ -22,15 +22,21 @@
 </head>
 <body>
 
-    <div id="app">
+    <div id="app" x-data="{ activeBusiness: '' }">
         <div class="flex justify-between items-center mb-6">
             <div>
                 <h1 class="text-2xl font-bold">Business Permits</h1>
                 <p class="text-sm opacity-60">Manage barangay business clearances and revenue</p>
             </div>
              <div class="flex gap-2">
-                <button class="btn btn-outline">Renewals (5)</button>
-                <button class="btn btn-primary">New Business</button>
+                <button class="btn btn-outline" onclick="alert('Showing permits expiring in 30 days...')">
+                    <span class="indicator-item badge badge-secondary badge-xs">5</span>
+                    Expiring Soon
+                </button>
+                <button class="btn btn-primary" onclick="document.getElementById('business_modal').showModal()">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                    New Business
+                </button>
             </div>
         </div>
 
@@ -55,7 +61,7 @@
 
         <div class="card bg-base-100 shadow-sm border border-base-200 overflow-hidden">
             <div class="overflow-x-auto">
-                <table class="table table-zebra w-full">
+                <table class="table table-zebra w-full hidden sm:table">
                     <thead>
                         <tr>
                             <th>Business Name</th>
@@ -63,38 +69,137 @@
                             <th>Permit #</th>
                             <th>Expiration</th>
                             <th>Status</th>
-                            <th>Action</th>
+                            <th class="text-right">Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
+                        <tr class="hover group">
                             <td class="font-bold">Aling Nena's Sari-Sari Store</td>
                             <td>Nena Magalona</td>
                             <td>BP-2025-001</td>
                             <td>Dec 31, 2025</td>
                             <td><span class="badge badge-success badge-sm">Active</span></td>
-                            <td><button class="btn btn-xs btn-ghost">View</button></td>
+                            <td class="text-right">
+                                <div class="dropdown dropdown-end">
+                                    <button tabindex="0" class="btn btn-ghost btn-xs btn-circle">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" /></svg>
+                                    </button>
+                                    <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                                        <li><a>View Details</a></li>
+                                        <li><a>Print Clearance</a></li>
+                                        <li><a>Renew Permit</a></li>
+                                        <div class="divider my-0"></div>
+                                        <li><a class="text-error">Retire Business</a></li>
+                                    </ul>
+                                </div>
+                            </td>
                         </tr>
-                        <tr>
+                        <tr class="hover group">
                             <td class="font-bold">Mang Inasal 2</td>
                             <td>Edgar Sia II</td>
                             <td>BP-2025-042</td>
                             <td>Dec 31, 2025</td>
                             <td><span class="badge badge-success badge-sm">Active</span></td>
-                            <td><button class="btn btn-xs btn-ghost">View</button></td>
+                            <td class="text-right">
+                                <div class="dropdown dropdown-end">
+                                    <button tabindex="0" class="btn btn-ghost btn-xs btn-circle">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" /></svg>
+                                    </button>
+                                    <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                                        <li><a>View Details</a></li>
+                                        <li><a>Print Clearance</a></li>
+                                        <li><a>Renew Permit</a></li>
+                                        <div class="divider my-0"></div>
+                                        <li><a class="text-error">Retire Business</a></li>
+                                    </ul>
+                                </div>
+                            </td>
                         </tr>
-                         <tr>
+                         <tr class="hover group">
                             <td class="font-bold">Computer Shop 143</td>
                             <td>Mark Zuckerberg</td>
                             <td>BP-2024-112</td>
                             <td class="text-error font-semibold">Dec 31, 2024</td>
                             <td><span class="badge badge-error badge-sm">Expired</span></td>
-                            <td><button class="btn btn-xs btn-primary">Renew</button></td>
+                            <td class="text-right">
+                                <button class="btn btn-xs btn-primary shadow-sm" onclick="document.getElementById('business_modal').showModal()">Renew Now</button>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </div>
+
+        <!-- Issue Business Permit Modal -->
+        <dialog id="business_modal" class="modal">
+            <div class="modal-box w-11/12 max-w-3xl">
+                <h3 class="font-bold text-lg mb-6 border-b pb-2">Issue Business Permit</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                    <div class="form-control w-full">
+                        <label class="label"><span class="label-text">Trade Name</span></label>
+                        <input type="text" placeholder="e.g. Aling Nena's Store" class="input input-bordered w-full" />
+                    </div>
+                    <div class="form-control w-full">
+                        <label class="label"><span class="label-text">Business Owner</span></label>
+                        <div class="flex gap-2">
+                             <input type="text" placeholder="Search Resident..." class="input input-bordered w-full" />
+                             <button class="btn btn-square btn-outline">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                             </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                     <div class="form-control w-full">
+                        <label class="label"><span class="label-text">Nature of Business</span></label>
+                         <select class="select select-bordered">
+                            <option disabled selected>Select Type</option>
+                            <option>Sari-Sari Store</option>
+                            <option>Eatery / Carenderia</option>
+                            <option>Internet Cafe</option>
+                            <option>Hardware</option>
+                            <option>Service Provider</option>
+                        </select>
+                    </div>
+                     <div class="form-control w-full">
+                        <label class="label"><span class="label-text">Application Status</span></label>
+                         <select class="select select-bordered">
+                            <option>New</option>
+                            <option>Renewal</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="divider">Assessment & Fees</div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div class="form-control w-full">
+                        <label class="label"><span class="label-text">Gross Sales / Capital</span></label>
+                        <input type="number" placeholder="0.00" class="input input-bordered w-full" />
+                    </div>
+                     <div class="form-control w-full">
+                        <label class="label"><span class="label-text">Tax Due (Auto)</span></label>
+                        <input type="text" value="₱ 0.00" class="input input-bordered w-full bg-base-200" readonly />
+                    </div>
+                     <div class="form-control w-full">
+                        <label class="label"><span class="label-text">O.R. Number</span></label>
+                        <input type="text" placeholder="Official Receipt No." class="input input-bordered w-full" />
+                    </div>
+                </div>
+
+                <div class="modal-action">
+                    <form method="dialog">
+                        <button class="btn btn-ghost">Cancel</button>
+                        <button class="btn btn-primary ml-2" onclick="alert('Business Permit Issued! (Prototype)');">Issue Permit</button>
+                    </form>
+                </div>
+            </div>
+            <form method="dialog" class="modal-backdrop">
+                <button>close</button>
+            </form>
+        </dialog>
     </div>
 
     <script src="../../static/js/layout.js"></script>
