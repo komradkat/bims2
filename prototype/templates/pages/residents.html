@@ -25,10 +25,16 @@
     <div id="app">
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-2xl font-bold">Residents Masterlist</h1>
-            <a href="residents_add.html" class="btn btn-primary">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-                Add Resident
-            </a>
+            <div class="flex gap-2">
+                <button class="btn btn-outline btn-success" onclick="alert('Exporting to Excel... (Prototype)')">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                    Export
+                </button>
+                <a href="residents_add.html" class="btn btn-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                    Add Resident
+                </a>
+            </div>
         </div>
 
         <!-- Search & Filter -->
@@ -61,7 +67,7 @@
         <!-- Table -->
         <div class="card bg-base-100 shadow-sm border border-base-200 overflow-hidden">
             <div class="overflow-x-auto">
-                <table class="table table-zebra w-full">
+                <table class="table table-zebra w-full hidden sm:table"> <!-- Hidden on mobile, use cards for mobile if needed, for now table is ok -->
                     <!-- head -->
                     <thead>
                         <tr>
@@ -69,12 +75,12 @@
                             <th>Age / Sex</th>
                             <th>Address</th>
                             <th>Sector</th>
-                            <th>Actions</th>
+                            <th class="text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         <!-- Row 1 -->
-                        <tr class="hover">
+                        <tr class="hover group">
                             <td>
                                 <div class="flex items-center gap-3">
                                     <div class="avatar">
@@ -101,12 +107,27 @@
                                      <span class="badge badge-error badge-outline badge-sm">Indigent</span>
                                 </div>
                             </td>
-                            <th>
-                                <button class="btn btn-ghost btn-xs">Details</button>
-                            </th>
+                            <td class="text-right">
+                                <div class="dropdown dropdown-end">
+                                    <button tabindex="0" class="btn btn-ghost btn-xs btn-circle">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" /></svg>
+                                    </button>
+                                    <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                                        <li><a>View Profile</a></li>
+                                        <li><a>Edit Profile</a></li>
+                                        <div class="divider my-0"></div>
+                                        <li class="menu-title text-xs opacity-50 py-1">Certificates</li>
+                                        <li><a>Indigency</a></li>
+                                        <li><a>Residency</a></li>
+                                        <li><a>Barangay Clearance</a></li>
+                                        <div class="divider my-0"></div>
+                                        <li><a class="text-error">Delete</a></li>
+                                    </ul>
+                                </div>
+                            </td>
                         </tr>
                         <!-- Row 2 -->
-                        <tr class="hover">
+                        <tr class="hover group">
                             <td>
                                 <div class="flex items-center gap-3">
                                     <div class="avatar">
@@ -134,9 +155,23 @@
                                      <span class="badge badge-info badge-outline badge-sm">PWD</span>
                                 </div>
                             </td>
-                            <th>
-                                <button class="btn btn-ghost btn-xs">Details</button>
-                            </th>
+                            <td class="text-right">
+                                <div class="dropdown dropdown-end">
+                                    <button tabindex="0" class="btn btn-ghost btn-xs btn-circle">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" /></svg>
+                                    </button>
+                                    <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                                        <li><a>View Profile</a></li>
+                                        <li><a>Edit Profile</a></li>
+                                        <div class="divider my-0"></div>
+                                        <li class="menu-title text-xs opacity-50 py-1">Certificates</li>
+                                        <li><a>Residency</a></li>
+                                        <li><a>Barangay Clearance</a></li>
+                                        <div class="divider my-0"></div>
+                                        <li><a class="text-error">Delete</a></li>
+                                    </ul>
+                                </div>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
