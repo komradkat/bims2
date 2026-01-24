@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="emerald">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audit Logs - BIMS</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Taildwind & DaisyUI -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body>
+
+    <div id="app">
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h1 class="text-2xl font-bold">Audit Logs</h1>
+                <p class="text-sm opacity-60">System-wide activity tracker</p>
+            </div>
+             <button class="btn btn-outline btn-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                Export Logs
+            </button>
+        </div>
+
+        <div class="card bg-base-100 shadow-sm border border-base-200">
+            <div class="overflow-x-auto">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>User</th>
+                            <th>Action</th>
+                            <th>Module</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="whitespace-nowrap text-xs opacity-70">Jan 24, 11:42 AM</td>
+                            <td><div class="badge badge-ghost badge-sm">admin</div></td>
+                            <td class="text-success font-medium">Create</td>
+                            <td>Certificates</td>
+                            <td>Issued Clearance for Juan Santos</td>
+                        </tr>
+                        <tr>
+                            <td class="whitespace-nowrap text-xs opacity-70">Jan 24, 10:15 AM</td>
+                            <td><div class="badge badge-ghost badge-sm">treasurer</div></td>
+                            <td class="text-info font-medium">Update</td>
+                            <td>Finance</td>
+                            <td>Verified OR #7583921</td>
+                        </tr>
+                        <tr>
+                            <td class="whitespace-nowrap text-xs opacity-70">Jan 24, 09:30 AM</td>
+                            <td><div class="badge badge-ghost badge-sm">clerk1</div></td>
+                            <td class="text-success font-medium">Create</td>
+                            <td>Residents</td>
+                            <td>Added resident profile: Maria Santos</td>
+                        </tr>
+                         <tr>
+                            <td class="whitespace-nowrap text-xs opacity-70">Jan 23, 04:55 PM</td>
+                            <td><div class="badge badge-ghost badge-sm">admin</div></td>
+                            <td class="text-error font-medium">Delete</td>
+                            <td>Residents</td>
+                            <td>Removed duplicate entry for ID: 9921</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+             <div class="flex justify-center p-4 border-t border-base-200">
+                <div class="join">
+                    <button class="join-item btn btn-sm">«</button>
+                    <button class="join-item btn btn-sm">Page 1</button>
+                    <button class="join-item btn btn-sm">»</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../static/js/layout.js"></script>
+</body>
+</html>
