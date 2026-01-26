@@ -8,3 +8,30 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Django
+*.log
+db.sqlite3
+db.sqlite3-journal
+/media
+/staticfiles
+*.pot
+
+# Environment
+.env
+.envs/*
+!.envs/.gitkeep
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+init_apps.py
