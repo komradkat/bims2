@@ -1,9 +1,11 @@
 {% load static %}
 
 {# Sidebar Navigation - Extracted from prototype/static/js/layout.js #}
-<div class="drawer-side z-20">
+<div class="drawer-side z-20 h-full">
   <label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"></label> 
-  <ul class="menu p-4 w-80 min-h-full bg-base-100 text-base-content border-r border-base-300">
+  <div class="flex flex-col w-80 h-full bg-base-100 border-r border-base-300">
+    {# Menu - Scrollable #}
+    <ul class="menu p-4 flex-1 overflow-y-auto text-base-content">
     
     {# Tier 1: Community Edition #}
     <li class="menu-title mt-2">Tier 1: Community</li>
@@ -62,13 +64,20 @@
       </a>
     </li>
     
-    {# Spacer to push logout to bottom #}
+    {# Spacer to push footer to bottom #}
     <li class="mt-auto"></li>
-    <li>
-      <a class="text-error" href="#">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-        Logout
-      </a>
-    </li>
   </ul>
+  
+  {# Footer in Sidebar - Fixed at bottom #}
+  <div class="p-4 border-t border-base-300 bg-base-100 shrink-0">
+    <p class="text-xs text-center text-base-content/60">
+      © 2026 <strong>{{ barangay_info.name }}</strong>
+    </p>
+    <p class="text-xs text-center text-base-content/60 mt-1">
+      <span class="badge badge-xs badge-{{ tier_info.badge_color }}">{{ tier_info.name }}</span>
+      <span class="mx-1">•</span>
+      <span>v1.0.0</span>
+    </p>
+  </div>
+  </div>
 </div>

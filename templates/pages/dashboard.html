@@ -6,45 +6,113 @@
 <div class="container mx-auto">
     <h1 class="text-3xl font-bold mb-6">Dashboard</h1>
     
-    {# Alert Example #}
-    <div class="mb-6">
-        {% include 'components/alert.html' with type="success" message="Welcome back! All systems operational." dismissible=True %}
-    </div>
-    
     {# Stats Cards using Component #}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {% include 'components/stat_card.html' with title="Total Residents" value=stats.total_residents icon="users" color="primary" description="Registered in the system" %}
-        {% include 'components/stat_card.html' with title="Documents Issued" value=stats.documents_issued icon="document" color="secondary" description="This month" %}
-        {% include 'components/stat_card.html' with title="Total Revenue" value="₱"|add:stats.total_revenue|floatformat:0 icon="money" color="accent" description="This month" %}
-        {% include 'components/stat_card.html' with title="Active Cases" value=stats.active_cases icon="case" color="warning" description="Pending resolution" %}
+        {% include 'components/stat_card.html' with title="Total Residents" value=stats.total_residents icon="users" color="primary" description="↗︎ 14 new this month" %}
+        {% include 'components/stat_card.html' with title="Documents Issued" value=stats.documents_issued icon="document" color="secondary" description="This week" %}
+        {% include 'components/stat_card.html' with title="Revenue (YTD)" value="₱45K" icon="money" color="accent" description="Est. from permits" %}
+        {% include 'components/stat_card.html' with title="Pending Incidents" value=stats.active_cases icon="case" color="warning" description="Requires attention" %}
     </div>
 
     {# Quick Actions #}
     <div class="mb-8">
-        <h2 class="text-2xl font-semibold mb-4">Quick Actions</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <a href="{% url 'core:residents_add' %}" class="btn btn-primary btn-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg>
-                Add New Resident
+        <h2 class="text-xl font-bold mb-4">Quick Actions</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <a href="{% url 'core:residents_add' %}" class="btn btn-outline h-auto py-4 flex flex-col items-center gap-2 hover:bg-primary hover:text-white group">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-primary group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg>
+                New Resident
             </a>
-            <a href="{% url 'core:certificates' %}" class="btn btn-secondary btn-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+            <a href="{% url 'core:certificates' %}" class="btn btn-outline h-auto py-4 flex flex-col items-center gap-2 hover:bg-secondary hover:text-white group">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-secondary group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                 Issue Certificate
             </a>
-            <a href="{% url 'core:blotter_list' %}" class="btn btn-accent btn-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-                File Blotter Report
+            <a href="{% url 'core:blotter_list' %}" class="btn btn-outline h-auto py-4 flex flex-col items-center gap-2 hover:bg-warning hover:text-white group">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-warning group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                New Blotter
+            </a>
+            <a href="{% url 'core:business_list' %}" class="btn btn-outline h-auto py-4 flex flex-col items-center gap-2 hover:bg-accent hover:text-white group">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-accent group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                Renew Permit
             </a>
         </div>
     </div>
 
-    {# Recent Activity using Data Table Component #}
+    {# Two Column Layout: Recent Certificates & Urgent Blotter Cases #}
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        {# Recent Certificates #}
+        <div class="card bg-base-100 shadow-sm border border-base-200">
+            <div class="card-body">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="card-title text-lg">Recent Certificates</h2>
+                    <span class="badge badge-sm badge-primary">Latest</span>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr class="text-xs text-base-content/60">
+                                <th>Recipient</th>
+                                <th>Type</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cert in recent_certificates %}
+                            <tr class="hover">
+                                <td class="font-medium">{{ cert.recipient }}</td>
+                                <td class="text-sm text-base-content/70">{{ cert.type }}</td>
+                                <td class="text-sm text-base-content/70">{{ cert.date }}</td>
+                                <td>
+                                    <span class="badge badge-success badge-sm">{{ cert.status }}</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="card-actions justify-end mt-4">
+                    <a href="{% url 'core:certificates' %}" class="link link-primary text-sm">View All Certificates</a>
+                </div>
+            </div>
+        </div>
+
+        {# Urgent Blotter Cases #}
+        <div class="card bg-base-100 shadow-sm border border-base-200">
+            <div class="card-body">
+                <h2 class="card-title text-lg text-error mb-4">Urgent Blotter Cases</h2>
+                
+                <div class="space-y-4">
+                    {% for case in urgent_cases %}
+                    <div class="flex gap-3">
+                        <div class="avatar placeholder">
+                            <div class="bg-{{ case.priority_color }} text-white rounded-full w-10 h-10">
+                                <span class="text-lg font-bold">{{ case.priority_number }}</span>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="font-semibold text-sm">{{ case.title }}</div>
+                            <div class="text-xs text-base-content/60">{{ case.description }}</div>
+                        </div>
+                        <div class="text-right text-xs text-base-content/60">
+                            {{ case.schedule }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="card-actions justify-end mt-4">
+                    <a href="{% url 'core:blotter_list' %}" class="btn btn-sm btn-outline">Go to Blotter</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Recent Activity (moved below) #}
     <div>
         <h2 class="text-2xl font-semibold mb-4">Recent Activity</h2>
         {% include 'components/data_table.html' with headers=activity_headers rows=activity_rows actions=False %}
     </div>
-    
-    {# Example Modal (hidden by default) #}
-    {% include 'components/modal.html' with modal_id="example_modal" title="Example Modal" show_trigger=True trigger_text="Open Example Modal" trigger_variant="ghost" %}
 </div>
 {% endblock %}

@@ -27,30 +27,29 @@
 
     {% block extra_css %}{% endblock %}
 </head>
-<body>
+<body class="h-screen overflow-hidden">
 
-<div class="flex flex-col min-h-screen">
-  {# Top Navigation Bar #}
-  {% include 'partials/topbar.html' %}
+<div class="flex flex-col h-screen">
+  {# Top Navigation Bar - Fixed at top #}
+  <div class="sticky top-0 z-30">
+    {% include 'partials/topbar.html' %}
+  </div>
 
   {# Main Content Area with Drawer (Sidebar) #}
   <div class="drawer lg:drawer-open flex-1 overflow-hidden">
     <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
     
-    {# Main Content #}
-    <div class="drawer-content flex flex-col bg-base-200 overflow-y-auto">
+    {# Main Content - Scrollable #}
+    <div class="drawer-content flex flex-col bg-base-200 h-full overflow-y-auto">
       {# Page Content #}
       <main class="flex-1 p-6">
           {% block content %}
           {# Page content goes here #}
           {% endblock %}
       </main>
-      
-      {# Footer #}
-      {% include 'partials/footer.html' %}
     </div> 
     
-    {# Sidebar #}
+    {# Sidebar - Fixed and scrollable #}
     {% include 'partials/sidebar.html' %}
   </div>
 </div>

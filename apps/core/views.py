@@ -11,11 +11,51 @@ class DashboardView(TemplateView):
         context = super().get_context_data(**kwargs)
         # Placeholder data for testing
         context['stats'] = {
-            'total_residents': 1234,
-            'documents_issued': 567,
+            'total_residents': 1204,
+            'documents_issued': 89,
             'total_revenue': 45000,
-            'active_cases': 12,
+            'active_cases': 3,
         }
+        
+        # Recent Certificates data
+        context['recent_certificates'] = [
+            {
+                'recipient': 'Maria dela Cruz',
+                'type': 'Indigency',
+                'date': 'Today, 10:42 AM',
+                'status': 'Issued',
+            },
+            {
+                'recipient': 'Juan Santos',
+                'type': 'Barangay Clearance',
+                'date': 'Today, 09:15 AM',
+                'status': 'Issued',
+            },
+            {
+                'recipient': 'Pedro Penduko',
+                'type': 'Residency',
+                'date': 'Yesterday',
+                'status': 'Issued',
+            },
+        ]
+        
+        # Urgent Blotter Cases data
+        context['urgent_cases'] = [
+            {
+                'priority_number': '1',
+                'priority_color': 'error',
+                'title': 'Case #2026-003',
+                'description': 'Boundary Dispute - Sitio 1',
+                'schedule': 'Hearing: Tomorrow 2PM',
+            },
+            {
+                'priority_number': '2',
+                'priority_color': 'warning',
+                'title': 'Case #2026-004',
+                'description': 'Complaint vs. Animal Control',
+                'schedule': 'Mediation: Jan 28',
+            },
+        ]
         
         # Data for activity table
         context['activity_headers'] = ['Time', 'Activity', 'User', 'Status']
