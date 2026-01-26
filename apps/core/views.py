@@ -421,3 +421,49 @@ class BusinessListView(TemplateView):
         ]
         
         return context
+
+
+class FinanceDashboardView(TemplateView):
+    """Finance dashboard view with placeholder data"""
+    template_name = 'pages/finance/dashboard.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Statistics data
+        context['stats'] = {
+            'daily_collection': '3,450',
+            'date_today': 'Jan 24, 2026',
+            'monthly_revenue': '45,200',
+            'month_range': 'Jan 1 - Jan 24',
+        }
+        
+        # Placeholder official receipts data
+        context['receipts'] = [
+            {
+                'or_number': '7583921',
+                'date': 'Jan 24, 2026',
+                'payor': "Aling Nena's Store",
+                'particulars': 'Business Clearance',
+                'amount': '500.00',
+                'status': 'Paid',
+            },
+            {
+                'or_number': '7583922',
+                'date': 'Jan 24, 2026',
+                'payor': 'Juan Dela Cruz',
+                'particulars': 'Brgy. Clearance',
+                'amount': '100.00',
+                'status': 'Paid',
+            },
+            {
+                'or_number': '7583923',
+                'date': 'Jan 24, 2026',
+                'payor': 'Maria Santos',
+                'particulars': 'Residency',
+                'amount': '50.00',
+                'status': 'Paid',
+            },
+        ]
+        
+        return context
