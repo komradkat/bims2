@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}Katarungang Pambarangay{% endblock %}
+
+{% block content %}
+<div class="container mx-auto">
+    {# Page Header #}
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-2xl font-bold">Katarungang Pambarangay</h1>
+            <p class="text-sm opacity-60">Blotter and Incident Management</p>
+        </div>
+        <a href="{% url 'core:blotter_add' %}" class="btn btn-error text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+            New Incident
+        </a>
+    </div>
+
+    {# Statistics Cards #}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+        {% include 'components/stat_card.html' with title="Total Cases" value=stats.total_cases icon="case" color="primary" description="All time" %}
+        {% include 'components/stat_card.html' with title="Active Cases" value=stats.active_cases icon="warning" color="warning" description="Ongoing mediation/conciliation" %}
+        {% include 'components/stat_card.html' with title="Settled Cases" value=stats.settled_cases icon="check" color="success" description="Successfully resolved" %}
+        {% include 'components/stat_card.html' with title="Urgent Hearings" value=stats.urgent_hearings icon="alert" color="error" description="Within 48 hours" %}
+    </div>
+
+    {# Status Filter Tabs #}
+    <div class="flex gap-4 mb-6 overflow-x-auto pb-2">
+        <button class="btn btn-active">All Cases</button>
+        <button class="btn">Mediation (3)</button>
+        <button class="btn">Conciliation (1)</button>
+        <button class="btn">Arbitration (0)</button>
+        <button class="btn">Settled</button>
+        <button class="btn">Dismissed</button>
+    </div>
+
+    {# Blotter Cases Table #}
+    <div class="card bg-base-100 shadow-sm border border-base-200">
+        <div>
+            <table class="table table-zebra w-full">
+                <thead>
+                    <tr>
+                        <th>Case #</th>
+                        <th>Complainant vs Respondent</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th>Hearing Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for case in cases %}
+                    <tr class="hover {{ case.opacity }}">
+                        <td class="font-mono text-xs">{{ case.case_number }}</td>
+                        <td>
+                            <div class="font-bold">{{ case.parties }}</div>
+                            <div class="text-xs opacity-50">{{ case.description }}</div>
+                        </td>
+                        <td><span class="badge badge-ghost badge-sm">{{ case.type }}</span></td>
+                        <td><span class="badge badge-{{ case.status_color }} badge-sm">{{ case.status }}</span></td>
+                        <td class="{{ case.hearing_class }}">{{ case.hearing_date }}</td>
+                        <td>
+                            <div class="join">
+                                <button class="btn btn-xs join-item">Docs</button>
+                                <button class="btn btn-xs join-item">{{ case.action_button }}</button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

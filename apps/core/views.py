@@ -89,6 +89,63 @@ class DashboardView(TemplateView):
         return context
 
 
+class BlotterListView(TemplateView):
+    """Blotter list view with placeholder data"""
+    template_name = 'pages/blotter/list.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Statistics data
+        context['stats'] = {
+            'total_cases': 15,
+            'active_cases': 4,
+            'settled_cases': 8,
+            'urgent_hearings': 1,
+        }
+        
+        # Placeholder blotter cases data
+        context['cases'] = [
+            {
+                'case_number': '2026-003',
+                'parties': 'Jose Ryan vs. Cardo Dalisay',
+                'description': 'Property Boundary Dispute',
+                'type': 'Civil',
+                'status': 'Mediation',
+                'status_color': 'warning',
+                'hearing_date': 'Tomorrow, 2:00 PM',
+                'hearing_class': 'text-error font-medium',
+                'action_button': 'Update',
+                'opacity': '',
+            },
+            {
+                'case_number': '2026-004',
+                'parties': 'Marites Chismosa vs. Barangay',
+                'description': 'Unjust Vexation',
+                'type': 'Criminal',
+                'status': 'Conciliation',
+                'status_color': 'info',
+                'hearing_date': 'Jan 26, 2026',
+                'hearing_class': '',
+                'action_button': 'Update',
+                'opacity': '',
+            },
+            {
+                'case_number': '2026-001',
+                'parties': 'Tito Sotto vs. Vic Sotto',
+                'description': 'Collection of Sum of Money',
+                'type': 'Civil',
+                'status': 'Settled',
+                'status_color': 'success',
+                'hearing_date': '--',
+                'hearing_class': '',
+                'action_button': 'View',
+                'opacity': 'opacity-50',
+            },
+        ]
+        
+        return context
+
 class ResidentsListView(TemplateView):
     """Residents list view with placeholder data"""
     template_name = 'pages/residents/list.html'
