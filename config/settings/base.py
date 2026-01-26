@@ -66,6 +66,10 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                # Custom context processors
+                'apps.core.context_processors.barangay_info',
+                'apps.core.context_processors.user_info',
+                'apps.core.context_processors.tier_info',
             ],
         },
     },
