@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}Audit Logs{% endblock %}
+
+{% block content %}
+<div class="container mx-auto">
+    {# Page Header #}
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-2xl font-bold">Audit Logs</h1>
+            <p class="text-sm opacity-60">System-wide activity tracker</p>
+        </div>
+        <button class="btn btn-outline btn-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+            Export Logs
+        </button>
+    </div>
+
+    {# Audit Logs Table #}
+    <div class="card bg-base-100 shadow-sm border border-base-200">
+        <div>
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>User</th>
+                        <th>Action</th>
+                        <th>Module</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs %}
+                    <tr>
+                        <td class="whitespace-nowrap text-xs opacity-70">{{ log.timestamp }}</td>
+                        <td><div class="badge badge-ghost badge-sm">{{ log.user }}</div></td>
+                        <td class="text-{{ log.action_color }} font-medium">{{ log.action }}</td>
+                        <td>{{ log.module }}</td>
+                        <td>{{ log.details }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="flex justify-center p-4 border-t border-base-200">
+            <div class="join">
+                <button class="join-item btn btn-sm">«</button>
+                <button class="join-item btn btn-sm">Page 1</button>
+                <button class="join-item btn btn-sm">»</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -467,3 +467,49 @@ class FinanceDashboardView(TemplateView):
         ]
         
         return context
+
+
+class AuditLogsView(TemplateView):
+    """Audit logs view with placeholder data"""
+    template_name = 'pages/audit/logs.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Placeholder audit logs data
+        context['logs'] = [
+            {
+                'timestamp': 'Jan 24, 11:42 AM',
+                'user': 'admin',
+                'action': 'Create',
+                'action_color': 'success',
+                'module': 'Certificates',
+                'details': 'Issued Clearance for Juan Santos',
+            },
+            {
+                'timestamp': 'Jan 24, 10:15 AM',
+                'user': 'treasurer',
+                'action': 'Update',
+                'action_color': 'info',
+                'module': 'Finance',
+                'details': 'Verified OR #7583921',
+            },
+            {
+                'timestamp': 'Jan 24, 09:30 AM',
+                'user': 'clerk1',
+                'action': 'Create',
+                'action_color': 'success',
+                'module': 'Residents',
+                'details': 'Added resident profile: Maria Santos',
+            },
+            {
+                'timestamp': 'Jan 23, 04:55 PM',
+                'user': 'admin',
+                'action': 'Delete',
+                'action_color': 'error',
+                'module': 'Residents',
+                'details': 'Removed duplicate entry for ID: 9921',
+            },
+        ]
+        
+        return context
