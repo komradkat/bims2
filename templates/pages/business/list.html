@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block title %}Business Permits{% endblock %}
+
+{% block content %}
+<div class="container mx-auto" x-data="{ activeBusiness: '' }">
+    {# Page Header #}
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-2xl font-bold">Business Permits</h1>
+            <p class="text-sm opacity-60">Manage barangay business clearances and revenue</p>
+        </div>
+        <div class="flex gap-2">
+            <button class="btn btn-outline" onclick="alert('Showing permits expiring in 30 days...')">
+                <span class="indicator-item badge badge-secondary badge-xs">5</span>
+                Expiring Soon
+            </button>
+            <a href="{% url 'core:business_add' %}" class="btn btn-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                New Business
+            </a>
+        </div>
+    </div>
+
+    {# Statistics Cards #}
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div class="stat bg-base-100 shadow-sm border border-base-200 rounded-box p-4">
+            <div class="stat-title">Active Permits</div>
+            <div class="stat-value text-success">{{ stats.active_permits }}</div>
+        </div>
+        <div class="stat bg-base-100 shadow-sm border border-base-200 rounded-box p-4">
+            <div class="stat-title">Expired</div>
+            <div class="stat-value text-error">{{ stats.expired }}</div>
+        </div>
+        <div class="stat bg-base-100 shadow-sm border border-base-200 rounded-box p-4">
+            <div class="stat-title">Pending</div>
+            <div class="stat-value text-warning">{{ stats.pending }}</div>
+        </div>
+        <div class="stat bg-base-100 shadow-sm border border-base-200 rounded-box p-4">
+            <div class="stat-title">Total Revenue</div>
+            <div class="stat-value text-secondary">₱{{ stats.total_revenue }}</div>
+        </div>
+    </div>
+
+    {# Business Permits Table #}
+    <div class="card bg-base-100 shadow-sm border border-base-200">
+        <div>
+            <table class="table table-zebra w-full">
+                <thead>
+                    <tr>
+                        <th>Business Name</th>
+                        <th>Owner</th>
+                        <th>Permit #</th>
+                        <th>Expiration</th>
+                        <th>Status</th>
+                        <th class="text-right">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for business in businesses %}
+                    <tr class="hover group">
+                        <td class="font-bold">{{ business.name }}</td>
+                        <td>{{ business.owner }}</td>
+                        <td>{{ business.permit_number }}</td>
+                        <td class="{{ business.expiration_class }}">{{ business.expiration }}</td>
+                        <td><span class="badge badge-{{ business.status_color }} badge-sm">{{ business.status }}</span></td>
+                        <td class="text-right">
+                            {% if business.status == 'Expired' %}
+                            <button class="btn btn-xs btn-primary shadow-sm" onclick="document.getElementById('business_modal').showModal()">Renew Now</button>
+                            {% else %}
+                            <div class="dropdown dropdown-end">
+                                <button tabindex="0" class="btn btn-ghost btn-xs btn-circle">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" /></svg>
+                                </button>
+                                <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                                    <li><a>View Details</a></li>
+                                    <li><a>Print Clearance</a></li>
+                                    <li><a>Renew Permit</a></li>
+                                    <div class="divider my-0"></div>
+                                    <li><a class="text-error">Retire Business</a></li>
+                                </ul>
+                            </div>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

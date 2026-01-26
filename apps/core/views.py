@@ -372,3 +372,52 @@ class ResidentsListView(TemplateView):
         ]
         
         return context
+
+
+class BusinessListView(TemplateView):
+    """Business permits list view with placeholder data"""
+    template_name = 'pages/business/list.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Statistics data
+        context['stats'] = {
+            'active_permits': 245,
+            'expired': 12,
+            'pending': 8,
+            'total_revenue': '125k',
+        }
+        
+        # Placeholder business permits data
+        context['businesses'] = [
+            {
+                'name': "Aling Nena's Sari-Sari Store",
+                'owner': 'Nena Magalona',
+                'permit_number': 'BP-2025-001',
+                'expiration': 'Dec 31, 2025',
+                'expiration_class': '',
+                'status': 'Active',
+                'status_color': 'success',
+            },
+            {
+                'name': 'Mang Inasal 2',
+                'owner': 'Edgar Sia II',
+                'permit_number': 'BP-2025-042',
+                'expiration': 'Dec 31, 2025',
+                'expiration_class': '',
+                'status': 'Active',
+                'status_color': 'success',
+            },
+            {
+                'name': 'Computer Shop 143',
+                'owner': 'Mark Zuckerberg',
+                'permit_number': 'BP-2024-112',
+                'expiration': 'Dec 31, 2024',
+                'expiration_class': 'text-error font-semibold',
+                'status': 'Expired',
+                'status_color': 'error',
+            },
+        ]
+        
+        return context
