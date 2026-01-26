@@ -1,5 +1,6 @@
 # Core URLs
 from django.urls import path
+from django.views.generic import TemplateView
 from . import views
 
 app_name = 'core'
@@ -10,8 +11,8 @@ urlpatterns = [
     
     # Residents
     path('residents/', views.ResidentsListView.as_view(), name='residents_list'),
-    path('residents/add/', views.DashboardView.as_view(), name='residents_add'),
-    path('certificates/', views.DashboardView.as_view(), name='certificates'),
+    path('residents/add/', TemplateView.as_view(template_name='pages/residents/form.html'), name='residents_add'),
+    path('certificates/', TemplateView.as_view(template_name='pages/certificates/center.html'), name='certificates'),
     path('business/', views.DashboardView.as_view(), name='business_list'),
     path('blotter/', views.DashboardView.as_view(), name='blotter_list'),
     path('finance/', views.DashboardView.as_view(), name='finance'),
