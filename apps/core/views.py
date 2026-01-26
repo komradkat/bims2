@@ -1,6 +1,63 @@
 # Core views
 from django.shortcuts import render
 from django.views.generic import TemplateView
+from django.contrib.auth.views import LoginView
+from django.urls import reverse_lazy
+
+
+
+class CustomLoginView(LoginView):
+    template_name = 'auth/login.html'
+    redirect_authenticated_user = True
+    
+    def get_success_url(self):
+        return reverse_lazy('core:dashboard')
+
+
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import ListView, CreateView, UpdateView
+from .models import User
+from .decorators import role_required
+from django.utils.decorators import method_decorator
+
+@method_decorator(role_required(['admin']), name='dispatch')
+class UserListView(LoginRequiredMixin, ListView):
+    model = User
+    template_name = 'auth/user_list.html'
+    context_object_name = 'users'
+    paginate_by = 20
+
+@method_decorator(role_required(['admin']), name='dispatch')
+class UserCreateView(LoginRequiredMixin, CreateView):
+    model = User
+    template_name = 'auth/user_form.html'
+    fields = ['username', 'email', 'role', 'barangay_position', 'is_active']
+    success_url = reverse_lazy('core:user_list')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['action'] = 'Add'
+        return context
+        
+    def form_valid(self, form):
+        user = form.save(commit=False)
+        password = self.request.POST.get('password')
+        if password:
+            user.set_password(password)
+        user.save()
+        return super().form_valid(form)
+
+@method_decorator(role_required(['admin']), name='dispatch')
+class UserUpdateView(LoginRequiredMixin, UpdateView):
+    model = User
+    template_name = 'auth/user_form.html'
+    fields = ['username', 'email', 'role', 'barangay_position', 'is_active']
+    success_url = reverse_lazy('core:user_list')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['action'] = 'Edit'
+        return context
 
 
 class DashboardView(TemplateView):

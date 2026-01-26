@@ -17,7 +17,7 @@ def role_required(allowed_roles=[]):
         @wraps(view_func)
         def _wrapped_view(request, *args, **kwargs):
             if not request.user.is_authenticated:
-                return redirect(f"{reverse('login')}?next={request.path}")
+                return redirect(f"{reverse('core:login')}?next={request.path}")
                 
             if request.user.role in allowed_roles or request.user.is_superuser:
                 return view_func(request, *args, **kwargs)

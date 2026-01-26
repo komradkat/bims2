@@ -1,0 +1,78 @@
+{% extends 'base.html' %} 
+
+{% block title %}Sign In{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Hide sidebar and topbar for login page by targeting the drawer layout */
+    .drawer-side, .navbar, .sticky { display: none !important; }
+    .drawer-content { margin: 0 !important; }
+    /* Override base layout to center content */
+    main { 
+        display: flex; 
+        align-items: center; 
+        justify-content: center;
+        min-height: 100vh;
+        background-color: #f3f4f6;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card w-96 bg-base-100 shadow-xl">
+    <div class="card-body">
+        <div class="text-center mb-6">
+            <div class="avatar placeholder mb-4">
+                <div class="bg-primary text-primary-content rounded-full w-16">
+                    <span class="text-3xl font-bold">{{ barangay_info.name|slice:":1" }}</span>
+                </div>
+            </div>
+            <h2 class="card-title justify-center text-2xl font-bold">{{ barangay_info.name }}</h2>
+            <p class="text-sm opacity-70">Barangay Information Management System</p>
+        </div>
+
+        <form method="post" action="{% url 'core:login' %}">
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+            <div class="alert alert-error text-sm py-2 mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <div>
+                    {% for error in form.non_field_errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="form-control w-full">
+                <label class="label">
+                    <span class="label-text">Username</span>
+                </label>
+                <input type="text" name="username" placeholder="Enter username" class="input input-bordered w-full" required />
+            </div>
+
+            <div class="form-control w-full mt-4">
+                <label class="label">
+                    <span class="label-text">Password</span>
+                </label>
+                <input type="password" name="password" placeholder="Enter password" class="input input-bordered w-full" required />
+                <label class="label">
+                    <a href="#" class="label-text-alt link link-hover">Forgot password?</a>
+                </label>
+            </div>
+
+            <div class="form-control mt-2">
+                <label class="label cursor-pointer justify-start gap-2">
+                    <input type="checkbox" class="checkbox checkbox-sm" />
+                    <span class="label-text text-sm">Remember me</span>
+                </label>
+            </div>
+
+            <div class="form-control mt-6">
+                <button type="submit" class="btn btn-primary">Sign In</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
