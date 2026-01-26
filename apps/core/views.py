@@ -513,3 +513,8 @@ class AuditLogsView(TemplateView):
         ]
         
         return context
+
+
+class GisMapView(TemplateView):
+    """GIS Map view"""
+    template_name = 'pages/gis/map.html'

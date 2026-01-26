@@ -19,6 +19,6 @@ urlpatterns = [
     path('blotter/add/', TemplateView.as_view(template_name='pages/blotter/form.html'), name='blotter_add'),
     path('finance/', views.FinanceDashboardView.as_view(), name='finance'),
     path('audit-logs/', views.AuditLogsView.as_view(), name='audit_logs'),
-    path('gis-map/', views.DashboardView.as_view(), name='gis_map'),
+    path('gis-map/', views.GisMapView.as_view(), name='gis_map'),
 ]
 
