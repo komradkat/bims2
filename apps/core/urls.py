@@ -8,8 +8,8 @@ urlpatterns = [
     # Dashboard
     path('', views.DashboardView.as_view(), name='dashboard'),
     
-    # Placeholder routes (will add views in next steps)
-    path('residents/', views.DashboardView.as_view(), name='residents_list'),
+    # Residents
+    path('residents/', views.ResidentsListView.as_view(), name='residents_list'),
     path('residents/add/', views.DashboardView.as_view(), name='residents_add'),
     path('certificates/', views.DashboardView.as_view(), name='certificates'),
     path('business/', views.DashboardView.as_view(), name='business_list'),

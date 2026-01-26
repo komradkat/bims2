@@ -88,3 +88,70 @@ class DashboardView(TemplateView):
         
         return context
 
+
+class ResidentsListView(TemplateView):
+    """Residents list view with placeholder data"""
+    template_name = 'pages/residents/list.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Placeholder resident data
+        context['residents'] = [
+            {
+                'name': 'Juan Dela Cruz',
+                'id': 'BID-2026-001',
+                'age': 45,
+                'sex': 'M',
+                'civil_status': 'Married',
+                'address': '123 Kalye Serye, Purok 1',
+                'sectors': [
+                    {'name': 'Indigent', 'color': 'error'},
+                ],
+            },
+            {
+                'name': 'Maria Santos',
+                'id': 'BID-2026-005',
+                'age': 68,
+                'sex': 'F',
+                'civil_status': 'Widowed',
+                'address': '45 Mabini St, Purok 2',
+                'sectors': [
+                    {'name': 'Senior Citizen', 'color': 'info'},
+                ],
+            },
+            {
+                'name': 'Pedro Penduko',
+                'id': 'BID-2026-012',
+                'age': 32,
+                'sex': 'M',
+                'civil_status': 'Single',
+                'address': '78 Rizal Ave, Purok 1',
+                'sectors': [
+                    {'name': '4Ps', 'color': 'warning'},
+                    {'name': 'Solo Parent', 'color': 'secondary'},
+                ],
+            },
+            {
+                'name': 'Ana Reyes',
+                'id': 'BID-2026-018',
+                'age': 29,
+                'sex': 'F',
+                'civil_status': 'Married',
+                'address': '56 Luna St, Purok 3',
+                'sectors': [
+                    {'name': 'PWD', 'color': 'accent'},
+                ],
+            },
+            {
+                'name': 'Roberto Garcia',
+                'id': 'BID-2026-023',
+                'age': 52,
+                'sex': 'M',
+                'civil_status': 'Married',
+                'address': '89 Bonifacio Rd, Purok 2',
+                'sectors': [],
+            },
+        ]
+        
+        return context
