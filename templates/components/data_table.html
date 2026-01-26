@@ -1,0 +1,68 @@
+{# Data Table Component - Reusable table with pagination #}
+{# Usage: {% include 'components/data_table.html' with headers=headers rows=rows actions=True %} #}
+
+<div class="overflow-x-auto bg-base-100 rounded-lg shadow">
+    <table class="table">
+        {# Table Header #}
+        <thead>
+            <tr>
+                {% for header in headers %}
+                <th>{{ header }}</th>
+                {% endfor %}
+                {% if actions %}
+                <th>Actions</th>
+                {% endif %}
+            </tr>
+        </thead>
+        
+        {# Table Body #}
+        <tbody>
+            {% if rows %}
+                {% for row in rows %}
+                <tr class="hover">
+                    {% for cell in row.cells %}
+                    <td>{{ cell }}</td>
+                    {% endfor %}
+                    {% if actions %}
+                    <td>
+                        <div class="dropdown dropdown-end">
+                            <div tabindex="0" role="button" class="btn btn-ghost btn-xs">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-5 h-5 stroke-current"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"></path></svg>
+                            </div>
+                            <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                                {% if row.actions %}
+                                    {% for action in row.actions %}
+                                    <li><a href="{{ action.url }}">{{ action.label }}</a></li>
+                                    {% endfor %}
+                                {% else %}
+                                <li><a>View</a></li>
+                                <li><a>Edit</a></li>
+                                <li><a class="text-error">Delete</a></li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="{{ headers|length|add:1 }}" class="text-center text-base-content/50 py-8">
+                        No data available
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+{# Pagination (if provided) #}
+{% if pagination %}
+<div class="flex justify-center mt-4">
+    <div class="join">
+        <button class="join-item btn btn-sm" {% if not pagination.has_previous %}disabled{% endif %}>«</button>
+        <button class="join-item btn btn-sm">Page {{ pagination.current }} of {{ pagination.total }}</button>
+        <button class="join-item btn btn-sm" {% if not pagination.has_next %}disabled{% endif %}>»</button>
+    </div>
+</div>
+{% endif %}

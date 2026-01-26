@@ -1,0 +1,49 @@
+{# Modal Component - Reusable modal dialog #}
+{# Usage: {% include 'components/modal.html' with modal_id="my_modal" title="Modal Title" %} #}
+
+{# Modal Trigger Button (optional - can be triggered programmatically) #}
+{% if show_trigger %}
+<button class="btn btn-{{ trigger_variant|default:'primary' }}" onclick="{{ modal_id }}.showModal()">
+    {{ trigger_text|default:'Open Modal' }}
+</button>
+{% endif %}
+
+{# Modal Dialog #}
+<dialog id="{{ modal_id }}" class="modal">
+    <div class="modal-box {% if size == 'large' %}w-11/12 max-w-5xl{% elif size == 'small' %}max-w-md{% endif %}">
+        {# Modal Header #}
+        <h3 class="font-bold text-lg mb-4">{{ title }}</h3>
+        
+        {# Modal Content #}
+        <div class="py-4">
+            {% if content %}
+                {{ content|safe }}
+            {% else %}
+                {% block modal_content %}
+                <p>Modal content goes here</p>
+                {% endblock %}
+            {% endif %}
+        </div>
+        
+        {# Modal Actions #}
+        <div class="modal-action">
+            {% if actions %}
+                {% for action in actions %}
+                <button class="btn btn-{{ action.variant|default:'primary' }}" 
+                        {% if action.onclick %}onclick="{{ action.onclick }}"{% endif %}>
+                    {{ action.label }}
+                </button>
+                {% endfor %}
+            {% else %}
+                <form method="dialog">
+                    <button class="btn">Close</button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+    
+    {# Click outside to close #}
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+</dialog>

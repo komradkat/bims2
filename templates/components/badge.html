@@ -1,0 +1,21 @@
+{# Badge Component - Status indicator badge #}
+{# Usage: {% include 'components/badge.html' with text="Active" variant="success" size="md" %} #}
+
+<span class="badge 
+    {% if variant == 'success' %}badge-success
+    {% elif variant == 'error' %}badge-error
+    {% elif variant == 'warning' %}badge-warning
+    {% elif variant == 'info' %}badge-info
+    {% elif variant == 'primary' %}badge-primary
+    {% elif variant == 'secondary' %}badge-secondary
+    {% elif variant == 'accent' %}badge-accent
+    {% elif variant == 'ghost' %}badge-ghost
+    {% elif variant == 'outline' %}badge-outline
+    {% endif %}
+    {% if size == 'xs' %}badge-xs
+    {% elif size == 'sm' %}badge-sm
+    {% elif size == 'md' %}badge-md
+    {% elif size == 'lg' %}badge-lg
+    {% endif %}">
+    {{ text }}
+</span>
