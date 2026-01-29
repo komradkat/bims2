@@ -62,7 +62,7 @@ class UserUpdateView(LoginRequiredMixin, UpdateView):
         return context
 
 
-class DashboardView(TemplateView):
+class DashboardView(LoginRequiredMixin, TemplateView):
     """Dashboard view with placeholder data"""
     template_name = 'pages/dashboard.html'
     

@@ -38,6 +38,18 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
+    # Third-party apps
+    'simple_history',
+    
+    # Custom apps
+    'apps.core',
+    'apps.residents',
+    'apps.certificates',
+    'apps.business',
+    'apps.blotter',
+    'apps.finance',
+    'apps.audit',
 ]
 
 MIDDLEWARE = [
@@ -116,12 +128,14 @@ LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 
 
+
 # Authentication
 AUTH_USER_MODEL = 'core.User'
-LOGIN_URL = 'core:login'
+LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = 'core:dashboard'
 LOGOUT_REDIRECT_URL = 'core:login'
 USE_I18N = True
+
 
 USE_TZ = True
 
@@ -135,3 +149,6 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Override Django's default LOGIN_URL
+LOGIN_URL = '/login/'

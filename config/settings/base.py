@@ -146,5 +146,10 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Custom user model (will be created in Phase 1.2)
-# AUTH_USER_MODEL = 'core.User'
+# Authentication URLs
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = 'core:dashboard'
+LOGOUT_REDIRECT_URL = 'core:login'
+
+# Custom user model
+AUTH_USER_MODEL = 'core.User'
