@@ -10,6 +10,9 @@ urlpatterns = [
     path('login/', views.CustomLoginView.as_view(), name='login'),
     path('logout/', LogoutView.as_view(next_page='core:login'), name='logout'),
     
+    # License Management
+    path('license/activate/', views.LicenseActivationView.as_view(), name='license_activation'),
+    
     # User Management
     path('users/', views.UserListView.as_view(), name='user_list'),
     path('users/add/', views.UserCreateView.as_view(), name='user_add'),

@@ -1,8 +1,10 @@
 # Core views
-from django.shortcuts import render
-from django.views.generic import TemplateView
+from django.shortcuts import render, redirect
+from django.views.generic import TemplateView, View
 from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
+from django.contrib import messages
+from django.core.cache import cache
 
 
 
@@ -17,7 +19,7 @@ class CustomLoginView(LoginView):
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView, CreateView, UpdateView
 from .models import User
-from .decorators import role_required
+from .decorators import role_required, tier_required
 from django.utils.decorators import method_decorator
 
 @method_decorator(role_required(['admin']), name='dispatch')
@@ -480,8 +482,9 @@ class BusinessListView(TemplateView):
         return context
 
 
+@method_decorator(tier_required(['pro', 'ultra']), name='dispatch')
 class FinanceDashboardView(TemplateView):
-    """Finance dashboard view with placeholder data"""
+    """Finance dashboard view with placeholder data (Pro/Ultra only)"""
     template_name = 'pages/finance/dashboard.html'
     
     def get_context_data(self, **kwargs):
@@ -572,6 +575,70 @@ class AuditLogsView(TemplateView):
         return context
 
 
+@method_decorator(tier_required(['ultra']), name='dispatch')
 class GisMapView(TemplateView):
-    """GIS Map view"""
+    """GIS Map view (Ultra only)"""
     template_name = 'pages/gis/map.html'
+
+
+class LicenseActivationView(LoginRequiredMixin, View):
+    """License activation view for activating license keys"""
+    template_name = 'auth/license_activation.html'
+    
+    def get(self, request):
+        from apps.core.utils.hardware import get_hardware_id
+        from apps.core.models import LicenseKey
+        
+        hardware_id = get_hardware_id()
+        current_license = LicenseKey.objects.filter(
+            hardware_id=hardware_id,
+            is_active=True
+        ).first()
+        
+        return render(request, self.template_name, {
+            'hardware_id': hardware_id,
+            'current_license': current_license
+        })
+    
+    def post(self, request):
+        from apps.core.utils.hardware import get_hardware_id
+        from apps.core.models import LicenseKey
+        
+        license_key = request.POST.get('license_key', '').strip()
+        hardware_id = get_hardware_id()
+        
+        if not license_key:
+            messages.error(request, "Please enter a license key.")
+            return redirect('core:license_activation')
+        
+        try:
+            license_obj = LicenseKey.objects.get(key=license_key)
+            
+            # Check if already activated on another machine
+            if license_obj.hardware_id and license_obj.hardware_id != hardware_id:
+                messages.error(
+                    request,
+                    "This license is already activated on another server. "
+                    "Please contact support to transfer your license."
+                )
+                return redirect('core:license_activation')
+            
+            # Activate license
+            license_obj.hardware_id = hardware_id
+            license_obj.is_active = True
+            license_obj.save()
+            
+            # Clear cache to force reload of license data
+            cache.delete('active_license')
+            
+            messages.success(
+                request,
+                f"License activated successfully! Tier: {license_obj.tier.upper()} | "
+                f"Max Users: {license_obj.max_users}"
+            )
+            return redirect('core:dashboard')
+            
+        except LicenseKey.DoesNotExist:
+            messages.error(request, "Invalid license key. Please check and try again.")
+            return redirect('core:license_activation')
+
