@@ -10,7 +10,7 @@
             <h1 class="text-2xl font-bold">Katarungang Pambarangay</h1>
             <p class="text-sm opacity-60">Blotter and Incident Management</p>
         </div>
-        <a href="{% url 'core:blotter_add' %}" class="btn btn-error text-white">
+        <a href="{% url 'blotter:add' %}" class="btn btn-error text-white">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
             New Incident
         </a>
@@ -19,51 +19,77 @@
     {# Statistics Cards #}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
         {% include 'components/stat_card.html' with title="Total Cases" value=stats.total_cases icon="case" color="primary" description="All time" %}
-        {% include 'components/stat_card.html' with title="Active Cases" value=stats.active_cases icon="warning" color="warning" description="Ongoing mediation/conciliation" %}
-        {% include 'components/stat_card.html' with title="Settled Cases" value=stats.settled_cases icon="check" color="success" description="Successfully resolved" %}
-        {% include 'components/stat_card.html' with title="Urgent Hearings" value=stats.urgent_hearings icon="alert" color="error" description="Within 48 hours" %}
+        {% include 'components/stat_card.html' with title="Active Cases" value=stats.active_cases icon="warning" color="warning" description="Ongoing cases" %}
+        {% include 'components/stat_card.html' with title="Settled Cases" value=stats.settled_cases icon="check" color="success" description="Resolved cases" %}
+        {% include 'components/stat_card.html' with title="Today's Hearings" value=stats.urgent_hearings icon="alert" color="error" description="Scheduled today" %}
     </div>
 
     {# Status Filter Tabs #}
-    <div class="flex gap-4 mb-6 overflow-x-auto pb-2">
-        <button class="btn btn-active">All Cases</button>
-        <button class="btn">Mediation (3)</button>
-        <button class="btn">Conciliation (1)</button>
-        <button class="btn">Arbitration (0)</button>
-        <button class="btn">Settled</button>
-        <button class="btn">Dismissed</button>
+    <div class="flex gap-2 mb-6 overflow-x-auto pb-2">
+        <a href="?status=all" class="btn btn-sm {% if not request.GET.status or request.GET.status == 'all' %}btn-primary{% endif %}">All</a>
+        <a href="?status=mediation" class="btn btn-sm {% if request.GET.status == 'mediation' %}btn-primary{% endif %}">Mediation</a>
+        <a href="?status=conciliation" class="btn btn-sm {% if request.GET.status == 'conciliation' %}btn-primary{% endif %}">Conciliation</a>
+        <a href="?status=arbitration" class="btn btn-sm {% if request.GET.status == 'arbitration' %}btn-primary{% endif %}">Arbitration</a>
+        <a href="?status=settled" class="btn btn-sm {% if request.GET.status == 'settled' %}btn-primary{% endif %}">Settled</a>
+        <a href="?status=dismissed" class="btn btn-sm {% if request.GET.status == 'dismissed' %}btn-primary{% endif %}">Dismissed</a>
+        <a href="?status=cfa" class="btn btn-sm {% if request.GET.status == 'cfa' %}btn-primary{% endif %}">CFA</a>
     </div>
 
     {# Blotter Cases Table #}
     <div class="card bg-base-100 shadow-sm border border-base-200">
-        <div>
-            <table class="table table-zebra w-full">
+        <div class="overflow-x-auto">
+            <table class="table table-zebra w-full text-sm">
                 <thead>
                     <tr>
-                        <th>Case #</th>
-                        <th>Complainant vs Respondent</th>
-                        <th>Type</th>
-                        <th>Status</th>
-                        <th>Hearing Date</th>
-                        <th>Actions</th>
+                        <th class="bg-base-200/50">Case #</th>
+                        <th class="bg-base-200/50">Parties Involved</th>
+                        <th class="bg-base-200/50">Type</th>
+                        <th class="bg-base-200/50">Status</th>
+                        <th class="bg-base-200/50">Next Hearing</th>
+                        <th class="bg-base-200/50 text-right">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for case in cases %}
-                    <tr class="hover {{ case.opacity }}">
-                        <td class="font-mono text-xs">{{ case.case_number }}</td>
-                        <td>
-                            <div class="font-bold">{{ case.parties }}</div>
-                            <div class="text-xs opacity-50">{{ case.description }}</div>
+                    <tr class="hover group">
+                        <td class="font-mono text-xs font-bold text-primary">
+                            <a href="{% url 'blotter:detail' case.id %}" class="hover:underline">{{ case.case_number }}</a>
                         </td>
-                        <td><span class="badge badge-ghost badge-sm">{{ case.type }}</span></td>
-                        <td><span class="badge badge-{{ case.status_color }} badge-sm">{{ case.status }}</span></td>
-                        <td class="{{ case.hearing_class }}">{{ case.hearing_date }}</td>
                         <td>
-                            <div class="join">
-                                <button class="btn btn-xs join-item">Docs</button>
-                                <button class="btn btn-xs join-item">{{ case.action_button }}</button>
-                            </div>
+                            <div class="font-bold text-base-content">{{ case.participants_display }}</div>
+                            <div class="text-xs opacity-50 truncate max-w-xs">{{ case.narrative|truncatechars:100 }}</div>
+                        </td>
+                        <td>
+                            <span class="badge badge-outline badge-sm">{{ case.get_incident_type_display }}</span>
+                        </td>
+                        <td>
+                            <span class="badge badge-{{ case.status_color }} badge-sm text-white font-medium">
+                                {{ case.get_status_display }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if case.next_hearing %}
+                                <div class="text-xs">
+                                    <span class="block font-medium">{{ case.next_hearing.scheduled_at|date:"M d, Y" }}</span>
+                                    <span class="opacity-50 italic">{{ case.next_hearing.scheduled_at|time:"h:i A" }}</span>
+                                </div>
+                            {% else %}
+                                <span class="text-xs opacity-30 italic">Not scheduled</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-right">
+                            <div class="join opacity-50 group-hover:opacity-100 transition-opacity">
+                                <a href="{% url 'blotter:detail' case.id %}" class="btn btn-xs join-item" title="Detailed View">
+                                    <i class="fas fa-eye text-[10px]"></i>
+                                </a>
+                                <a href="{% url 'admin:blotter_blottercase_change' case.id %}" class="btn btn-xs join-item" title="System Settings">
+                                    <i class="fas fa-cog text-[10px]"></i>
+                                </a>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-12 opacity-40 italic">
+                            No cases found matching your criteria.
                         </td>
                     </tr>
                     {% endfor %}

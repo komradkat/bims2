@@ -1,0 +1,261 @@
+{% extends 'base.html' %}
+
+{% block title %}Case Details: {{ case.case_number }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto max-w-6xl pb-12">
+    {# Breadcrumbs & Header #}
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+        <div>
+            <div class="text-sm breadcrumbs mb-1 opacity-60">
+                <ul>
+                    <li><a href="{% url 'blotter:list' %}">Blotter</a></li>
+                    <li>Case {{ case.case_number }}</li>
+                </ul>
+            </div>
+            <h1 class="text-3xl font-bold flex items-center gap-3">
+                <span class="text-primary">{{ case.case_number }}</span>
+                <span class="badge badge-{{ case.status_color }} badge-lg text-white font-semibold">
+                    {{ case.get_status_display }}
+                </span>
+            </h1>
+        </div>
+        <div class="flex gap-2 w-full md:w-auto">
+            <button class="btn btn-ghost border-base-300">
+                <i class="fas fa-print mr-2 opacity-60"></i> Print Case Folder
+            </button>
+            <div class="dropdown dropdown-end">
+                <div tabindex="0" role="button" class="btn btn-primary">Actions <i class="fas fa-chevron-down ml-2 text-xs"></i></div>
+                <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52 border border-base-200 mt-2">
+                    <li><a onclick="document.getElementById('hearing_modal').showModal()"><i class="fas fa-calendar-plus opacity-70"></i> Add Hearing</a></li>
+                    <li><a><i class="fas fa-file-contract opacity-70"></i> Generate Summon</a></li>
+                    <div class="divider my-1"></div>
+                    <li class="menu-title text-[10px] uppercase font-bold opacity-50">Change Status</li>
+                    <li>
+                        <form method="post" action="{% url 'blotter:status_update' case.id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="status" value="settled">
+                            <button type="submit" class="text-success w-full text-left flex items-center gap-2">
+                                <i class="fas fa-check-circle"></i> Mark as Settled
+                            </button>
+                        </form>
+                    </li>
+                    <li>
+                        <form method="post" action="{% url 'blotter:status_update' case.id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="status" value="dismissed">
+                            <button type="submit" class="text-error w-full text-left flex items-center gap-2">
+                                <i class="fas fa-times-circle"></i> Dismiss Case
+                            </button>
+                        </form>
+                    </li>
+                    <li>
+                        <form method="post" action="{% url 'blotter:status_update' case.id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="status" value="cfa">
+                            <button type="submit" class="text-info w-full text-left flex items-center gap-2">
+                                <i class="fas fa-external-link-alt"></i> Issue CFA
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    {# Modals #}
+    <dialog id="hearing_modal" class="modal">
+        <div class="modal-box">
+            <h3 class="font-bold text-lg mb-4">Schedule New Hearing</h3>
+            <form method="post" action="{% url 'blotter:hearing_add' case.id %}">
+                {% csrf_token %}
+                <div class="form-control w-full mb-4">
+                    <label class="label"><span class="label-text">Hearing Date & Time</span></label>
+                    <input type="datetime-local" name="scheduled_at" class="input input-bordered w-full" required />
+                </div>
+                <div class="form-control w-full mb-6">
+                    <label class="label"><span class="label-text">Remarks / Venue</span></label>
+                    <textarea name="remarks" class="textarea textarea-bordered h-24" placeholder="e.g. Venue: Barangay Hall, Second Hearing"></textarea>
+                </div>
+                <div class="modal-action">
+                    <button type="button" class="btn" onclick="document.getElementById('hearing_modal').close()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Schedule Hearing</button>
+                </div>
+            </form>
+        </div>
+        <form method="dialog" class="modal-backdrop">
+            <button>close</button>
+        </form>
+    </dialog>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {# Left Column: Case Narrative & Details #}
+        <div class="lg:col-span-2 space-y-8">
+            {# Incident Summary #}
+            <div class="card bg-base-100 shadow-sm border border-base-200 overflow-hidden">
+                <div class="bg-base-200/50 px-6 py-4 flex justify-between items-center border-b border-base-200">
+                    <h2 class="font-bold flex items-center gap-2">
+                        <i class="fas fa-info-circle text-primary"></i> Incident Summary
+                    </h2>
+                    <span class="text-xs font-mono opacity-50">ID: {{ case.id }}</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="grid grid-cols-2 md:grid-cols-4 divide-x divide-y md:divide-y-0 divide-base-200">
+                        <div class="p-4">
+                            <label class="text-[10px] uppercase font-bold opacity-40 block mb-1">Type</label>
+                            <span class="font-medium">{{ case.get_incident_type_display }}</span>
+                        </div>
+                        <div class="p-4">
+                            <label class="text-[10px] uppercase font-bold opacity-40 block mb-1">Date Occurred</label>
+                            <span class="font-medium">{{ case.incident_date|date:"F d, Y" }}</span>
+                        </div>
+                        <div class="p-4">
+                            <label class="text-[10px] uppercase font-bold opacity-40 block mb-1">Time</label>
+                            <span class="font-medium">{{ case.incident_date|time:"h:i A" }}</span>
+                        </div>
+                        <div class="p-4">
+                            <label class="text-[10px] uppercase font-bold opacity-40 block mb-1">Location</label>
+                            <span class="font-medium text-xs">{{ case.incident_location }}</span>
+                        </div>
+                    </div>
+                    <div class="p-6 border-t border-base-200 bg-base-50/30">
+                        <label class="text-[10px] uppercase font-bold opacity-40 block mb-3">Incident Narrative</label>
+                        <div class="prose max-w-none text-sm leading-relaxed text-base-content/80 whitespace-pre-wrap">{{ case.narrative }}</div>
+                    </div>
+                </div>
+            </div>
+
+            {# Participants Section #}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {# Complainants #}
+                <div class="space-y-4">
+                    <h3 class="font-bold text-sm uppercase tracking-wider opacity-60 flex items-center gap-2 px-1">
+                        <i class="fas fa-user-plus text-success"></i> Complainants
+                    </h3>
+                    {% for c in complainants %}
+                    <div class="card bg-base-100 border border-base-200 shadow-sm p-4 relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 w-12 h-12 bg-success/5 rotate-45 translate-x-6 -translate-y-6"></div>
+                        <div class="flex items-start gap-4">
+                            <div class="avatar placeholder">
+                                <div class="bg-success/10 text-success rounded-lg w-12 h-12 border border-success/20">
+                                    <span class="text-lg font-bold">{{ c.name|first }}</span>
+                                </div>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-bold text-base-content">{{ c.name }}</h4>
+                                {% if c.resident %}
+                                    <div class="flex items-center gap-1.5 mt-0.5">
+                                        <span class="badge badge-success badge-xs py-1.5 text-[10px] font-bold uppercase tracking-tighter">Resident</span>
+                                        <a href="{% url 'residents:detail' c.resident.id %}" class="text-[11px] text-primary hover:underline font-medium">View Profile</a>
+                                    </div>
+                                {% else %}
+                                    <span class="text-[10px] uppercase font-bold text-base-content/40 tracking-tight">Non-Resident</span>
+                                {% endif %}
+                                <div class="mt-3 space-y-1.5 text-xs opacity-60">
+                                    <div class="flex items-center gap-2"><i class="fas fa-map-marker-alt w-3"></i> {{ c.address }}</div>
+                                    {% if c.contact_number %}
+                                    <div class="flex items-center gap-2"><i class="fas fa-phone w-3"></i> {{ c.contact_number }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                {# Respondents #}
+                <div class="space-y-4">
+                    <h3 class="font-bold text-sm uppercase tracking-wider opacity-60 flex items-center gap-2 px-1">
+                        <i class="fas fa-user-minus text-error"></i> Respondents
+                    </h3>
+                    {% for r in respondents %}
+                    <div class="card bg-base-100 border border-base-200 shadow-sm p-4 relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 w-12 h-12 bg-error/5 rotate-45 translate-x-6 -translate-y-6"></div>
+                        <div class="flex items-start gap-4">
+                            <div class="avatar placeholder">
+                                <div class="bg-error/10 text-error rounded-lg w-12 h-12 border border-error/20">
+                                    <span class="text-lg font-bold">{{ r.name|first }}</span>
+                                </div>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-bold text-base-content">{{ r.name }}</h4>
+                                {% if r.resident %}
+                                    <div class="flex items-center gap-1.5 mt-0.5">
+                                        <span class="badge badge-error badge-xs py-1.5 text-[10px] font-bold uppercase tracking-tighter">Resident</span>
+                                        <a href="{% url 'residents:detail' r.resident.id %}" class="text-[11px] text-primary hover:underline font-medium">View Profile</a>
+                                    </div>
+                                {% else %}
+                                    <span class="text-[10px] uppercase font-bold text-base-content/40 tracking-tight">Non-Resident</span>
+                                {% endif %}
+                                <div class="mt-3 space-y-1.5 text-xs opacity-60">
+                                    <div class="flex items-center gap-2"><i class="fas fa-map-marker-alt w-3"></i> {{ r.address }}</div>
+                                    {% if r.contact_number %}
+                                    <div class="flex items-center gap-2"><i class="fas fa-phone w-3"></i> {{ r.contact_number }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        {# Right Column: Timeline & Metadata #}
+        <div class="space-y-8">
+            {# Hearing History #}
+            <div class="card bg-base-100 shadow-sm border border-base-200">
+                <div class="bg-base-200/50 px-6 py-4 border-b border-base-200 flex justify-between items-center">
+                    <h2 class="font-bold flex items-center gap-2">
+                        <i class="fas fa-calendar-alt text-warning"></i> Hearing Timeline
+                    </h2>
+                    <button class="btn btn-ghost btn-xs text-primary font-bold">Add New</button>
+                </div>
+                <div class="card-body p-6">
+                    {% if hearings %}
+                    <ul class="steps steps-vertical -ml-32 md:-ml-0">
+                        {% for h in hearings %}
+                        <li class="step {% if h.status == 'completed' %}step-primary{% elif h.status == 'scheduled' %}step-warning{% endif %}">
+                            <div class="flex flex-col items-start text-left pl-4 w-full">
+                                <div class="flex items-center justify-between w-full">
+                                    <span class="text-xs font-bold">{{ h.scheduled_at|date:"M d, Y | h:i A" }}</span>
+                                    <span class="badge badge-outline badge-xs opacity-60">{{ h.get_status_display }}</span>
+                                </div>
+                                {% if h.remarks %}
+                                <p class="text-[11px] opacity-60 mt-1 leading-tight italic">{{ h.remarks|truncatechars:100 }}</p>
+                                {% endif %}
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <div class="text-center py-8 opacity-30 italic text-sm">
+                        No hearings scheduled.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            {# Metadata Card #}
+            <div class="card bg-base-100 shadow-sm border border-base-200 p-6 space-y-4">
+                <div class="flex justify-between items-center text-xs">
+                    <span class="opacity-50">Recorded By:</span>
+                    <span class="font-bold text-primary">{{ case.created_by.get_full_name|default:case.created_by.username }}</span>
+                </div>
+                <div class="flex justify-between items-center text-xs">
+                    <span class="opacity-50">Date Recorded:</span>
+                    <span class="font-bold">{{ case.created_at|date:"M d, Y h:i A" }}</span>
+                </div>
+                <div class="flex justify-between items-center text-xs text-info">
+                    <span class="opacity-50">Last Update:</span>
+                    <span class="font-medium italic">{{ case.updated_at|timesince }} ago</span>
+                </div>
+                <div class="divider my-0"></div>
+                <a href="{% url 'admin:blotter_blottercase_change' case.id %}" class="btn btn-sm btn-ghost w-full border-base-200 font-bold opacity-60 hover:opacity-100 hover:bg-base-200">
+                    <i class="fas fa-cog mr-2"></i> System History
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
