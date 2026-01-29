@@ -60,8 +60,8 @@
     </div>
 
     {# Residents Table #}
-    <div class="card bg-base-100 shadow-sm border border-base-200">
-        <div class="overflow-x-auto">
+    <div class="card bg-base-100 shadow-sm border border-base-200 overflow-visible">
+        <div class="overflow-x-auto md:overflow-visible">
             <table class="table table-zebra w-full">
                 <thead>
                     <tr>
@@ -93,13 +93,34 @@
                             </div>
                         </td>
                         <td>
-                            {{ resident.age }} / {{ resident.get_sex_display }}
-                            <br/>
-                            <span class="badge badge-ghost badge-sm">{{ resident.get_civil_status_display }}</span>
+                            <div class="flex flex-col gap-1">
+                                <div class="flex items-center gap-2 text-sm">
+                                    <span class="font-mono font-bold">{{ resident.age }}</span>
+                                    <span class="opacity-50 text-xs">yrs</span>
+                                    <span class="w-px h-3 bg-base-content/20 mx-1"></span>
+                                    {% if resident.sex == 'M' %}
+                                    <div class="tooltip" data-tip="Male">
+                                        <i class="fas fa-mars text-info"></i>
+                                    </div>
+                                    {% else %}
+                                    <div class="tooltip" data-tip="Female">
+                                        <i class="fas fa-venus text-pink-500"></i>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="badge badge-ghost badge-sm text-xs font-normal">
+                                    {{ resident.get_civil_status_display }}
+                                </div>
+                            </div>
                         </td>
                         <td>
-                            <div class="text-sm">{{ resident.purok }}</div>
-                            <div class="text-xs opacity-60">{{ resident.address }}</div>
+                            <div class="flex items-start gap-2">
+                                <i class="fas fa-map-marker-alt text-error mt-1 opacity-70"></i>
+                                <div>
+                                    <div class="font-medium text-sm">{{ resident.purok }}</div>
+                                    <div class="text-xs opacity-60 max-w-[150px] truncate" title="{{ resident.address }}">{{ resident.address }}</div>
+                                </div>
+                            </div>
                         </td>
                         <td>
                             <div class="flex gap-1 flex-wrap">
@@ -124,21 +145,27 @@
                             </div>
                         </td>
                         <td class="text-right">
-                            <div class="dropdown dropdown-end">
-                                <button tabindex="0" class="btn btn-ghost btn-xs btn-circle">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" /></svg>
-                                </button>
-                                <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52 border border-base-200">
-                                    <li><a href="{% url 'residents:detail' resident.pk %}"><i class="fas fa-eye mr-2"></i>View Profile</a></li>
-                                    <li><a href="{% url 'residents:edit' resident.pk %}"><i class="fas fa-edit mr-2"></i>Edit Profile</a></li>
-                                    <div class="divider my-0"></div>
-                                    <li class="menu-title text-xs opacity-50 py-1">Certificates</li>
-                                    <li><a href="#"><i class="fas fa-file-alt mr-2"></i>Indigency</a></li>
-                                    <li><a href="#"><i class="fas fa-file-alt mr-2"></i>Residency</a></li>
-                                    <li><a href="#"><i class="fas fa-file-alt mr-2"></i>Clearance</a></li>
-                                    <div class="divider my-0"></div>
-                                    <li><a class="text-error" href="#"><i class="fas fa-trash mr-2"></i>Delete</a></li>
-                                </ul>
+                            <div class="flex justify-end gap-1">
+                                <a href="{% url 'residents:detail' resident.pk %}" class="btn btn-ghost btn-xs tooltip tooltip-left" data-tip="View Profile">
+                                    <i class="fas fa-eye text-info"></i>
+                                </a>
+                                <a href="{% url 'residents:edit' resident.pk %}" class="btn btn-ghost btn-xs tooltip tooltip-left" data-tip="Edit Profile">
+                                    <i class="fas fa-edit text-warning"></i>
+                                </a>
+                                
+                                <div class="dropdown dropdown-end">
+                                    <button tabindex="0" class="btn btn-ghost btn-xs btn-circle tooltip tooltip-left" data-tip="More Options">
+                                        <i class="fas fa-ellipsis-v opacity-50"></i>
+                                    </button>
+                                    <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52 border border-base-200">
+                                        <li class="menu-title text-xs opacity-50 py-1">Certificates</li>
+                                        <li><a href="#"><i class="fas fa-file-alt mr-2"></i>Indigency</a></li>
+                                        <li><a href="#"><i class="fas fa-file-alt mr-2"></i>Residency</a></li>
+                                        <li><a href="#"><i class="fas fa-file-alt mr-2"></i>Clearance</a></li>
+                                        <div class="divider my-0"></div>
+                                        <li><a class="text-error" href="#"><i class="fas fa-trash mr-2"></i>Delete</a></li>
+                                    </ul>
+                                </div>
                             </div>
                         </td>
                     </tr>

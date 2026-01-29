@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Add New Resident{% endblock %}
+{% block title %}{{ title }}{% endblock %}
 
 {% block content %}
 <div class="container mx-auto max-w-4xl pb-12">
@@ -10,13 +10,35 @@
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
         </a>
         <div>
-            <h1 class="text-2xl font-bold">Add New Resident</h1>
-            <p class="text-sm opacity-60">Create a new resident profile</p>
+            <h1 class="text-2xl font-bold">{{ title }}</h1>
+            <p class="text-sm opacity-60">
+                {% if action == 'Add' %}Create a new resident profile{% else %}Update resident information{% endif %}
+            </p>
         </div>
     </div>
 
-    <form method="post">
+    <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
+
+        {# Error Summary - Shows if form is invalid #}
+        {% if form.errors %}
+        <div class="alert alert-error shadow-lg mb-6">
+            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <div>
+                <h3 class="font-bold">Please correct the following errors:</h3>
+                <ul class="list-disc list-inside text-sm mt-1">
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
         
         {# Card: Personal Information #}
         <div class="card bg-base-100 shadow-sm border border-base-200 mb-6">
@@ -26,49 +48,93 @@
                     Personal Information
                 </h2>
                 
+                {# Photo Upload #}
+                <div class="form-control w-full mb-6" x-data="{ photoPreview: '{% if form.instance.photo %}{{ form.instance.photo.url }}{% endif %}' }">
+                    <label class="label"><span class="label-text">Profile Photo</span></label>
+                    <div class="flex items-center gap-4">
+                        <div class="avatar placeholder">
+                            <div class="bg-neutral text-neutral-content rounded-full w-16 h-16 mask mask-squircle">
+                                <template x-if="photoPreview">
+                                    <img :src="photoPreview" class="w-full h-full object-cover" />
+                                </template>
+                                <template x-if="!photoPreview">
+                                    <span class="text-xs">Photo</span>
+                                </template>
+                            </div>
+                        </div>
+                        <div class="w-full">
+                            <input type="file" name="photo" class="file-input file-input-bordered w-full" accept="image/*" @change="const file = $event.target.files[0]; if(file){ photoPreview = URL.createObjectURL(file) }" />
+                            {% if form.photo.errors %}
+                                <label class="label"><span class="label-text-alt text-error">{{ form.photo.errors.0 }}</span></label>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                     <div class="form-control w-full">
                         <label class="label"><span class="label-text">First Name</span></label>
-                        <input type="text" name="first_name" placeholder="e.g. Juan" class="input input-bordered w-full" required />
+                        <input type="text" name="first_name" value="{{ form.first_name.value|default:'' }}" placeholder="e.g. Juan" class="input input-bordered w-full {% if form.first_name.errors %}input-error{% endif %}" required />
+                        {% if form.first_name.errors %}
+                            <label class="label"><span class="label-text-alt text-error">{{ form.first_name.errors.0 }}</span></label>
+                        {% endif %}
                     </div>
                     <div class="form-control w-full">
                         <label class="label"><span class="label-text">Middle Name</span></label>
-                        <input type="text" name="middle_name" placeholder="e.g. Tamad" class="input input-bordered w-full" />
+                        <input type="text" name="middle_name" value="{{ form.middle_name.value|default:'' }}" placeholder="e.g. Tamad" class="input input-bordered w-full {% if form.middle_name.errors %}input-error{% endif %}" />
+                        {% if form.middle_name.errors %}
+                            <label class="label"><span class="label-text-alt text-error">{{ form.middle_name.errors.0 }}</span></label>
+                        {% endif %}
                     </div>
                     <div class="form-control w-full">
                         <label class="label"><span class="label-text">Last Name</span></label>
-                        <input type="text" name="last_name" placeholder="e.g. Dela Cruz" class="input input-bordered w-full" required />
+                        <input type="text" name="last_name" value="{{ form.last_name.value|default:'' }}" placeholder="e.g. Dela Cruz" class="input input-bordered w-full {% if form.last_name.errors %}input-error{% endif %}" required />
+                        {% if form.last_name.errors %}
+                            <label class="label"><span class="label-text-alt text-error">{{ form.last_name.errors.0 }}</span></label>
+                        {% endif %}
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                     <div class="form-control w-full">
                         <label class="label"><span class="label-text">Date of Birth</span></label>
-                        <input type="date" name="date_of_birth" class="input input-bordered w-full" required />
+                        <input type="date" name="date_of_birth" value="{{ form.date_of_birth.value|date:'Y-m-d'|default:'' }}" class="input input-bordered w-full {% if form.date_of_birth.errors %}input-error{% endif %}" required />
+                        {% if form.date_of_birth.errors %}
+                            <label class="label"><span class="label-text-alt text-error">{{ form.date_of_birth.errors.0 }}</span></label>
+                        {% endif %}
                     </div>
                     <div class="form-control w-full">
                         <label class="label"><span class="label-text">Sex</span></label>
-                        <select name="sex" class="select select-bordered" required>
-                            <option disabled selected>Select Sex</option>
-                            <option value="M">Male</option>
-                            <option value="F">Female</option>
+                        <select name="sex" class="select select-bordered {% if form.sex.errors %}select-error{% endif %}" required>
+                            <option disabled {% if not form.sex.value %}selected{% endif %}>Select Sex</option>
+                            <option value="M" {% if form.sex.value == 'M' %}selected{% endif %}>Male</option>
+                            <option value="F" {% if form.sex.value == 'F' %}selected{% endif %}>Female</option>
                         </select>
+                        {% if form.sex.errors %}
+                            <label class="label"><span class="label-text-alt text-error">{{ form.sex.errors.0 }}</span></label>
+                        {% endif %}
                     </div>
                     <div class="form-control w-full">
                         <label class="label"><span class="label-text">Civil Status</span></label>
-                        <select name="civil_status" class="select select-bordered" required>
-                            <option disabled selected>Select Status</option>
-                            <option>Single</option>
-                            <option>Married</option>
-                            <option>Widowed</option>
-                            <option>Separated</option>
+                        <select name="civil_status" class="select select-bordered {% if form.civil_status.errors %}select-error{% endif %}" required>
+                            <option disabled {% if not form.civil_status.value %}selected{% endif %}>Select Status</option>
+                            <option value="single" {% if form.civil_status.value == 'single' %}selected{% endif %}>Single</option>
+                            <option value="married" {% if form.civil_status.value == 'married' %}selected{% endif %}>Married</option>
+                            <option value="widowed" {% if form.civil_status.value == 'widowed' %}selected{% endif %}>Widowed</option>
+                            <option value="separated" {% if form.civil_status.value == 'separated' %}selected{% endif %}>Separated</option>
                         </select>
+                        {% if form.civil_status.errors %}
+                            <label class="label"><span class="label-text-alt text-error">{{ form.civil_status.errors.0 }}</span></label>
+                        {% endif %}
                     </div>
                 </div>
 
                 <div class="form-control w-full mb-6">
                     <label class="label"><span class="label-text">Citizenship</span></label>
-                    <input type="text" name="citizenship" value="Filipino" class="input input-bordered w-full" />
+                    <input type="text" name="citizenship" value="{{ form.citizenship.value|default:'Filipino' }}" class="input input-bordered w-full {% if form.citizenship.errors %}input-error{% endif %}" />
+                    {% if form.citizenship.errors %}
+                        <label class="label"><span class="label-text-alt text-error">{{ form.citizenship.errors.0 }}</span></label>
+                    {% endif %}
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -109,32 +175,41 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div class="form-control w-full">
                         <label class="label"><span class="label-text">Educational Attainment</span></label>
-                        <select name="educational_attainment" class="select select-bordered">
-                            <option disabled selected>Select Level</option>
-                            <option>Elementary Level</option>
-                            <option>Elementary Graduate</option>
-                            <option>High School Level</option>
-                            <option>High School Graduate</option>
-                            <option>College Level</option>
-                            <option>College Graduate</option>
-                            <option>Vocational</option>
-                            <option>Post-Graduate</option>
+                        <select name="educational_attainment" class="select select-bordered {% if form.educational_attainment.errors %}select-error{% endif %}">
+                            <option disabled {% if not form.educational_attainment.value %}selected{% endif %}>Select Level</option>
+                            <option value="elementary_level" {% if form.educational_attainment.value == 'elementary_level' %}selected{% endif %}>Elementary Level</option>
+                            <option value="elementary_graduate" {% if form.educational_attainment.value == 'elementary_graduate' %}selected{% endif %}>Elementary Graduate</option>
+                            <option value="high_school_level" {% if form.educational_attainment.value == 'high_school_level' %}selected{% endif %}>High School Level</option>
+                            <option value="high_school_graduate" {% if form.educational_attainment.value == 'high_school_graduate' %}selected{% endif %}>High School Graduate</option>
+                            <option value="college_level" {% if form.educational_attainment.value == 'college_level' %}selected{% endif %}>College Level</option>
+                            <option value="college_graduate" {% if form.educational_attainment.value == 'college_graduate' %}selected{% endif %}>College Graduate</option>
+                            <option value="vocational" {% if form.educational_attainment.value == 'vocational' %}selected{% endif %}>Vocational</option>
+                            <option value="post_graduate" {% if form.educational_attainment.value == 'post_graduate' %}selected{% endif %}>Post-Graduate</option>
                         </select>
+                        {% if form.educational_attainment.errors %}
+                            <label class="label"><span class="label-text-alt text-error">{{ form.educational_attainment.errors.0 }}</span></label>
+                        {% endif %}
                     </div>
                     <div class="form-control w-full">
                         <label class="label"><span class="label-text">Employment Status</span></label>
-                        <select name="employment_status" class="select select-bordered">
-                            <option disabled selected>Select Status</option>
-                            <option>Employed</option>
-                            <option>Unemployed</option>
-                            <option>Self-Employed</option>
-                            <option>Student</option>
-                            <option>Retired</option>
+                        <select name="employment_status" class="select select-bordered {% if form.employment_status.errors %}select-error{% endif %}">
+                            <option disabled {% if not form.employment_status.value %}selected{% endif %}>Select Status</option>
+                            <option value="employed" {% if form.employment_status.value == 'employed' %}selected{% endif %}>Employed</option>
+                            <option value="unemployed" {% if form.employment_status.value == 'unemployed' %}selected{% endif %}>Unemployed</option>
+                            <option value="self_employed" {% if form.employment_status.value == 'self_employed' %}selected{% endif %}>Self-Employed</option>
+                            <option value="student" {% if form.employment_status.value == 'student' %}selected{% endif %}>Student</option>
+                            <option value="retired" {% if form.employment_status.value == 'retired' %}selected{% endif %}>Retired</option>
                         </select>
+                        {% if form.employment_status.errors %}
+                            <label class="label"><span class="label-text-alt text-error">{{ form.employment_status.errors.0 }}</span></label>
+                        {% endif %}
                     </div>
                     <div class="form-control w-full">
                         <label class="label"><span class="label-text">Occupation</span></label>
-                        <input type="text" name="occupation" placeholder="e.g. Tricycle Driver" class="input input-bordered w-full" />
+                        <input type="text" name="occupation" value="{{ form.occupation.value|default:'' }}" placeholder="e.g. Tricycle Driver" class="input input-bordered w-full {% if form.occupation.errors %}input-error{% endif %}" />
+                        {% if form.occupation.errors %}
+                            <label class="label"><span class="label-text-alt text-error">{{ form.occupation.errors.0 }}</span></label>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -151,11 +226,17 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div class="form-control w-full">
                         <label class="label"><span class="label-text">Mobile Number</span></label>
-                        <input type="tel" name="mobile_number" placeholder="0917-123-4567" class="input input-bordered w-full" />
+                        <input type="tel" name="mobile_number" value="{{ form.mobile_number.value|default:'' }}" placeholder="0917-123-4567" class="input input-bordered w-full {% if form.mobile_number.errors %}input-error{% endif %}" />
+                        {% if form.mobile_number.errors %}
+                            <label class="label"><span class="label-text-alt text-error">{{ form.mobile_number.errors.0 }}</span></label>
+                        {% endif %}
                     </div>
                     <div class="form-control w-full">
                         <label class="label"><span class="label-text">Email Address</span></label>
-                        <input type="email" name="email" placeholder="juan@example.com" class="input input-bordered w-full" />
+                        <input type="email" name="email" value="{{ form.email.value|default:'' }}" placeholder="juan@example.com" class="input input-bordered w-full {% if form.email.errors %}input-error{% endif %}" />
+                        {% if form.email.errors %}
+                            <label class="label"><span class="label-text-alt text-error">{{ form.email.errors.0 }}</span></label>
+                        {% endif %}
                     </div>
                 </div>
                 
@@ -199,17 +280,23 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div class="form-control w-full">
                         <label class="label"><span class="label-text">Purok / Sitio</span></label>
-                        <select name="purok" class="select select-bordered" required>
-                            <option disabled selected>Select Purok</option>
-                            <option>Purok 1</option>
-                            <option>Purok 2</option>
-                            <option>Purok 3</option>
-                            <option>Sitio Kawayan</option>
+                        <select name="purok" class="select select-bordered {% if form.purok.errors %}select-error{% endif %}" required>
+                            <option disabled {% if not form.purok.value %}selected{% endif %}>Select Purok</option>
+                            <option {% if form.purok.value == 'Purok 1' %}selected{% endif %}>Purok 1</option>
+                            <option {% if form.purok.value == 'Purok 2' %}selected{% endif %}>Purok 2</option>
+                            <option {% if form.purok.value == 'Purok 3' %}selected{% endif %}>Purok 3</option>
+                            <option {% if form.purok.value == 'Sitio Kawayan' %}selected{% endif %}>Sitio Kawayan</option>
                         </select>
+                        {% if form.purok.errors %}
+                            <label class="label"><span class="label-text-alt text-error">{{ form.purok.errors.0 }}</span></label>
+                        {% endif %}
                     </div>
                     <div class="form-control w-full">
                         <label class="label"><span class="label-text">House Number / Street</span></label>
-                        <input type="text" name="address" placeholder="e.g. 123 Kalye Serye" class="input input-bordered w-full" required />
+                        <input type="text" name="address" value="{{ form.address.value|default:'' }}" placeholder="e.g. 123 Kalye Serye" class="input input-bordered w-full {% if form.address.errors %}input-error{% endif %}" required />
+                        {% if form.address.errors %}
+                            <label class="label"><span class="label-text-alt text-error">{{ form.address.errors.0 }}</span></label>
+                        {% endif %}
                     </div>
                 </div>
 
@@ -287,7 +374,10 @@
                         </label>
                         <div x-show="isVoter" x-transition>
                             <label class="label pb-1"><span class="label-text text-xs opacity-70">Precinct Number</span></label>
-                            <input type="text" name="precinct_number" placeholder="e.g. 0123A" class="input input-sm input-bordered w-full" />
+                            <input type="text" name="precinct_number" value="{{ form.precinct_number.value|default:'' }}" placeholder="e.g. 0123A" class="input input-sm input-bordered w-full {% if form.precinct_number.errors %}input-error{% endif %}" />
+                             {% if form.precinct_number.errors %}
+                                <label class="label"><span class="label-text-alt text-error">{{ form.precinct_number.errors.0 }}</span></label>
+                            {% endif %}
                         </div>
                     </div>
 
@@ -299,7 +389,10 @@
                         </label>
                         <div x-show="isPWD" x-transition>
                             <label class="label pb-1"><span class="label-text text-xs opacity-70">Specific Disability (Targeted Aid)</span></label>
-                            <input type="text" name="disability_type" placeholder="e.g. Visual, Orthopedic, Psychosocial" class="input input-sm input-bordered w-full" />
+                            <input type="text" name="disability_type" value="{{ form.disability_type.value|default:'' }}" placeholder="e.g. Visual, Orthopedic, Psychosocial" class="input input-sm input-bordered w-full {% if form.disability_type.errors %}input-error{% endif %}" />
+                            {% if form.disability_type.errors %}
+                                <label class="label"><span class="label-text-alt text-error">{{ form.disability_type.errors.0 }}</span></label>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
