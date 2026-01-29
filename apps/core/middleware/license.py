@@ -2,13 +2,14 @@
 License verification middleware for BIMS2.
 Checks and caches active license on each request.
 
-DEBUG MODE: When DEBUG=True, automatically grants Ultra tier for development.
+DEBUG MODE: When DEBUG=True or LICENSE_DEBUG_BYPASS=True, automatically grants Ultra tier.
 """
 
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.core.cache import cache
 from django.conf import settings
+from decouple import config
 from apps.core.models import LicenseKey
 from apps.core.utils.hardware import get_hardware_id
 
@@ -30,7 +31,10 @@ class LicenseVerificationMiddleware:
     
     def __call__(self, request):
         # DEBUG MODE: Bypass license check and grant Ultra tier for development
-        if settings.DEBUG:
+        # Check both DEBUG setting and LICENSE_DEBUG_BYPASS env variable
+        license_debug_bypass = config('LICENSE_DEBUG_BYPASS', default=False, cast=bool)
+        
+        if settings.DEBUG or license_debug_bypass:
             request.license = {
                 'tier': 'ultra',
                 'max_users': 999,
