@@ -21,6 +21,11 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('apps.core.urls')),  # Core app URLs
     path('residents/', include('apps.residents.urls')),
+    path('certificates/', include('apps.certificates.urls')),
+    path('blotter/', include('apps.blotter.urls')),
+    path('business/', include('apps.business.urls')),
+    path('finance/', include('apps.finance.urls')),
+    path('audit/', include('apps.audit.urls')),
 ]
 
 from django.conf import settings

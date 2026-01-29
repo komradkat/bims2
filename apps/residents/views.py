@@ -263,3 +263,31 @@ class ResidentDetailView(LoginRequiredMixin, DetailView):
             context['household_head'] = self.object.household_head
         
         return context
+class ResidentSearchView(LoginRequiredMixin, ListView):
+    model = Resident
+    template_name = 'pages/residents/partials/search_results.html'
+    context_object_name = 'residents'
+    
+    def get_queryset(self):
+        query = self.request.GET.get('q', '').strip()
+        if len(query) < 2:
+            return Resident.objects.none()
+        
+        # Split query into words for individual field matching
+        words = query.split()
+        
+        filters = Q(first_name__icontains=query) | \
+                  Q(last_name__icontains=query) | \
+                  Q(middle_name__icontains=query) | \
+                  Q(id__icontains=query)
+        
+        # Add support for "First Last" search by matching multiple fields
+        if len(words) >= 2:
+            combined_filter = Q()
+            for word in words:
+                combined_filter &= (Q(first_name__icontains=word) | 
+                                   Q(last_name__icontains=word) | 
+                                   Q(middle_name__icontains=word))
+            filters |= combined_filter
+
+        return Resident.objects.filter(filters, is_active=True).order_by('last_name', 'first_name')[:10]

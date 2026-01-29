@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <div>
+            <h1 class="text-2xl font-bold">Issued Certificates Registry</h1>
+            <p class="text-sm text-base-content/60">Manage and track all issued certificates</p>
+        </div>
+        <div class="flex gap-2">
+            <a href="{% url 'certificates:center' %}" class="btn btn-primary">
+                <i class="fas fa-plus mr-2"></i>Issue New
+            </a>
+        </div>
+    </div>
+
+    {# Search and Filters #}
+    <div class="card bg-base-100 shadow-sm border border-base-200 mb-6">
+        <div class="card-body p-4">
+            <form method="get" class="flex flex-wrap items-end gap-4">
+                <div class="form-control w-full md:w-80">
+                    <label class="label"><span class="label-text">Search</span></label>
+                    <div class="join">
+                        <input type="text" name="search" placeholder="Ref #, Name, or OR #" 
+                               class="input input-bordered join-item w-full" value="{{ request.GET.search }}" />
+                        <button type="submit" class="btn btn-primary join-item">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {# Registry Table #}
+    <div class="card bg-base-100 shadow-sm border border-base-200 overflow-visible">
+        <div class="overflow-x-auto overflow-y-visible">
+            <table class="table table-zebra w-full">
+                <thead>
+                    <tr>
+                        <th>Transaction ID</th>
+                        <th>Resident</th>
+                        <th>Type</th>
+                        <th>Purpose</th>
+                        <th>Status</th>
+                        <th>Date Issued</th>
+                        <th class="text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cert in certificates %}
+                    <tr class="hover group">
+                        <td>
+                            <span class="font-mono text-xs font-bold">{{ cert.transaction_number }}</span>
+                            {% if cert.or_number %}
+                            <div class="text-[10px] opacity-50">OR: {{ cert.or_number }}</div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="flex items-center gap-3">
+                                <div class="avatar placeholder">
+                                    <div class="bg-primary/10 text-primary rounded-full w-8 h-8">
+                                        <span class="text-xs">{{ cert.resident.first_name.0 }}{{ cert.resident.last_name.0 }}</span>
+                                    </div>
+                                </div>
+                                <div class="font-bold text-sm">{{ cert.resident.full_name }}</div>
+                            </div>
+                        </td>
+                        <td>{{ cert.certificate_type.name }}</td>
+                        <td><div class="max-w-[150px] truncate text-xs" title="{{ cert.purpose }}">{{ cert.purpose }}</div></td>
+                        <td>
+                            <div class="badge badge-sm {% if cert.status == 'issued' %}badge-success text-white{% elif cert.status == 'cancelled' %}badge-error text-white{% else %}badge-ghost{% endif %}">
+                                {{ cert.get_status_display }}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="text-xs">{{ cert.issued_at|date:"M d, Y" }}</div>
+                            <div class="text-[10px] opacity-50">{{ cert.issued_at|date:"h:i A" }}</div>
+                        </td>
+                        <td class="text-right">
+                            <div class="dropdown dropdown-end">
+                                <button tabindex="0" class="btn btn-ghost btn-xs btn-circle">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                                    <li><a href="{% url 'certificates:print' cert.pk %}" target="_blank">
+                                        <i class="fas fa-print mr-2 opacity-70"></i>Reprint PDF
+                                    </a></li>
+                                    {% if cert.status != 'cancelled' %}
+                                    <li>
+                                        <form method="post" action="{% url 'certificates:void' cert.pk %}" class="w-full">
+                                            {% csrf_token %}
+                                            <button type="submit" class="text-error w-full text-left flex items-center" 
+                                                    onclick="return confirm('Are you sure you want to void this certificate? This action cannot be undone.')">
+                                                <i class="fas fa-ban mr-2 opacity-70"></i>Void / Cancel
+                                            </button>
+                                        </form>
+                                    </li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-8 opacity-50 italic">
+                            No matching certificates found in the registry.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {# Pagination #}
+    {% if is_paginated %}
+    <div class="flex justify-center mt-6">
+        <div class="join">
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="join-item btn btn-sm">«</a>
+            {% endif %}
+            <button class="join-item btn btn-sm">Page {{ page_obj.number }} of {{ paginator.num_pages }}</button>
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="join-item btn btn-sm">»</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

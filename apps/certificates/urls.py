@@ -1,8 +1,11 @@
-# Certificates URLs
 from django.urls import path
+from . import views
 
 app_name = 'certificates'
 
 urlpatterns = [
-    # URLs will be added as needed
+    path('', views.CertificateCenterView.as_view(), name='center'),
+    path('history/', views.CertificateListView.as_view(), name='list'),
+    path('<int:pk>/print/', views.CertificatePrintView.as_view(), name='print'),
+    path('<int:pk>/void/', views.void_certificate, name='void'),
 ]

@@ -1,0 +1,21 @@
+{% extends "certificates/print/base_document.html" %}
+
+{% block document_content %}
+<p style="text-indent: 1cm;"><strong>TO WHOM IT MAY CONCERN:</strong></p>
+
+<p style="text-indent: 1cm;">This is to certify that <strong>{{ certificate.resident.full_name|upper }}</strong>, 
+{{ certificate.resident.age }} years of age, is a 
+bona fide resident of Barangay {{ barangay.name }}, {{ barangay.city }}, {{ barangay.province }} 
+for at least six (6) months.</p>
+
+<p style="text-indent: 1cm;">This certification is issued pursuant to <strong>Republic Act No. 11261</strong>, 
+otherwise known as the <strong>"First Time Jobseekers Assistance Act"</strong>, 
+granting exemption from the payment of fees and other charges on the issuance 
+of documents requested by first-time jobseekers.</p>
+
+<p style="text-indent: 1cm;">The applicant is hereby informed that this certification is valid for 
+<strong>one (1) year</strong> from the date of issuance.</p>
+
+<p style="text-indent: 1cm;">Issued this {{ today|date:"jS" }} day of {{ today|date:"F, Y" }} 
+at the Barangay Hall of {{ barangay.name }}, {{ barangay.city }}, Philippines.</p>
+{% endblock %}

@@ -3,167 +3,168 @@
 {% block title %}Certificate Center{% endblock %}
 
 {% block content %}
-<div class="container mx-auto" x-data="{ activeCert: '', price: '' }">
+<div class="container mx-auto" x-data="{ 
+    selectedResident: '', 
+    selectedResidentId: '', 
+    searchQuery: '', 
+    searchResults: false, 
+    purpose: '', 
+    orNumber: '', 
+    isSubmitting: false, 
+    activeCertId: '', 
+    activeCertName: '',
+    priceInput: '',
+    isFree: false,
+    resetForm() {
+        this.selectedResident = '';
+        this.selectedResidentId = '';
+        this.searchQuery = '';
+        this.searchResults = false;
+        this.purpose = '';
+        this.orNumber = '';
+        this.isSubmitting = false;
+    }
+}">
     <h1 class="text-2xl font-bold mb-6">Certificate Center</h1>
     
-    {# Tier 1: Community Edition #}
-    <div class="mb-8">
-        <div class="flex items-center gap-2 mb-4">
-            <span class="badge badge-primary">Tier 1</span>
-            <h2 class="font-bold text-lg">Community Edition (Social Services)</h2>
+    {# Search Results for individual types (Optional) #}
+    
+    <div class="space-y-12 mb-12">
+        {# Community Tier #}
+        {% if community_certs %}
+        <section>
+            <div class="flex items-center gap-3 mb-6">
+                <div class="p-2 rounded-lg bg-success/10 text-success">
+                    <i class="fas fa-users-cog"></i>
+                </div>
+                <h2 class="text-xl font-bold">Tier 1: Community Edition</h2>
+                <div class="badge badge-success badge-outline">Basic</div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for type in community_certs %}
+                    {% include 'pages/certificates/partials/cert_card.html' with type=type %}
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        {# Pro Tier #}
+        {% if pro_certs %}
+        <section>
+            <div class="flex items-center gap-3 mb-6">
+                <div class="p-2 rounded-lg bg-primary/10 text-primary">
+                    <i class="fas fa-briefcase"></i>
+                </div>
+                <h2 class="text-xl font-bold">Tier 2: Pro Edition</h2>
+                <div class="badge badge-primary badge-outline">Standard</div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for type in pro_certs %}
+                    {% include 'pages/certificates/partials/cert_card.html' with type=type %}
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        {# Ultra Tier #}
+        {% if ultra_certs %}
+        <section>
+            <div class="flex items-center gap-3 mb-6">
+                <div class="p-2 rounded-lg bg-accent/10 text-accent">
+                    <i class="fas fa-crown"></i>
+                </div>
+                <h2 class="text-xl font-bold">Tier 3: Ultra Edition</h2>
+                <div class="badge badge-accent badge-outline">Premium</div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for type in ultra_certs %}
+                    {% include 'pages/certificates/partials/cert_card.html' with type=type %}
+                {% endfor %}
+            </div>
+        </section>
+        {% else %}
+        <div class="p-8 rounded-2xl bg-base-200/50 border-2 border-dashed border-base-300 text-center">
+            <div class="inline-flex p-4 rounded-full bg-base-100 text-base-content/30 mb-4">
+                <i class="fas fa-lock fa-2xl"></i>
+            </div>
+            <h3 class="text-lg font-bold opacity-40">Ultra Features Locked</h3>
+            <p class="text-sm opacity-40 max-w-xs mx-auto">Upgrade to Ultra tier to unlock advanced certificates like GIS Map and Audit certificates.</p>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {# Indigency #}
-            <div class="card bg-base-100 shadow-sm border border-base-200 hover:border-primary transition-colors cursor-pointer group">
-                <div class="card-body">
-                    <div class="flex items-start justify-between">
-                        <div class="p-3 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-content transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                        </div>
-                        <div class="badge badge-ghost">Free</div>
-                    </div>
-                    <h2 class="card-title mt-4">Certificate of Indigency</h2>
-                    <p class="text-sm text-base-content/70">For financial assistance, medical aid (DSWD/PAO/Lingap).</p>
-                    <div class="card-actions justify-end mt-4">
-                        <button class="btn btn-sm btn-primary" @click="activeCert = 'Certificate of Indigency'; price = 'Free'; document.getElementById('issue_modal').showModal()">Issue Now</button>
-                    </div>
-                </div>
-            </div>
-
-            {# Jobseeker #}
-            <div class="card bg-base-100 shadow-sm border border-base-200 hover:border-primary transition-colors cursor-pointer group">
-                <div class="card-body">
-                    <div class="flex items-start justify-between">
-                        <div class="p-3 rounded-lg bg-info/10 text-info group-hover:bg-info group-hover:text-info-content transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                        </div>
-                        <div class="badge badge-ghost">Free (RA 11261)</div>
-                    </div>
-                    <h2 class="card-title mt-4">First-Time Jobseeker</h2>
-                    <p class="text-sm text-base-content/70">Free certification for new graduates seeking employment.</p>
-                    <div class="card-actions justify-end mt-4">
-                        <button class="btn btn-sm btn-outline" @click="activeCert = 'First-Time Jobseeker'; price = 'Free'; document.getElementById('issue_modal').showModal()">Issue Now</button>
-                    </div>
-                </div>
-            </div>
-
-            {# Residency #}
-            <div class="card bg-base-100 shadow-sm border border-base-200 hover:border-primary transition-colors cursor-pointer group">
-                <div class="card-body">
-                    <div class="flex items-start justify-between">
-                        <div class="p-3 rounded-lg bg-secondary/10 text-secondary group-hover:bg-secondary group-hover:text-secondary-content transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
-                        </div>
-                        <div class="badge badge-ghost">₱ 50.00</div>
-                    </div>
-                    <h2 class="card-title mt-4">Certificate of Residency</h2>
-                    <p class="text-sm text-base-content/70">Proof of residence for bank opening, school requirements, or ID application.</p>
-                    <div class="card-actions justify-end mt-4">
-                        <button class="btn btn-sm btn-outline" @click="activeCert = 'Certificate of Residency'; price = '₱ 50.00'; document.getElementById('issue_modal').showModal()">Issue Now</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    {# Tier 2: Pro Version #}
-    <div class="mb-8">
-        <div class="flex items-center gap-2 mb-4">
-            <span class="badge badge-warning">Tier 2</span>
-            <h2 class="font-bold text-lg">Pro Version (Regulatory & Business)</h2>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {# Clearance #}
-            <div class="card bg-base-100 shadow-sm border border-base-200 hover:border-primary transition-colors cursor-pointer group">
-                <div class="card-body">
-                    <div class="flex items-start justify-between">
-                        <div class="p-3 rounded-lg bg-accent/10 text-accent group-hover:bg-accent group-hover:text-accent-content transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        </div>
-                        <div class="badge badge-ghost">₱ 100.00</div>
-                    </div>
-                    <h2 class="card-title mt-4">Barangay Clearance</h2>
-                    <p class="text-sm text-base-content/70">General purpose clearance for employment or postal ID.</p>
-                    <div class="card-actions justify-end mt-4">
-                        <button class="btn btn-sm btn-outline" @click="activeCert = 'Barangay Clearance'; price = '₱ 100.00'; document.getElementById('issue_modal').showModal()">Issue Now</button>
-                    </div>
-                </div>
-            </div>
-
-            {# Good Moral #}
-            <div class="card bg-base-100 shadow-sm border border-base-200 hover:border-primary transition-colors cursor-pointer group">
-                <div class="card-body">
-                    <div class="flex items-start justify-between">
-                        <div class="p-3 rounded-lg bg-success/10 text-success group-hover:bg-success group-hover:text-success-content transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" /></svg>
-                        </div>
-                        <div class="badge badge-ghost">₱ 50.00</div>
-                    </div>
-                    <h2 class="card-title mt-4">Good Moral Character</h2>
-                    <p class="text-sm text-base-content/70">For school admission, employment, or legal requirements.</p>
-                    <div class="card-actions justify-end mt-4">
-                        <button class="btn btn-sm btn-outline" @click="activeCert = 'Good Moral Character'; price = '₱ 50.00'; document.getElementById('issue_modal').showModal()">Issue Now</button>
-                    </div>
-                </div>
-            </div>
-
-            {# Business #}
-            <div class="card bg-base-100 shadow-sm border border-base-200 hover:border-primary transition-colors cursor-pointer group">
-                <div class="card-body">
-                    <div class="flex items-start justify-between">
-                        <div class="p-3 rounded-lg bg-warning/10 text-warning group-hover:bg-warning group-hover:text-warning-content transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        </div>
-                        <div class="badge badge-warning text-warning-content">PRO</div>
-                    </div>
-                    <h2 class="card-title mt-4">Business Clearance</h2>
-                    <p class="text-sm text-base-content/70">For business permit application and renewal.</p>
-                    <div class="card-actions justify-end mt-4">
-                        <button class="btn btn-sm btn-outline btn-disabled">Via Business Module</button>
-                    </div>
-                </div>
-            </div>
-
-            {# Custom Template #}
-            <div class="card border border-dashed border-base-300 hover:border-primary transition-colors cursor-pointer group flex items-center justify-center p-8 bg-base-50">
-                <div class="text-center">
-                    <div class="p-3 rounded-full bg-base-200 inline-block mb-3 group-hover:bg-primary group-hover:text-white transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-                    </div>
-                    <h3 class="font-bold">Create Custom</h3>
-                    <p class="text-xs opacity-60 mt-1">Design a new certificate template</p>
-                </div>
-            </div>
-        </div>
+        {% endif %}
     </div>
 
     {# Issue Modal #}
-    <dialog id="issue_modal" class="modal">
-        <div class="modal-box">
-            <h3 class="font-bold text-lg mb-4">Issue <span x-text="activeCert"></span></h3>
-            <div class="badge badge-lg mb-6" :class="price === 'Free' ? 'badge-success text-white' : 'badge-ghost'" x-text="price"></div>
+    <dialog id="issue_modal" class="modal" @close="resetForm()">
+        <div class="modal-box max-w-lg">
+            <h3 class="font-bold text-lg mb-4">Issue <span x-text="activeCertName"></span></h3>
+            
+            <form method="post" action="{% url 'certificates:center' %}" @submit="isSubmitting = true">
+                {% csrf_token %}
+                <input type="hidden" name="certificate_type" :value="activeCertId">
+                <input type="hidden" name="resident" :value="selectedResidentId">
 
-            <div class="form-control w-full mb-4">
-                <label class="label"><span class="label-text">Select Resident</span></label>
-                <input type="text" placeholder="Search resident name..." class="input input-bordered w-full" />
-            </div>
+                <div class="form-control w-full mb-4 relative">
+                    <label class="label"><span class="label-text">Select Resident</span></label>
+                    <div class="relative">
+                        <input type="text" 
+                               name="q"
+                               placeholder="Search resident name..." 
+                               class="input input-bordered w-full"
+                               x-model="searchQuery"
+                               @input="searchResults = true"
+                               hx-get="{% url 'residents:search' %}"
+                               hx-trigger="keyup changed delay:300ms"
+                               hx-target="#search-results"
+                               hx-indicator=".search-spinner"
+                               :value="selectedResident"
+                               autocomplete="off" />
+                        <div class="absolute right-3 top-3 search-spinner htmx-indicator">
+                            <span class="loading loading-spinner loading-xs"></span>
+                        </div>
+                    </div>
+                    
+                    {# Search Results #}
+                    <div id="search-results" 
+                         class="relative" 
+                         x-show="searchResults && searchQuery.length >= 2" 
+                         @click.away="searchResults = false">
+                        {# HTMX will inject results here #}
+                    </div>
 
-            <div class="form-control w-full mb-4">
-                <label class="label"><span class="label-text">Purpose</span></label>
-                <input type="text" placeholder="e.g. Scholarship, Employment, Loan" class="input input-bordered w-full" />
-            </div>
+                    <template x-if="selectedResident">
+                        <div class="mt-2 p-2 bg-primary/10 rounded-lg flex items-center justify-between border border-primary/20 animate-in fade-in duration-300">
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-user-check text-primary"></i>
+                                <span class="font-bold text-sm" x-text="selectedResident"></span>
+                                <span class="text-xs opacity-60">Selected</span>
+                            </div>
+                            <button type="button" class="btn btn-ghost btn-xs btn-circle" @click="selectedResident = ''; selectedResidentId = ''; searchQuery = ''">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </template>
+                </div>
 
-            <div class="form-control w-full mb-6" x-show="price !== 'Free'">
-                <label class="label"><span class="label-text">O.R. Number</span></label>
-                <input type="text" placeholder="Enter Official Receipt No." class="input input-bordered w-full" />
-            </div>
+                <div class="form-control w-full mb-4">
+                    <label class="label"><span class="label-text">Purpose</span></label>
+                    <input type="text" name="purpose" x-model="purpose" placeholder="e.g. Scholarship, Employment, Loan" class="input input-bordered w-full" required />
+                </div>
 
-            <div class="modal-action">
-                <form method="dialog">
-                    <button class="btn btn-ghost">Cancel</button>
-                    <button class="btn btn-primary ml-2" onclick="alert('Certificate Generated! (Prototype)');">Generate & Print</button>
-                </form>
-            </div>
+                <div class="form-control w-full mb-6" x-show="!isFree">
+                    <label class="label"><span class="label-text">O.R. Number</span></label>
+                    <input type="text" name="or_number" x-model="orNumber" placeholder="Enter Official Receipt No." class="input input-bordered w-full" :required="!isFree" />
+                </div>
+
+                <div class="modal-action">
+                    <button type="button" class="btn btn-ghost" onclick="document.getElementById('issue_modal').close()">Cancel</button>
+                    <button type="submit" 
+                            class="btn btn-primary ml-2 px-8" 
+                            :disabled="!selectedResidentId || isSubmitting">
+                        <span x-show="isSubmitting" class="loading loading-spinner loading-xs mr-2"></span>
+                        Generate & Issue
+                    </button>
+                </div>
+            </form>
         </div>
         <form method="dialog" class="modal-backdrop">
             <button>close</button>

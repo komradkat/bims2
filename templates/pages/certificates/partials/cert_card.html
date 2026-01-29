@@ -1,0 +1,36 @@
+<div class="card bg-base-100 shadow-sm border border-base-200 hover:border-primary transition-all hover:shadow-md group">
+    <div class="card-body">
+        <div class="flex items-start justify-between">
+            <div class="p-3 rounded-lg {% if type.tier == 'community' %}bg-success/10 text-success group-hover:bg-success group-hover:text-success-content{% elif type.tier == 'pro' %}bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-content{% else %}bg-accent/10 text-accent group-hover:bg-accent group-hover:text-accent-content{% endif %} transition-colors">
+                {% if 'Clearance' in type.name %}
+                    <i class="fas fa-certificate fa-lg"></i>
+                {% elif 'Indigency' in type.name %}
+                    <i class="fas fa-hand-holding-heart fa-lg"></i>
+                {% elif 'Residency' in type.name %}
+                    <i class="fas fa-home fa-lg"></i>
+                {% elif 'Job' in type.name %}
+                    <i class="fas fa-briefcase fa-lg"></i>
+                {% elif 'Good Moral' in type.name %}
+                    <i class="fas fa-user-check fa-lg"></i>
+                {% else %}
+                    <i class="fas fa-file-contract fa-lg"></i>
+                {% endif %}
+            </div>
+            <div class="badge {% if type.default_price == 0 %}badge-success text-white{% else %}badge-ghost{% endif %}">
+                {% if type.default_price == 0 %}Free{% else %}₱ {{ type.default_price }}{% endif %}
+            </div>
+        </div>
+        <h2 class="card-title mt-4">{{ type.name }}</h2>
+        <p class="text-sm text-base-content/70">{{ type.description }}</p>
+        <div class="card-actions justify-end mt-4">
+            <button class="btn btn-sm {% if type.tier == 'community' %}btn-success text-white{% elif type.tier == 'pro' %}btn-primary{% else %}btn-accent{% endif %}" 
+                @click="activeCertName = '{{ type.name }}'; 
+                        activeCertId = '{{ type.id }}'; 
+                        priceInput = '{{ type.default_price }}';
+                        isFree = {{ type.default_price|lower }} == 0;
+                        document.getElementById('issue_modal').showModal()">
+                Issue Now
+            </button>
+        </div>
+    </div>
+</div>

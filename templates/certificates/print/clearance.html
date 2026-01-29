@@ -1,0 +1,22 @@
+{% extends "certificates/print/base_document.html" %}
+
+{% block document_content %}
+<p style="text-indent: 1cm;"><strong>TO WHOM IT MAY CONCERN:</strong></p>
+
+<p style="text-indent: 1cm;">This is to certify that <strong>{{ certificate.resident.full_name|upper }}</strong>, 
+{{ certificate.resident.age }} years of age, 
+{% if certificate.resident.sex == 'M' %}Male{% else %}Female{% endif %}, 
+{{ certificate.resident.get_civil_status_display }}, is a 
+bona fide resident of Barangay {{ barangay.name }}, {{ barangay.city }}, {{ barangay.province }} 
+with postal address at {{ certificate.resident.address }}.</p>
+
+<p style="text-indent: 1cm;">This further certifies that the above-named person is a person of good moral 
+character and law-abiding citizen in this community, and that he/she has 
+<strong>NO DEROGATORY RECORD</strong> on file in this office as of this date.</p>
+
+<p style="text-indent: 1cm;">This certification is being issued upon the request of the interested party 
+for <strong>{{ certificate.purpose|upper }}</strong> and for whatever legal purpose it may serve.</p>
+
+<p style="text-indent: 1cm;">Issued this {{ today|date:"jS" }} day of {{ today|date:"F, Y" }} 
+at the Barangay Hall of {{ barangay.name }}, {{ barangay.city }}, Philippines.</p>
+{% endblock %}
