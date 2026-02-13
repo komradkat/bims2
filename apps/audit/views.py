@@ -1,4 +1,60 @@
-# Audit views
 from django.shortcuts import render
+from django.views.generic import ListView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.apps import apps
 
-# Views will be added as needed
+class AuditLogsView(LoginRequiredMixin, ListView):
+    template_name = 'pages/audit/logs.html'
+    context_object_name = 'logs'
+    paginate_by = 50
+
+    def get_queryset(self):
+        models_to_track = [
+            ('residents', 'Resident', 'Residents'),
+            ('certificates', 'Certificate', 'Certificates'),
+            ('blotter', 'BlotterCase', 'Blotter'),
+            ('business', 'BusinessPermit', 'Business'),
+            ('finance', 'OfficialReceipt', 'Finance'),
+        ]
+
+        all_logs = []
+
+        for app_label, model_name, module_name in models_to_track:
+            try:
+                model = apps.get_model(app_label, model_name)
+                # Check if model has history manager
+                if hasattr(model, 'history'):
+                    # Fetch history records
+                    records = model.history.all().order_by('-history_date')[:50] # Limit to recent 50 per model for performance
+
+                    for record in records:
+                        action_map = {'+': 'Create', '~': 'Update', '-': 'Delete'}
+                        action = action_map.get(record.history_type, 'Unknown')
+
+                        color_map = {'Create': 'success', 'Update': 'info', 'Delete': 'error'}
+                        action_color = color_map.get(action, 'ghost')
+
+                        details = f"{action} record: {str(record)}"
+                        if record.history_change_reason:
+                            details += f" ({record.history_change_reason})"
+
+                        user_display = 'System'
+                        if record.history_user:
+                             user_display = record.history_user.username
+
+                        log = {
+                            'timestamp': record.history_date,
+                            'user': user_display,
+                            'action': action,
+                            'action_color': action_color,
+                            'module': module_name,
+                            'details': details,
+                        }
+                        all_logs.append(log)
+            except LookupError:
+                continue
+
+        # Sort combined logs by timestamp descending
+        all_logs.sort(key=lambda x: x['timestamp'], reverse=True)
+
+        return all_logs

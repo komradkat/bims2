@@ -5,9 +5,18 @@ from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.core.cache import cache
+from django.db.models import Sum, Q
+from django.utils import timezone
+from datetime import timedelta
 
+# Import models for Dashboard
+from apps.residents.models import Resident
+from apps.certificates.models import Certificate
+from apps.blotter.models import BlotterCase, Hearing
+from apps.business.models import BusinessPermit, BusinessClearance
+from apps.finance.models import OfficialReceipt
 
-
+# Custom Login
 class CustomLoginView(LoginView):
     template_name = 'auth/login.html'
     redirect_authenticated_user = True
@@ -18,7 +27,7 @@ class CustomLoginView(LoginView):
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView, CreateView, UpdateView
-from .models import User
+from .models import User, LicenseKey
 from .decorators import role_required, tier_required
 from django.utils.decorators import method_decorator
 
@@ -63,462 +72,125 @@ class UserUpdateView(LoginRequiredMixin, UpdateView):
 
 
 class DashboardView(LoginRequiredMixin, TemplateView):
-    """Dashboard view with placeholder data"""
+    """Dashboard view with real data"""
     template_name = 'pages/dashboard.html'
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Placeholder data for testing
+        today = timezone.now().date()
+        
+        # Stats
+        total_residents = Resident.objects.filter(is_active=True).count()
+        documents_issued = Certificate.objects.filter(status='issued').count()
+        
+        # Revenue: Sum of OfficialReceipts + BusinessClearances (if not in OR) + Certificates (if not in OR)
+        # For simplicity, assuming all revenue is tracked in OfficialReceipt if we enforced it,
+        # but since we just implemented it, we might need to sum up.
+        # Let's sum OfficialReceipts for now as it's the intended source of truth for Finance.
+        # If BusinessClearance creates an OR, it should be there.
+        # In my BusinessCreateView, I created BusinessClearance but not OfficialReceipt explicitly in Finance app.
+        # But BusinessClearance has 'amount_paid'.
+        
+        revenue_or = OfficialReceipt.objects.filter(status='paid').aggregate(Sum('amount'))['amount__sum'] or 0
+        revenue_biz = BusinessClearance.objects.aggregate(Sum('amount_paid'))['amount_paid__sum'] or 0
+        revenue_cert = Certificate.objects.filter(status='paid').aggregate(Sum('amount_paid'))['amount_paid__sum'] or 0
+        
+        # To avoid double counting, ideally we should have a unified transaction model.
+        # For this MVP, I'll display the sum but acknowledge it might need refinement.
+        # Let's just use OfficialReceipt if available, otherwise fallback.
+        # Actually, let's just sum OfficialReceipt and assume that's the finance module's job.
+        # But since I didn't link Business/Cert to OR creation automatically in all places,
+        # I'll just use a simple aggregation of what we have.
+        # Since I implemented BusinessClearance and it stores amount, and Certificate stores amount.
+        # I'll sum them.
+        
+        total_revenue = revenue_or + revenue_biz + revenue_cert
+        
+        active_cases = BlotterCase.objects.exclude(status__in=['settled', 'dismissed', 'cfa']).count()
+        
         context['stats'] = {
-            'total_residents': 1204,
-            'documents_issued': 89,
-            'total_revenue': 45000,
-            'active_cases': 3,
+            'total_residents': total_residents,
+            'documents_issued': documents_issued,
+            'total_revenue': total_revenue,
+            'active_cases': active_cases,
         }
         
-        # Recent Certificates data
+        # Recent Certificates
+        recent_certs = Certificate.objects.select_related('resident', 'certificate_type').order_by('-created_at')[:5]
         context['recent_certificates'] = [
             {
-                'recipient': 'Maria dela Cruz',
-                'type': 'Indigency',
-                'date': 'Today, 10:42 AM',
-                'status': 'Issued',
-            },
-            {
-                'recipient': 'Juan Santos',
-                'type': 'Barangay Clearance',
-                'date': 'Today, 09:15 AM',
-                'status': 'Issued',
-            },
-            {
-                'recipient': 'Pedro Penduko',
-                'type': 'Residency',
-                'date': 'Yesterday',
-                'status': 'Issued',
-            },
+                'recipient': c.resident.full_name,
+                'type': c.certificate_type.name,
+                'date': c.created_at,
+                'status': c.get_status_display(),
+            } for c in recent_certs
         ]
         
-        # Urgent Blotter Cases data
+        # Urgent Blotter Cases (Hearings scheduled for today/tomorrow)
+        tomorrow = today + timedelta(days=1)
+        upcoming_hearings = Hearing.objects.filter(
+            scheduled_at__date__gte=today,
+            scheduled_at__date__lte=tomorrow,
+            status='scheduled'
+        ).select_related('case').order_by('scheduled_at')[:5]
+        
         context['urgent_cases'] = [
             {
-                'priority_number': '1',
-                'priority_color': 'error',
-                'title': 'Case #2026-003',
-                'description': 'Boundary Dispute - Sitio 1',
-                'schedule': 'Hearing: Tomorrow 2PM',
-            },
-            {
-                'priority_number': '2',
-                'priority_color': 'warning',
-                'title': 'Case #2026-004',
-                'description': 'Complaint vs. Animal Control',
-                'schedule': 'Mediation: Jan 28',
-            },
+                'priority_number': idx + 1,
+                'priority_color': 'error' if h.scheduled_at.date() == today else 'warning',
+                'title': h.case.case_number,
+                'description': f"{h.case.get_incident_type_display()} - {h.remarks}",
+                'schedule': h.scheduled_at,
+            } for idx, h in enumerate(upcoming_hearings)
         ]
         
-        # Data for activity table
+        # Activity Logs (from Audit/History)
+        # We can't easily fetch mixed history efficiently without the Audit view logic.
+        # I'll reuse a simplified version of Audit logic here.
+        from django.apps import apps
+        
+        models_to_track = [
+            ('residents', 'Resident'),
+            ('certificates', 'Certificate'),
+            ('blotter', 'BlotterCase'),
+            ('business', 'BusinessPermit'),
+        ]
+
+        activities = []
+        for app_label, model_name in models_to_track:
+            try:
+                model = apps.get_model(app_label, model_name)
+                if hasattr(model, 'history'):
+                    records = model.history.all().order_by('-history_date')[:3]
+                    for record in records:
+                        action_map = {'+': 'Created', '~': 'Updated', '-': 'Deleted'}
+                        action = action_map.get(record.history_type, 'Unknown')
+
+                        activities.append({
+                            'time': record.history_date,
+                            'activity': f"{action} {model_name}: {str(record)}",
+                            'user': record.history_user.username if record.history_user else 'System',
+                            'status': 'Completed'
+                        })
+            except LookupError:
+                continue
+
+        activities.sort(key=lambda x: x['time'], reverse=True)
+        activities = activities[:5]
+
         context['activity_headers'] = ['Time', 'Activity', 'User', 'Status']
         context['activity_rows'] = [
             {
                 'cells': [
-                    '10:30 AM',
-                    'Certificate of Indigency issued to Juan Dela Cruz',
-                    'Admin User',
-                    '<span class="badge badge-success">Completed</span>',
+                    a['time'],
+                    a['activity'],
+                    a['user'],
+                    f'<span class="badge badge-success">{a["status"]}</span>'
                 ]
-            },
-            {
-                'cells': [
-                    '10:15 AM',
-                    'New resident registered: Maria Santos',
-                    'Admin User',
-                    '<span class="badge badge-success">Completed</span>',
-                ]
-            },
-            {
-                'cells': [
-                    '9:45 AM',
-                    'Business permit renewed: Sari-Sari Store',
-                    'Admin User',
-                    '<span class="badge badge-success">Completed</span>',
-                ]
-            },
+            } for a in activities
         ]
         
         return context
-
-
-
-
-class ResidentsListView(TemplateView):
-    """Residents list view with placeholder data"""
-    template_name = 'pages/residents/list.html'
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        
-        # Placeholder resident data
-        context['residents'] = [
-            {
-                'name': 'Juan Dela Cruz',
-                'id': 'BID-2026-001',
-                'age': 45,
-                'sex': 'M',
-                'civil_status': 'Married',
-                'address': '123 Kalye Serye, Purok 1',
-                'sectors': [
-                    {'name': 'Indigent', 'color': 'error'},
-                ],
-            },
-            {
-                'name': 'Maria Santos',
-                'id': 'BID-2026-005',
-                'age': 68,
-                'sex': 'F',
-                'civil_status': 'Widowed',
-                'address': '45 Mabini St, Purok 2',
-                'sectors': [
-                    {'name': 'Senior Citizen', 'color': 'info'},
-                ],
-            },
-            {
-                'name': 'Pedro Penduko',
-                'id': 'BID-2026-012',
-                'age': 32,
-                'sex': 'M',
-                'civil_status': 'Single',
-                'address': '78 Rizal Ave, Purok 1',
-                'sectors': [
-                    {'name': '4Ps', 'color': 'warning'},
-                    {'name': 'Solo Parent', 'color': 'secondary'},
-                ],
-            },
-            {
-                'name': 'Ana Reyes',
-                'id': 'BID-2026-018',
-                'age': 29,
-                'sex': 'F',
-                'civil_status': 'Married',
-                'address': '56 Luna St, Purok 3',
-                'sectors': [
-                    {'name': 'PWD', 'color': 'accent'},
-                ],
-            },
-            {
-                'name': 'Roberto Garcia',
-                'id': 'BID-2026-023',
-                'age': 52,
-                'sex': 'M',
-                'civil_status': 'Married',
-                'address': '89 Bonifacio Rd, Purok 2',
-                'sectors': [],
-            },
-            {
-                'name': 'Linda Mercado',
-                'id': 'BID-2026-027',
-                'age': 71,
-                'sex': 'F',
-                'civil_status': 'Widowed',
-                'address': '12 Aguinaldo St, Purok 1',
-                'sectors': [
-                    {'name': 'Senior Citizen', 'color': 'info'},
-                    {'name': 'Indigent', 'color': 'error'},
-                ],
-            },
-            {
-                'name': 'Carlos Ramos',
-                'id': 'BID-2026-031',
-                'age': 38,
-                'sex': 'M',
-                'civil_status': 'Married',
-                'address': '34 Del Pilar Ave, Purok 3',
-                'sectors': [
-                    {'name': '4Ps', 'color': 'warning'},
-                ],
-            },
-            {
-                'name': 'Elena Cruz',
-                'id': 'BID-2026-035',
-                'age': 26,
-                'sex': 'F',
-                'civil_status': 'Single',
-                'address': '67 Quezon Blvd, Purok 2',
-                'sectors': [],
-            },
-            {
-                'name': 'Fernando Lopez',
-                'id': 'BID-2026-042',
-                'age': 55,
-                'sex': 'M',
-                'civil_status': 'Married',
-                'address': '90 Roxas St, Purok 1',
-                'sectors': [
-                    {'name': 'PWD', 'color': 'accent'},
-                ],
-            },
-            {
-                'name': 'Gloria Tan',
-                'id': 'BID-2026-048',
-                'age': 42,
-                'sex': 'F',
-                'civil_status': 'Separated',
-                'address': '23 Magsaysay Ave, Purok 3',
-                'sectors': [
-                    {'name': 'Solo Parent', 'color': 'secondary'},
-                    {'name': '4Ps', 'color': 'warning'},
-                ],
-            },
-            {
-                'name': 'Henry Villanueva',
-                'id': 'BID-2026-053',
-                'age': 60,
-                'sex': 'M',
-                'civil_status': 'Married',
-                'address': '45 Osmena Rd, Purok 2',
-                'sectors': [],
-            },
-            {
-                'name': 'Isabel Flores',
-                'id': 'BID-2026-059',
-                'age': 34,
-                'sex': 'F',
-                'civil_status': 'Married',
-                'address': '78 Laurel St, Purok 1',
-                'sectors': [
-                    {'name': 'Indigent', 'color': 'error'},
-                ],
-            },
-            {
-                'name': 'Jose Bautista',
-                'id': 'BID-2026-064',
-                'age': 73,
-                'sex': 'M',
-                'civil_status': 'Married',
-                'address': '12 Quirino Ave, Purok 3',
-                'sectors': [
-                    {'name': 'Senior Citizen', 'color': 'info'},
-                ],
-            },
-            {
-                'name': 'Karen Diaz',
-                'id': 'BID-2026-070',
-                'age': 28,
-                'sex': 'F',
-                'civil_status': 'Single',
-                'address': '56 Macapagal Blvd, Purok 2',
-                'sectors': [
-                    {'name': 'PWD', 'color': 'accent'},
-                    {'name': '4Ps', 'color': 'warning'},
-                ],
-            },
-            {
-                'name': 'Luis Mendoza',
-                'id': 'BID-2026-075',
-                'age': 49,
-                'sex': 'M',
-                'civil_status': 'Married',
-                'address': '89 Ramos St, Purok 1',
-                'sectors': [],
-            },
-            {
-                'name': 'Maricel Aquino',
-                'id': 'BID-2026-081',
-                'age': 36,
-                'sex': 'F',
-                'civil_status': 'Married',
-                'address': '23 Burgos Ave, Purok 2',
-                'sectors': [
-                    {'name': '4Ps', 'color': 'warning'},
-                ],
-            },
-            {
-                'name': 'Nelson Soriano',
-                'id': 'BID-2026-087',
-                'age': 67,
-                'sex': 'M',
-                'civil_status': 'Married',
-                'address': '45 Jacinto St, Purok 3',
-                'sectors': [
-                    {'name': 'Senior Citizen', 'color': 'info'},
-                ],
-            },
-            {
-                'name': 'Olivia Pascual',
-                'id': 'BID-2026-092',
-                'age': 31,
-                'sex': 'F',
-                'civil_status': 'Single',
-                'address': '67 Gomez Rd, Purok 1',
-                'sectors': [
-                    {'name': 'Solo Parent', 'color': 'secondary'},
-                ],
-            },
-            {
-                'name': 'Pablo Navarro',
-                'id': 'BID-2026-098',
-                'age': 44,
-                'sex': 'M',
-                'civil_status': 'Married',
-                'address': '12 Zamora Blvd, Purok 2',
-                'sectors': [],
-            },
-            {
-                'name': 'Queenie Salazar',
-                'id': 'BID-2026-104',
-                'age': 58,
-                'sex': 'F',
-                'civil_status': 'Widowed',
-                'address': '34 Paterno Ave, Purok 3',
-                'sectors': [
-                    {'name': 'Indigent', 'color': 'error'},
-                ],
-            },
-        ]
-        
-        return context
-
-
-class BusinessListView(TemplateView):
-    """Business permits list view with placeholder data"""
-    template_name = 'pages/business/list.html'
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        
-        # Statistics data
-        context['stats'] = {
-            'active_permits': 245,
-            'expired': 12,
-            'pending': 8,
-            'total_revenue': '125k',
-        }
-        
-        # Placeholder business permits data
-        context['businesses'] = [
-            {
-                'name': "Aling Nena's Sari-Sari Store",
-                'owner': 'Nena Magalona',
-                'permit_number': 'BP-2025-001',
-                'expiration': 'Dec 31, 2025',
-                'expiration_class': '',
-                'status': 'Active',
-                'status_color': 'success',
-            },
-            {
-                'name': 'Mang Inasal 2',
-                'owner': 'Edgar Sia II',
-                'permit_number': 'BP-2025-042',
-                'expiration': 'Dec 31, 2025',
-                'expiration_class': '',
-                'status': 'Active',
-                'status_color': 'success',
-            },
-            {
-                'name': 'Computer Shop 143',
-                'owner': 'Mark Zuckerberg',
-                'permit_number': 'BP-2024-112',
-                'expiration': 'Dec 31, 2024',
-                'expiration_class': 'text-error font-semibold',
-                'status': 'Expired',
-                'status_color': 'error',
-            },
-        ]
-        
-        return context
-
-
-@method_decorator(tier_required(['pro', 'ultra']), name='dispatch')
-class FinanceDashboardView(TemplateView):
-    """Finance dashboard view with placeholder data (Pro/Ultra only)"""
-    template_name = 'pages/finance/dashboard.html'
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        
-        # Statistics data
-        context['stats'] = {
-            'daily_collection': '3,450',
-            'date_today': 'Jan 24, 2026',
-            'monthly_revenue': '45,200',
-            'month_range': 'Jan 1 - Jan 24',
-        }
-        
-        # Placeholder official receipts data
-        context['receipts'] = [
-            {
-                'or_number': '7583921',
-                'date': 'Jan 24, 2026',
-                'payor': "Aling Nena's Store",
-                'particulars': 'Business Clearance',
-                'amount': '500.00',
-                'status': 'Paid',
-            },
-            {
-                'or_number': '7583922',
-                'date': 'Jan 24, 2026',
-                'payor': 'Juan Dela Cruz',
-                'particulars': 'Brgy. Clearance',
-                'amount': '100.00',
-                'status': 'Paid',
-            },
-            {
-                'or_number': '7583923',
-                'date': 'Jan 24, 2026',
-                'payor': 'Maria Santos',
-                'particulars': 'Residency',
-                'amount': '50.00',
-                'status': 'Paid',
-            },
-        ]
-        
-        return context
-
-
-class AuditLogsView(TemplateView):
-    """Audit logs view with placeholder data"""
-    template_name = 'pages/audit/logs.html'
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        
-        # Placeholder audit logs data
-        context['logs'] = [
-            {
-                'timestamp': 'Jan 24, 11:42 AM',
-                'user': 'admin',
-                'action': 'Create',
-                'action_color': 'success',
-                'module': 'Certificates',
-                'details': 'Issued Clearance for Juan Santos',
-            },
-            {
-                'timestamp': 'Jan 24, 10:15 AM',
-                'user': 'treasurer',
-                'action': 'Update',
-                'action_color': 'info',
-                'module': 'Finance',
-                'details': 'Verified OR #7583921',
-            },
-            {
-                'timestamp': 'Jan 24, 09:30 AM',
-                'user': 'clerk1',
-                'action': 'Create',
-                'action_color': 'success',
-                'module': 'Residents',
-                'details': 'Added resident profile: Maria Santos',
-            },
-            {
-                'timestamp': 'Jan 23, 04:55 PM',
-                'user': 'admin',
-                'action': 'Delete',
-                'action_color': 'error',
-                'module': 'Residents',
-                'details': 'Removed duplicate entry for ID: 9921',
-            },
-        ]
-        
-        return context
-
 
 @method_decorator(tier_required(['ultra']), name='dispatch')
 class GisMapView(TemplateView):
@@ -586,4 +258,3 @@ class LicenseActivationView(LoginRequiredMixin, View):
         except LicenseKey.DoesNotExist:
             messages.error(request, "Invalid license key. Please check and try again.")
             return redirect('core:license_activation')
-

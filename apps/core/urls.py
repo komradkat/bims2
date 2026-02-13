@@ -20,14 +20,6 @@ urlpatterns = [
     # Dashboard
     path('', views.DashboardView.as_view(), name='dashboard'),
     
-    # Residents - redirect to residents app
-    path('residents-old/', views.ResidentsListView.as_view(), name='residents_list_old'),
-    path('residents-add-old/', TemplateView.as_view(template_name='pages/residents/form.html'), name='residents_add_old'),
-    # path('certificates/', TemplateView.as_view(template_name='pages/certificates/center.html'), name='certificates'),
-    path('business/', views.BusinessListView.as_view(), name='business_list'),
-    path('business/add/', TemplateView.as_view(template_name='pages/business/form.html'), name='business_add'),
-    path('finance/', views.FinanceDashboardView.as_view(), name='finance'),
-    path('audit-logs/', views.AuditLogsView.as_view(), name='audit_logs'),
+    # GIS Map (Ultra only)
     path('gis-map/', views.GisMapView.as_view(), name='gis_map'),
 ]
-

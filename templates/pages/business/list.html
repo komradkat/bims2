@@ -15,7 +15,7 @@
                 <span class="indicator-item badge badge-secondary badge-xs">5</span>
                 Expiring Soon
             </button>
-            <a href="{% url 'core:business_add' %}" class="btn btn-primary">
+            <a href="{% url 'business:add' %}" class="btn btn-primary">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
                 New Business
             </a>
@@ -59,28 +59,24 @@
                 <tbody>
                     {% for business in businesses %}
                     <tr class="hover group">
-                        <td class="font-bold">{{ business.name }}</td>
-                        <td>{{ business.owner }}</td>
+                        <td class="font-bold">{{ business.business_name }}</td>
+                        <td>{{ business.owner_name }}</td>
                         <td>{{ business.permit_number }}</td>
-                        <td class="{{ business.expiration_class }}">{{ business.expiration }}</td>
-                        <td><span class="badge badge-{{ business.status_color }} badge-sm">{{ business.status }}</span></td>
+                        <td class="{% if business.is_expired %}text-error font-semibold{% endif %}">{{ business.expiration_date }}</td>
+                        <td><span class="badge badge-{{ business.status_color }} badge-sm">{{ business.get_status_display }}</span></td>
                         <td class="text-right">
-                            {% if business.status == 'Expired' %}
-                            <button class="btn btn-xs btn-primary shadow-sm" onclick="document.getElementById('business_modal').showModal()">Renew Now</button>
-                            {% else %}
                             <div class="dropdown dropdown-end">
                                 <button tabindex="0" class="btn btn-ghost btn-xs btn-circle">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" /></svg>
                                 </button>
                                 <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
-                                    <li><a>View Details</a></li>
+                                    <li><a href="{% url 'business:edit' business.pk %}">Edit Details</a></li>
                                     <li><a>Print Clearance</a></li>
                                     <li><a>Renew Permit</a></li>
                                     <div class="divider my-0"></div>
                                     <li><a class="text-error">Retire Business</a></li>
                                 </ul>
                             </div>
-                            {% endif %}
                         </td>
                     </tr>
                     {% endfor %}

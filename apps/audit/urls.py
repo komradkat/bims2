@@ -1,8 +1,8 @@
-# Audit URLs
 from django.urls import path
+from . import views
 
 app_name = 'audit'
 
 urlpatterns = [
-    # URLs will be added as needed
+    path('', views.AuditLogsView.as_view(), name='logs'),
 ]

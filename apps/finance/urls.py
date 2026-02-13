@@ -1,8 +1,9 @@
-# Finance URLs
 from django.urls import path
+from . import views
 
 app_name = 'finance'
 
 urlpatterns = [
-    # URLs will be added as needed
+    path('', views.FinanceDashboardView.as_view(), name='dashboard'),
+    path('receipts/', views.OfficialReceiptListView.as_view(), name='receipt_list'),
 ]

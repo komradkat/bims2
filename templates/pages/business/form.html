@@ -6,7 +6,7 @@
 <div class="container mx-auto max-w-4xl pb-12">
     {# Page Header #}
     <div class="flex items-center gap-4 mb-6">
-        <a href="{% url 'core:business_list' %}" class="btn btn-square btn-ghost">
+        <a href="{% url 'business:list' %}" class="btn btn-square btn-ghost">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
         </a>
         <div>
@@ -59,7 +59,18 @@
                     </div>
                     <div class="form-control w-full">
                         <label class="label"><span class="label-text">Business Address (within barangay) <span class="text-error">*</span></span></label>
-                        <input type="text" name="business_address" placeholder="e.g. 123 Main St, Purok 1" class="input input-bordered w-full" required />
+                        <input type="text" name="address" placeholder="e.g. 123 Main St, Purok 1" class="input input-bordered w-full" required />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="form-control w-full">
+                        <label class="label"><span class="label-text">Email Address</span></label>
+                        <input type="email" name="email" placeholder="email@example.com" class="input input-bordered w-full" />
+                    </div>
+                    <div class="form-control w-full">
+                        <label class="label"><span class="label-text">Contact Number</span></label>
+                        <input type="text" name="contact_number" placeholder="09123456789" class="input input-bordered w-full" />
                     </div>
                 </div>
             </div>
@@ -174,7 +185,7 @@
 
         {# Actions #}
         <div class="flex justify-end gap-2">
-            <a href="{% url 'core:business_list' %}" class="btn btn-ghost">Cancel</a>
+            <a href="{% url 'business:list' %}" class="btn btn-ghost">Cancel</a>
             <button type="submit" class="btn btn-primary px-8">Issue Business Permit</button>
         </div>
     </form>
