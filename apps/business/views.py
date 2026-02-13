@@ -5,6 +5,7 @@ from django.db.models import Sum, Q
 from django.urls import reverse_lazy
 from django.utils import timezone
 from .models import BusinessPermit, BusinessClearance
+from .forms import BusinessPermitForm
 from django.contrib import messages
 
 class BusinessListView(LoginRequiredMixin, ListView):
@@ -43,18 +44,20 @@ class BusinessListView(LoginRequiredMixin, ListView):
 
 class BusinessCreateView(LoginRequiredMixin, CreateView):
     model = BusinessPermit
+    form_class = BusinessPermitForm
     template_name = 'pages/business/form.html'
-    fields = [
-        'business_name', 'owner_name', 'owner_address', 'address',
-        'contact_number', 'email', 'dti_sec_number', 'tin',
-        'nature_of_business', 'cedula_number', 'cedula_date',
-        'gross_sales', 'clearance_fee', 'or_number'
-    ]
     success_url = reverse_lazy('business:list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['action'] = 'Add'
+        context['title'] = 'New Business Permit'
+        return context
 
     def form_valid(self, form):
         form.instance.created_by = self.request.user
-        form.instance.status = 'active' # Default to active when creating through form?
+        if not form.instance.status:
+             form.instance.status = 'active'
 
         # Save the permit
         response = super().form_valid(form)
@@ -73,14 +76,15 @@ class BusinessCreateView(LoginRequiredMixin, CreateView):
 
 class BusinessUpdateView(LoginRequiredMixin, UpdateView):
     model = BusinessPermit
+    form_class = BusinessPermitForm
     template_name = 'pages/business/form.html'
-    fields = [
-        'business_name', 'owner_name', 'owner_address', 'address',
-        'contact_number', 'email', 'dti_sec_number', 'tin',
-        'nature_of_business', 'cedula_number', 'cedula_date',
-        'gross_sales', 'clearance_fee', 'or_number', 'status'
-    ]
     success_url = reverse_lazy('business:list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['action'] = 'Edit'
+        context['title'] = 'Edit Business Permit'
+        return context
 
     def form_valid(self, form):
         response = super().form_valid(form)
