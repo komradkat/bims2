@@ -6,7 +6,7 @@ def generate_pdf(template_name, context):
     Renders an HTML template with context and converts it to PDF using WeasyPrint.
     """
     try:
-        from weasyprint import HTML, CSS
+        from weasyprint import HTML
     except OSError as e:
         raise ImportError(
             "WeasyPrint could not find its system dependencies (GTK). "

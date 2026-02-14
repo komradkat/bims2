@@ -1,6 +1,6 @@
 # Test script for Phase 2 Residents Module
 from django.core.management.base import BaseCommand
-from apps.residents.models import Resident, HouseholdMember
+from apps.residents.models import Resident
 from datetime import date, timedelta
 import random
 

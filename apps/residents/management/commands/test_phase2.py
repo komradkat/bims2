@@ -1,7 +1,7 @@
 # Comprehensive test script for Phase 2 Residents Module
 from django.core.management.base import BaseCommand
 from django.urls import reverse
-from apps.residents.models import Resident, HouseholdMember
+from apps.residents.models import Resident
 from apps.residents.forms import ResidentForm
 from datetime import date
 
@@ -80,6 +80,7 @@ class Command(BaseCommand):
             'civil_status': 'single',
             'purok': 'Purok 1',
             'address': '123 Test St',
+            'citizenship': 'Filipino',
             'is_household_head': True,
         }
         form = ResidentForm(data=form_data)
@@ -142,8 +143,8 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS('=' * 60))
         self.stdout.write(self.style.SUCCESS('✓ All Phase 2 tests completed successfully!'))
         self.stdout.write(self.style.SUCCESS(f'✓ Total residents: {total}'))
-        self.stdout.write(self.style.SUCCESS(f'✓ Data integrity: OK'))
-        self.stdout.write(self.style.SUCCESS(f'✓ Models: OK'))
-        self.stdout.write(self.style.SUCCESS(f'✓ Forms: OK'))
-        self.stdout.write(self.style.SUCCESS(f'✓ URLs: OK'))
+        self.stdout.write(self.style.SUCCESS('✓ Data integrity: OK'))
+        self.stdout.write(self.style.SUCCESS('✓ Models: OK'))
+        self.stdout.write(self.style.SUCCESS('✓ Forms: OK'))
+        self.stdout.write(self.style.SUCCESS('✓ URLs: OK'))
         self.stdout.write(self.style.SUCCESS('=' * 60))

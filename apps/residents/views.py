@@ -3,7 +3,7 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
 from django.http import HttpResponse
-from .models import Resident, HouseholdMember
+from .models import Resident
 import openpyxl
 from openpyxl.styles import Font, Alignment, PatternFill
 from datetime import datetime
@@ -157,7 +157,7 @@ def export_residents_excel(request):
             try:
                 if len(str(cell.value)) > max_length:
                     max_length = len(cell.value)
-            except:
+            except Exception:
                 pass
         adjusted_width = min(max_length + 2, 50)
         ws.column_dimensions[column_letter].width = adjusted_width
@@ -193,7 +193,6 @@ class ResidentCreateView(LoginRequiredMixin, CreateView):
     
     def form_valid(self, form):
         from django.contrib import messages
-        from django.urls import reverse
         
         response = super().form_valid(form)
         messages.success(

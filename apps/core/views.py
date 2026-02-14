@@ -5,7 +5,7 @@ from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.core.cache import cache
-from django.db.models import Sum, Q
+from django.db.models import Sum
 from django.utils import timezone
 from datetime import timedelta
 
@@ -13,7 +13,7 @@ from datetime import timedelta
 from apps.residents.models import Resident
 from apps.certificates.models import Certificate
 from apps.blotter.models import BlotterCase, Hearing
-from apps.business.models import BusinessPermit, BusinessClearance
+from apps.business.models import BusinessClearance
 from apps.finance.models import OfficialReceipt
 
 # Custom Login
@@ -27,7 +27,7 @@ class CustomLoginView(LoginView):
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView, CreateView, UpdateView
-from .models import User, LicenseKey
+from .models import User
 from .decorators import role_required, tier_required
 from django.utils.decorators import method_decorator
 

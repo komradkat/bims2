@@ -1,5 +1,5 @@
-from django.shortcuts import render, redirect
-from django.views.generic import ListView, CreateView, DetailView, UpdateView, View
+from django.shortcuts import redirect
+from django.views.generic import ListView, CreateView, DetailView, View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.db.models import Q
