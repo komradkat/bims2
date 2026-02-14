@@ -62,11 +62,17 @@
                         {% for receipt in receipts %}
                         <tr>
                             <td class="font-mono">{{ receipt.or_number }}</td>
-                            <td>{{ receipt.date }}</td>
+                            <td>{{ receipt.date|date:"M d, Y" }}</td>
                             <td>{{ receipt.payor }}</td>
                             <td>{{ receipt.particulars }}</td>
                             <td class="font-bold">₱{{ receipt.amount }}</td>
-                            <td><span class="badge badge-success badge-sm">{{ receipt.status }}</span></td>
+                            <td>
+                                {% if receipt.status == 'paid' %}
+                                    <span class="badge badge-success badge-sm">Paid</span>
+                                {% else %}
+                                    <span class="badge badge-error badge-sm">{{ receipt.get_status_display }}</span>
+                                {% endif %}
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>

@@ -1,22 +1,38 @@
 {% extends 'base.html' %}
 
-{% block title %}New Business Permit{% endblock %}
+{% block title %}{{ title }}{% endblock %}
 
 {% block content %}
 <div class="container mx-auto max-w-4xl pb-12">
     {# Page Header #}
     <div class="flex items-center gap-4 mb-6">
-        <a href="{% url 'core:business_list' %}" class="btn btn-square btn-ghost">
+        <a href="{% url 'business:list' %}" class="btn btn-square btn-ghost">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
         </a>
         <div>
-            <h1 class="text-2xl font-bold">New Business Permit</h1>
+            <h1 class="text-2xl font-bold">{{ title }}</h1>
             <p class="text-sm opacity-60">Issue barangay business clearance</p>
         </div>
     </div>
 
     <form method="post">
         {% csrf_token %}
+
+        {% if form.errors %}
+        <div class="alert alert-error shadow-lg mb-6">
+            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <div>
+                <h3 class="font-bold">Please correct the following errors:</h3>
+                <ul class="list-disc list-inside text-sm mt-1">
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
         
         {# Card: Business Information #}
         <div class="card bg-base-100 shadow-sm border border-base-200 mb-6">
@@ -28,38 +44,47 @@
                 
                 <div class="form-control w-full mb-6">
                     <label class="label"><span class="label-text">Business Name <span class="text-error">*</span></span></label>
-                    <input type="text" name="business_name" placeholder="As registered with DTI/SEC" class="input input-bordered w-full" required />
+                    {{ form.business_name }}
                     <label class="label"><span class="label-text-alt">As registered with DTI/SEC</span></label>
+                    {% if form.business_name.errors %}<span class="text-error text-xs">{{ form.business_name.errors.0 }}</span>{% endif %}
                 </div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div class="form-control w-full">
                         <label class="label"><span class="label-text">DTI/SEC Registration Number <span class="text-error">*</span></span></label>
-                        <input type="text" name="dti_sec_number" placeholder="e.g. DTI-123456789" class="input input-bordered w-full" required />
+                        {{ form.dti_sec_number }}
+                         {% if form.dti_sec_number.errors %}<span class="text-error text-xs">{{ form.dti_sec_number.errors.0 }}</span>{% endif %}
                     </div>
                     <div class="form-control w-full">
                         <label class="label"><span class="label-text">TIN <span class="text-error">*</span></span></label>
-                        <input type="text" name="tin" placeholder="XXX-XXX-XXX-XXX" class="input input-bordered w-full" required />
+                        {{ form.tin }}
+                        {% if form.tin.errors %}<span class="text-error text-xs">{{ form.tin.errors.0 }}</span>{% endif %}
                     </div>
                 </div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="form-control w-full">
                         <label class="label"><span class="label-text">Nature of Business <span class="text-error">*</span></span></label>
-                        <select name="nature_of_business" class="select select-bordered" required>
-                            <option disabled selected>Select Type</option>
-                            <option>Sari-Sari Store</option>
-                            <option>Eatery / Carenderia</option>
-                            <option>Internet Cafe</option>
-                            <option>Hardware</option>
-                            <option>Service Provider</option>
-                            <option>Food Stall</option>
-                            <option>Other</option>
-                        </select>
+                        {{ form.nature_of_business }}
+                        {% if form.nature_of_business.errors %}<span class="text-error text-xs">{{ form.nature_of_business.errors.0 }}</span>{% endif %}
                     </div>
                     <div class="form-control w-full">
                         <label class="label"><span class="label-text">Business Address (within barangay) <span class="text-error">*</span></span></label>
-                        <input type="text" name="business_address" placeholder="e.g. 123 Main St, Purok 1" class="input input-bordered w-full" required />
+                        {{ form.address }}
+                        {% if form.address.errors %}<span class="text-error text-xs">{{ form.address.errors.0 }}</span>{% endif %}
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                    <div class="form-control w-full">
+                        <label class="label"><span class="label-text">Email Address</span></label>
+                        {{ form.email }}
+                        {% if form.email.errors %}<span class="text-error text-xs">{{ form.email.errors.0 }}</span>{% endif %}
+                    </div>
+                    <div class="form-control w-full">
+                        <label class="label"><span class="label-text">Contact Number</span></label>
+                        {{ form.contact_number }}
+                        {% if form.contact_number.errors %}<span class="text-error text-xs">{{ form.contact_number.errors.0 }}</span>{% endif %}
                     </div>
                 </div>
             </div>
@@ -75,13 +100,15 @@
                 
                 <div class="form-control w-full mb-6">
                     <label class="label"><span class="label-text">Owner's Full Name <span class="text-error">*</span></span></label>
-                    <input type="text" name="owner_name" placeholder="Search or enter resident name..." class="input input-bordered w-full" required />
+                    {{ form.owner_name }}
                     <label class="label"><span class="label-text-alt">You can search from registered residents</span></label>
+                    {% if form.owner_name.errors %}<span class="text-error text-xs">{{ form.owner_name.errors.0 }}</span>{% endif %}
                 </div>
                 
                 <div class="form-control w-full">
                     <label class="label"><span class="label-text">Owner's Address <span class="text-error">*</span></span></label>
-                    <input type="text" name="owner_address" placeholder="Complete address" class="input input-bordered w-full" required />
+                    {{ form.owner_address }}
+                    {% if form.owner_address.errors %}<span class="text-error text-xs">{{ form.owner_address.errors.0 }}</span>{% endif %}
                 </div>
             </div>
         </div>
@@ -97,11 +124,13 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="form-control w-full">
                         <label class="label"><span class="label-text">Cedula Number <span class="text-error">*</span></span></label>
-                        <input type="text" name="cedula_number" placeholder="e.g. 12345678" class="input input-bordered w-full" required />
+                        {{ form.cedula_number }}
+                        {% if form.cedula_number.errors %}<span class="text-error text-xs">{{ form.cedula_number.errors.0 }}</span>{% endif %}
                     </div>
                     <div class="form-control w-full">
                         <label class="label"><span class="label-text">Date Issued <span class="text-error">*</span></span></label>
-                        <input type="date" name="cedula_date" class="input input-bordered w-full" required />
+                        {{ form.cedula_date }}
+                        {% if form.cedula_date.errors %}<span class="text-error text-xs">{{ form.cedula_date.errors.0 }}</span>{% endif %}
                     </div>
                 </div>
             </div>
@@ -117,15 +146,15 @@
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="form-control w-full">
-                        <label class="label"><span class="label-text">Application Type <span class="text-error">*</span></span></label>
-                        <select name="application_type" class="select select-bordered" required>
+                        <label class="label"><span class="label-text">Application Type</span></label>
+                        <select name="application_type" class="select select-bordered">
                             <option>New</option>
                             <option>Renewal</option>
                         </select>
                     </div>
                     <div class="form-control w-full">
                         <label class="label"><span class="label-text">Purpose</span></label>
-                        <input type="text" name="purpose" value="For Business Permit Application" class="input input-bordered w-full bg-base-200" readonly />
+                        <input type="text" value="For Business Permit Application" class="input input-bordered w-full bg-base-200" readonly />
                     </div>
                 </div>
             </div>
@@ -142,20 +171,36 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div class="form-control w-full">
                         <label class="label"><span class="label-text">Gross Sales / Capital</span></label>
-                        <input type="number" name="gross_sales" placeholder="0.00" class="input input-bordered w-full" />
+                        {{ form.gross_sales }}
+                        {% if form.gross_sales.errors %}<span class="text-error text-xs">{{ form.gross_sales.errors.0 }}</span>{% endif %}
                     </div>
                     <div class="form-control w-full">
                         <label class="label"><span class="label-text">Barangay Clearance Fee</span></label>
-                        <input type="number" name="clearance_fee" value="500" placeholder="₱200-₱500" class="input input-bordered w-full" />
+                        {{ form.clearance_fee }}
                         <label class="label"><span class="label-text-alt">Usually ₱200-₱500</span></label>
+                        {% if form.clearance_fee.errors %}<span class="text-error text-xs">{{ form.clearance_fee.errors.0 }}</span>{% endif %}
                     </div>
                     <div class="form-control w-full">
                         <label class="label"><span class="label-text">O.R. Number <span class="text-error">*</span></span></label>
-                        <input type="text" name="or_number" placeholder="Official Receipt No." class="input input-bordered w-full" required />
+                        {{ form.or_number }}
+                        {% if form.or_number.errors %}<span class="text-error text-xs">{{ form.or_number.errors.0 }}</span>{% endif %}
                     </div>
                 </div>
             </div>
         </div>
+
+        {% if form.status %}
+        {# Status Card for Edit #}
+        <div class="card bg-base-100 shadow-sm border border-base-200 mb-6">
+            <div class="card-body">
+                 <h2 class="card-title text-info mb-4">Status</h2>
+                 <div class="form-control w-full">
+                    <label class="label"><span class="label-text">Permit Status</span></label>
+                    {{ form.status }}
+                 </div>
+            </div>
+        </div>
+        {% endif %}
 
         {# Card: Signatures #}
         <div class="card bg-base-100 shadow-sm border border-base-200 mb-8">
@@ -174,8 +219,8 @@
 
         {# Actions #}
         <div class="flex justify-end gap-2">
-            <a href="{% url 'core:business_list' %}" class="btn btn-ghost">Cancel</a>
-            <button type="submit" class="btn btn-primary px-8">Issue Business Permit</button>
+            <a href="{% url 'business:list' %}" class="btn btn-ghost">Cancel</a>
+            <button type="submit" class="btn btn-primary px-8">Save Business Permit</button>
         </div>
     </form>
 </div>

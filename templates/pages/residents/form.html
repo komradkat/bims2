@@ -63,7 +63,7 @@
                             </div>
                         </div>
                         <div class="w-full">
-                            <input type="file" name="photo" class="file-input file-input-bordered w-full" accept="image/*" @change="const file = $event.target.files[0]; if(file){ photoPreview = URL.createObjectURL(file) }" />
+                            {{ form.photo }}
                             {% if form.photo.errors %}
                                 <label class="label"><span class="label-text-alt text-error">{{ form.photo.errors.0 }}</span></label>
                             {% endif %}
@@ -73,92 +73,58 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                     <div class="form-control w-full">
-                        <label class="label"><span class="label-text">First Name</span></label>
-                        <input type="text" name="first_name" value="{{ form.first_name.value|default:'' }}" placeholder="e.g. Juan" class="input input-bordered w-full {% if form.first_name.errors %}input-error{% endif %}" required />
-                        {% if form.first_name.errors %}
-                            <label class="label"><span class="label-text-alt text-error">{{ form.first_name.errors.0 }}</span></label>
-                        {% endif %}
+                        <label class="label"><span class="label-text">First Name <span class="text-error">*</span></span></label>
+                        {{ form.first_name }}
+                        {% if form.first_name.errors %}<span class="text-error text-xs">{{ form.first_name.errors.0 }}</span>{% endif %}
                     </div>
                     <div class="form-control w-full">
                         <label class="label"><span class="label-text">Middle Name</span></label>
-                        <input type="text" name="middle_name" value="{{ form.middle_name.value|default:'' }}" placeholder="e.g. Tamad" class="input input-bordered w-full {% if form.middle_name.errors %}input-error{% endif %}" />
-                        {% if form.middle_name.errors %}
-                            <label class="label"><span class="label-text-alt text-error">{{ form.middle_name.errors.0 }}</span></label>
-                        {% endif %}
+                        {{ form.middle_name }}
+                        {% if form.middle_name.errors %}<span class="text-error text-xs">{{ form.middle_name.errors.0 }}</span>{% endif %}
                     </div>
                     <div class="form-control w-full">
-                        <label class="label"><span class="label-text">Last Name</span></label>
-                        <input type="text" name="last_name" value="{{ form.last_name.value|default:'' }}" placeholder="e.g. Dela Cruz" class="input input-bordered w-full {% if form.last_name.errors %}input-error{% endif %}" required />
-                        {% if form.last_name.errors %}
-                            <label class="label"><span class="label-text-alt text-error">{{ form.last_name.errors.0 }}</span></label>
-                        {% endif %}
+                        <label class="label"><span class="label-text">Last Name <span class="text-error">*</span></span></label>
+                        {{ form.last_name }}
+                        {% if form.last_name.errors %}<span class="text-error text-xs">{{ form.last_name.errors.0 }}</span>{% endif %}
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                     <div class="form-control w-full">
-                        <label class="label"><span class="label-text">Date of Birth</span></label>
-                        <input type="date" name="date_of_birth" value="{{ form.date_of_birth.value|date:'Y-m-d'|default:'' }}" class="input input-bordered w-full {% if form.date_of_birth.errors %}input-error{% endif %}" required />
-                        {% if form.date_of_birth.errors %}
-                            <label class="label"><span class="label-text-alt text-error">{{ form.date_of_birth.errors.0 }}</span></label>
-                        {% endif %}
+                        <label class="label"><span class="label-text">Date of Birth <span class="text-error">*</span></span></label>
+                        {{ form.date_of_birth }}
+                        {% if form.date_of_birth.errors %}<span class="text-error text-xs">{{ form.date_of_birth.errors.0 }}</span>{% endif %}
                     </div>
                     <div class="form-control w-full">
-                        <label class="label"><span class="label-text">Sex</span></label>
-                        <select name="sex" class="select select-bordered {% if form.sex.errors %}select-error{% endif %}" required>
-                            <option disabled {% if not form.sex.value %}selected{% endif %}>Select Sex</option>
-                            <option value="M" {% if form.sex.value == 'M' %}selected{% endif %}>Male</option>
-                            <option value="F" {% if form.sex.value == 'F' %}selected{% endif %}>Female</option>
-                        </select>
-                        {% if form.sex.errors %}
-                            <label class="label"><span class="label-text-alt text-error">{{ form.sex.errors.0 }}</span></label>
-                        {% endif %}
+                        <label class="label"><span class="label-text">Sex <span class="text-error">*</span></span></label>
+                        {{ form.sex }}
+                        {% if form.sex.errors %}<span class="text-error text-xs">{{ form.sex.errors.0 }}</span>{% endif %}
                     </div>
                     <div class="form-control w-full">
-                        <label class="label"><span class="label-text">Civil Status</span></label>
-                        <select name="civil_status" class="select select-bordered {% if form.civil_status.errors %}select-error{% endif %}" required>
-                            <option disabled {% if not form.civil_status.value %}selected{% endif %}>Select Status</option>
-                            <option value="single" {% if form.civil_status.value == 'single' %}selected{% endif %}>Single</option>
-                            <option value="married" {% if form.civil_status.value == 'married' %}selected{% endif %}>Married</option>
-                            <option value="widowed" {% if form.civil_status.value == 'widowed' %}selected{% endif %}>Widowed</option>
-                            <option value="separated" {% if form.civil_status.value == 'separated' %}selected{% endif %}>Separated</option>
-                        </select>
-                        {% if form.civil_status.errors %}
-                            <label class="label"><span class="label-text-alt text-error">{{ form.civil_status.errors.0 }}</span></label>
-                        {% endif %}
+                        <label class="label"><span class="label-text">Civil Status <span class="text-error">*</span></span></label>
+                        {{ form.civil_status }}
+                        {% if form.civil_status.errors %}<span class="text-error text-xs">{{ form.civil_status.errors.0 }}</span>{% endif %}
                     </div>
                 </div>
 
                 <div class="form-control w-full mb-6">
                     <label class="label"><span class="label-text">Citizenship</span></label>
-                    <input type="text" name="citizenship" value="{{ form.citizenship.value|default:'Filipino' }}" class="input input-bordered w-full {% if form.citizenship.errors %}input-error{% endif %}" />
-                    {% if form.citizenship.errors %}
-                        <label class="label"><span class="label-text-alt text-error">{{ form.citizenship.errors.0 }}</span></label>
-                    {% endif %}
+                    {{ form.citizenship }}
+                    {% if form.citizenship.errors %}<span class="text-error text-xs">{{ form.citizenship.errors.0 }}</span>{% endif %}
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div class="form-control w-full">
                         <label class="label"><span class="label-text">Place of Birth</span></label>
-                        <input type="text" name="place_of_birth" placeholder="City/Municipality" class="input input-bordered w-full" />
+                        {{ form.place_of_birth }}
                     </div>
                     <div class="form-control w-full">
                         <label class="label"><span class="label-text">Religion</span></label>
-                        <input type="text" name="religion" placeholder="e.g. Roman Catholic" class="input input-bordered w-full" />
+                        {{ form.religion }}
                     </div>
                     <div class="form-control w-full">
                         <label class="label"><span class="label-text">Blood Type</span></label>
-                        <select name="blood_type" class="select select-bordered">
-                            <option disabled selected>Select Type</option>
-                            <option>A+</option>
-                            <option>A-</option>
-                            <option>B+</option>
-                            <option>B-</option>
-                            <option>AB+</option>
-                            <option>AB-</option>
-                            <option>O+</option>
-                            <option>O-</option>
-                        </select>
+                        {{ form.blood_type }}
                     </div>
                 </div>
             </div>
@@ -175,41 +141,15 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div class="form-control w-full">
                         <label class="label"><span class="label-text">Educational Attainment</span></label>
-                        <select name="educational_attainment" class="select select-bordered {% if form.educational_attainment.errors %}select-error{% endif %}">
-                            <option disabled {% if not form.educational_attainment.value %}selected{% endif %}>Select Level</option>
-                            <option value="elementary_level" {% if form.educational_attainment.value == 'elementary_level' %}selected{% endif %}>Elementary Level</option>
-                            <option value="elementary_graduate" {% if form.educational_attainment.value == 'elementary_graduate' %}selected{% endif %}>Elementary Graduate</option>
-                            <option value="high_school_level" {% if form.educational_attainment.value == 'high_school_level' %}selected{% endif %}>High School Level</option>
-                            <option value="high_school_graduate" {% if form.educational_attainment.value == 'high_school_graduate' %}selected{% endif %}>High School Graduate</option>
-                            <option value="college_level" {% if form.educational_attainment.value == 'college_level' %}selected{% endif %}>College Level</option>
-                            <option value="college_graduate" {% if form.educational_attainment.value == 'college_graduate' %}selected{% endif %}>College Graduate</option>
-                            <option value="vocational" {% if form.educational_attainment.value == 'vocational' %}selected{% endif %}>Vocational</option>
-                            <option value="post_graduate" {% if form.educational_attainment.value == 'post_graduate' %}selected{% endif %}>Post-Graduate</option>
-                        </select>
-                        {% if form.educational_attainment.errors %}
-                            <label class="label"><span class="label-text-alt text-error">{{ form.educational_attainment.errors.0 }}</span></label>
-                        {% endif %}
+                        {{ form.educational_attainment }}
                     </div>
                     <div class="form-control w-full">
                         <label class="label"><span class="label-text">Employment Status</span></label>
-                        <select name="employment_status" class="select select-bordered {% if form.employment_status.errors %}select-error{% endif %}">
-                            <option disabled {% if not form.employment_status.value %}selected{% endif %}>Select Status</option>
-                            <option value="employed" {% if form.employment_status.value == 'employed' %}selected{% endif %}>Employed</option>
-                            <option value="unemployed" {% if form.employment_status.value == 'unemployed' %}selected{% endif %}>Unemployed</option>
-                            <option value="self_employed" {% if form.employment_status.value == 'self_employed' %}selected{% endif %}>Self-Employed</option>
-                            <option value="student" {% if form.employment_status.value == 'student' %}selected{% endif %}>Student</option>
-                            <option value="retired" {% if form.employment_status.value == 'retired' %}selected{% endif %}>Retired</option>
-                        </select>
-                        {% if form.employment_status.errors %}
-                            <label class="label"><span class="label-text-alt text-error">{{ form.employment_status.errors.0 }}</span></label>
-                        {% endif %}
+                        {{ form.employment_status }}
                     </div>
                     <div class="form-control w-full">
                         <label class="label"><span class="label-text">Occupation</span></label>
-                        <input type="text" name="occupation" value="{{ form.occupation.value|default:'' }}" placeholder="e.g. Tricycle Driver" class="input input-bordered w-full {% if form.occupation.errors %}input-error{% endif %}" />
-                        {% if form.occupation.errors %}
-                            <label class="label"><span class="label-text-alt text-error">{{ form.occupation.errors.0 }}</span></label>
-                        {% endif %}
+                        {{ form.occupation }}
                     </div>
                 </div>
             </div>
@@ -226,32 +166,26 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div class="form-control w-full">
                         <label class="label"><span class="label-text">Mobile Number</span></label>
-                        <input type="tel" name="mobile_number" value="{{ form.mobile_number.value|default:'' }}" placeholder="0917-123-4567" class="input input-bordered w-full {% if form.mobile_number.errors %}input-error{% endif %}" />
-                        {% if form.mobile_number.errors %}
-                            <label class="label"><span class="label-text-alt text-error">{{ form.mobile_number.errors.0 }}</span></label>
-                        {% endif %}
+                        {{ form.mobile_number }}
                     </div>
                     <div class="form-control w-full">
                         <label class="label"><span class="label-text">Email Address</span></label>
-                        <input type="email" name="email" value="{{ form.email.value|default:'' }}" placeholder="juan@example.com" class="input input-bordered w-full {% if form.email.errors %}input-error{% endif %}" />
-                        {% if form.email.errors %}
-                            <label class="label"><span class="label-text-alt text-error">{{ form.email.errors.0 }}</span></label>
-                        {% endif %}
+                        {{ form.email }}
                     </div>
                 </div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                     <div class="form-control w-full">
                         <label class="label"><span class="label-text">PhilHealth No.</span></label>
-                        <input type="text" name="philhealth_no" placeholder="XX-XXXXXXXXX-X" class="input input-bordered w-full" />
+                        {{ form.philhealth_no }}
                     </div>
                     <div class="form-control w-full">
                         <label class="label"><span class="label-text">SSS / GSIS No.</span></label>
-                        <input type="text" name="sss_gsis_no" class="input input-bordered w-full" />
+                        {{ form.sss_gsis_no }}
                     </div>
                     <div class="form-control w-full">
                         <label class="label"><span class="label-text">TIN No.</span></label>
-                        <input type="text" name="tin_no" class="input input-bordered w-full" />
+                        {{ form.tin_no }}
                     </div>
                 </div>
 
@@ -259,11 +193,11 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="form-control w-full">
                         <label class="label"><span class="label-text">Full Name</span></label>
-                        <input type="text" name="emergency_contact_name" placeholder="Contact Person" class="input input-bordered w-full" />
+                        {{ form.emergency_contact_name }}
                     </div>
                     <div class="form-control w-full">
                         <label class="label"><span class="label-text">Mobile Number</span></label>
-                        <input type="tel" name="emergency_contact_number" placeholder="09XX-XXX-XXXX" class="input input-bordered w-full" />
+                        {{ form.emergency_contact_number }}
                     </div>
                 </div>
             </div>
@@ -279,58 +213,40 @@
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div class="form-control w-full">
-                        <label class="label"><span class="label-text">Purok / Sitio</span></label>
-                        <select name="purok" class="select select-bordered {% if form.purok.errors %}select-error{% endif %}" required>
-                            <option disabled {% if not form.purok.value %}selected{% endif %}>Select Purok</option>
-                            <option {% if form.purok.value == 'Purok 1' %}selected{% endif %}>Purok 1</option>
-                            <option {% if form.purok.value == 'Purok 2' %}selected{% endif %}>Purok 2</option>
-                            <option {% if form.purok.value == 'Purok 3' %}selected{% endif %}>Purok 3</option>
-                            <option {% if form.purok.value == 'Sitio Kawayan' %}selected{% endif %}>Sitio Kawayan</option>
-                        </select>
-                        {% if form.purok.errors %}
-                            <label class="label"><span class="label-text-alt text-error">{{ form.purok.errors.0 }}</span></label>
-                        {% endif %}
+                        <label class="label"><span class="label-text">Purok / Sitio <span class="text-error">*</span></span></label>
+                        {{ form.purok }}
+                        {% if form.purok.errors %}<span class="text-error text-xs">{{ form.purok.errors.0 }}</span>{% endif %}
                     </div>
                     <div class="form-control w-full">
-                        <label class="label"><span class="label-text">House Number / Street</span></label>
-                        <input type="text" name="address" value="{{ form.address.value|default:'' }}" placeholder="e.g. 123 Kalye Serye" class="input input-bordered w-full {% if form.address.errors %}input-error{% endif %}" required />
-                        {% if form.address.errors %}
-                            <label class="label"><span class="label-text-alt text-error">{{ form.address.errors.0 }}</span></label>
-                        {% endif %}
+                        <label class="label"><span class="label-text">House Number / Street <span class="text-error">*</span></span></label>
+                        {{ form.address }}
+                        {% if form.address.errors %}<span class="text-error text-xs">{{ form.address.errors.0 }}</span>{% endif %}
                     </div>
                 </div>
 
                 <div class="form-control w-full mb-6">
                     <label class="label"><span class="label-text">Years of Residency</span></label>
-                    <input type="number" name="years_of_residency" placeholder="e.g. 10" class="input input-bordered w-full" />
+                    {{ form.years_of_residency }}
                 </div>
 
-                <div class="form-control w-full" x-data="{ isHouseholdHead: true }">
+                <div class="form-control w-full" x-data="{ isHouseholdHead: {% if form.is_household_head.value|default_if_none:True %}true{% else %}false{% endif %} }">
                     <label class="label cursor-pointer justify-start gap-4">
-                        <input type="checkbox" name="is_household_head" class="checkbox checkbox-primary" x-model="isHouseholdHead" checked />
+                        {{ form.is_household_head }}
                         <span class="label-text font-medium">Is Household Head?</span>
                     </label>
                     <p class="text-xs text-base-content/60 ml-10 mt-1" x-show="isHouseholdHead">Resident is the head of the family.</p>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 ml-10 mt-4" x-show="!isHouseholdHead" x-transition>
                         <div>
-                            <label class="label"><span class="label-text text-sm font-medium">Household Head Name</span></label>
-                            <input type="text" name="household_head_name" placeholder="Search or Enter Name of Head" class="input input-bordered w-full" />
+                            <label class="label"><span class="label-text text-sm font-medium">Household Head</span></label>
+                            {{ form.household_head }}
                             <label class="label"><span class="label-text-alt text-error">Required if not head of household</span></label>
+                            {% if form.household_head.errors %}<span class="text-error text-xs">{{ form.household_head.errors.0 }}</span>{% endif %}
                         </div>
                         <div>
                             <label class="label"><span class="label-text text-sm font-medium">Relationship to Head</span></label>
-                            <select name="relationship_to_head" class="select select-bordered w-full">
-                                <option disabled selected>Select Relationship</option>
-                                <option>Spouse</option>
-                                <option>Son/Daughter</option>
-                                <option>Parent</option>
-                                <option>Sibling</option>
-                                <option>In-Law</option>
-                                <option>Grandchild</option>
-                                <option>Other Relative</option>
-                                <option>Boarder/Helper</option>
-                            </select>
+                            {{ form.relationship_to_head }}
+                            {% if form.relationship_to_head.errors %}<span class="text-error text-xs">{{ form.relationship_to_head.errors.0 }}</span>{% endif %}
                         </div>
                     </div>
                 </div>
@@ -345,23 +261,23 @@
                     Sectoral Information
                 </h2>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4" x-data="{ isPWD: false, isVoter: false }">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4" x-data="{ isPWD: {% if form.is_pwd.value %}true{% else %}false{% endif %}, isVoter: {% if form.is_voter.value %}true{% else %}false{% endif %} }">
                     {# Standard Checkboxes #}
                     <div class="grid grid-cols-2 gap-4">
                         <label class="label cursor-pointer justify-start gap-3 border border-base-200 rounded-lg p-3 hover:bg-base-200 transition-colors h-min">
-                            <input type="checkbox" name="is_senior_citizen" class="checkbox checkbox-sm" />
+                            {{ form.is_senior_citizen }}
                             <span class="label-text">Senior Citizen</span>
                         </label>
                         <label class="label cursor-pointer justify-start gap-3 border border-base-200 rounded-lg p-3 hover:bg-base-200 transition-colors h-min">
-                            <input type="checkbox" name="is_solo_parent" class="checkbox checkbox-sm" />
+                            {{ form.is_solo_parent }}
                             <span class="label-text">Solo Parent</span>
                         </label>
                         <label class="label cursor-pointer justify-start gap-3 border border-base-200 rounded-lg p-3 hover:bg-base-200 transition-colors h-min">
-                            <input type="checkbox" name="is_4ps" class="checkbox checkbox-sm" />
+                            {{ form.is_4ps }}
                             <span class="label-text">4Ps Member</span>
                         </label>
                         <label class="label cursor-pointer justify-start gap-3 border border-base-200 rounded-lg p-3 hover:bg-base-200 transition-colors h-min">
-                            <input type="checkbox" name="is_indigent" class="checkbox checkbox-sm" />
+                            {{ form.is_indigent }}
                             <span class="label-text">Indigent</span>
                         </label>
                     </div>
@@ -369,12 +285,12 @@
                     {# Voter Logic #}
                     <div class="border border-base-200 rounded-lg p-4 transition-all duration-300 h-min" :class="isVoter ? 'bg-base-100 ring-2 ring-primary/20' : 'bg-base-100'">
                         <label class="label cursor-pointer justify-start gap-3 mb-2">
-                            <input type="checkbox" name="is_voter" class="checkbox checkbox-sm" x-model="isVoter" />
+                            {{ form.is_voter }}
                             <span class="label-text font-bold">Registered Voter</span>
                         </label>
                         <div x-show="isVoter" x-transition>
                             <label class="label pb-1"><span class="label-text text-xs opacity-70">Precinct Number</span></label>
-                            <input type="text" name="precinct_number" value="{{ form.precinct_number.value|default:'' }}" placeholder="e.g. 0123A" class="input input-sm input-bordered w-full {% if form.precinct_number.errors %}input-error{% endif %}" />
+                            {{ form.precinct_number }}
                              {% if form.precinct_number.errors %}
                                 <label class="label"><span class="label-text-alt text-error">{{ form.precinct_number.errors.0 }}</span></label>
                             {% endif %}
@@ -384,12 +300,12 @@
                     {# Special PWD Section #}
                     <div class="border border-base-200 rounded-lg p-4 transition-all duration-300" :class="isPWD ? 'bg-base-100 ring-2 ring-primary/20' : 'bg-base-100'">
                         <label class="label cursor-pointer justify-start gap-3 mb-2">
-                            <input type="checkbox" name="is_pwd" class="checkbox checkbox-sm checkbox-secondary" x-model="isPWD" />
+                            {{ form.is_pwd }}
                             <span class="label-text font-bold">PWD (Person with Disability)</span>
                         </label>
                         <div x-show="isPWD" x-transition>
                             <label class="label pb-1"><span class="label-text text-xs opacity-70">Specific Disability (Targeted Aid)</span></label>
-                            <input type="text" name="disability_type" value="{{ form.disability_type.value|default:'' }}" placeholder="e.g. Visual, Orthopedic, Psychosocial" class="input input-sm input-bordered w-full {% if form.disability_type.errors %}input-error{% endif %}" />
+                            {{ form.disability_type }}
                             {% if form.disability_type.errors %}
                                 <label class="label"><span class="label-text-alt text-error">{{ form.disability_type.errors.0 }}</span></label>
                             {% endif %}
