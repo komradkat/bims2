@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}GIS Map | BIMS{% endblock %}
+
+{% block content %}
+<div class="h-[calc(100vh-4rem)] flex flex-col">
+    <div class="bg-white p-4 shadow-sm border-b flex justify-between items-center z-10">
+        <div>
+            <h1 class="text-xl font-bold text-gray-800">Barangay Map</h1>
+            <p class="text-sm text-gray-500">Geographic Information System</p>
+        </div>
+        <div class="flex gap-2">
+            <button onclick="map.setView([14.5995, 120.9842], 15)" class="btn btn-sm btn-ghost">Reset View</button>
+            <div class="dropdown dropdown-end">
+                <label tabindex="0" class="btn btn-sm btn-outline">Layers</label>
+                <ul tabindex="0" class="dropdown-content z-[1000] menu p-2 shadow bg-base-100 rounded-box w-52">
+                    <li><a onclick="setLayer('streets')">Streets</a></li>
+                    <li><a onclick="setLayer('satellite')">Satellite</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div id="map" class="flex-grow w-full z-0"></div>
+</div>
+
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRS9BMY="
+     crossorigin=""/>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+
+<script>
+    // Initialize map (Default to Manila coordinates, should be adjustable via settings)
+    const map = L.map('map').setView([14.5995, 120.9842], 15);
+    
+    // Tile Layers
+    const streets = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    });
+    
+    const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+    });
+    
+    streets.addTo(map);
+    
+    function setLayer(type) {
+        if (type === 'streets') {
+            map.removeLayer(satellite);
+            streets.addTo(map);
+        } else {
+            map.removeLayer(streets);
+            satellite.addTo(map);
+        }
+    }
+    
+    // Custom Icons
+    const residentIcon = L.divIcon({
+        className: 'custom-div-icon',
+        html: "<div style='background-color:#3b82f6; width:10px; height:10px; border-radius:50%; border:2px solid white;'></div>",
+        iconSize: [10, 10],
+        iconAnchor: [5, 5]
+    });
+
+    // Fetch Resident Data
+    fetch('{% url "gis:resident_geojson" %}')
+        .then(response => response.json())
+        .then(data => {
+            L.geoJSON(data, {
+                pointToLayer: function (feature, latlng) {
+                    return L.marker(latlng, {icon: residentIcon});
+                },
+                onEachFeature: function (feature, layer) {
+                    if (feature.properties) {
+                        layer.bindPopup(`
+                            <div class="font-bold">${feature.properties.name}</div>
+                            <div class="text-xs text-gray-500">${feature.properties.address}</div>
+                            <div class="text-xs text-badge badge-ghost mt-1">${feature.properties.purok}</div>
+                            <a href="/residents/${feature.properties.id}/" class="btn btn-xs btn-primary mt-2 w-full text-white">View Profile</a>
+                        `);
+                    }
+                }
+            }).addTo(map);
+        })
+        .catch(error => console.error('Error loading resident data:', error));
+</script>
+{% endblock %}

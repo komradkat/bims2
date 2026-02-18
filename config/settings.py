@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'apps.blotter',
     'apps.finance',
     'apps.audit',
+    'apps.gis',
 ]
 
 MIDDLEWARE = [

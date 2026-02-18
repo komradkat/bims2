@@ -26,6 +26,7 @@ urlpatterns = [
     path('business/', include('apps.business.urls')),
     path('finance/', include('apps.finance.urls')),
     path('audit/', include('apps.audit.urls')),
+    path('gis/', include('apps.gis.urls')),  # GIS Map
 ]
 
 from django.conf import settings

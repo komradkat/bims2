@@ -138,6 +138,10 @@ class Resident(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True, help_text="Set to False for deceased or moved out")
+
+    # GIS Location
+    latitude = models.FloatField(blank=True, null=True, help_text="Latitude coordinate")
+    longitude = models.FloatField(blank=True, null=True, help_text="Longitude coordinate")
     
     # Audit Trail
     history = HistoricalRecords()
