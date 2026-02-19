@@ -11,8 +11,12 @@
 
         {# Logo Placeholder #}
         <div class="avatar placeholder">
-            <div class="bg-[#6366f1] text-white rounded-lg w-10">
-                <span class="text-xl font-bold">B</span>
+            <div class="w-10 h-10 rounded-full bg-base-200 flex items-center justify-center overflow-hidden border border-base-300">
+                {% if barangay_info.logo_url %}
+                    <img src="{{ barangay_info.logo_url }}" alt="Logo" class="w-full h-full object-cover">
+                {% else %}
+                    <span class="text-xl">🏛️</span>
+                {% endif %}
             </div>
         </div>
         

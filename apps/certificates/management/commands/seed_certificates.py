@@ -1,83 +1,80 @@
 from django.core.management.base import BaseCommand
 from apps.certificates.models import CertificateType
 
-
 class Command(BaseCommand):
-    help = 'Seeds the database with standard certificate types'
+    help = 'Seed default certificate types'
 
-    def handle(self, *args, **options):
-        certificate_types = [
-            {
-                'name': 'Barangay Clearance',
-                'slug': 'barangay-clearance',
-                'tier': 'community',
-                'description': 'Certificate of Barangay Clearance for various purposes',
-                'default_price': 50.00,
-                'template_file': 'certificates/print/clearance.html',
-            },
+    def handle(self, *args, **kwargs):
+        self.stdout.write('Seeding certificate types...')
+        
+        certs = [
+            # Community (Free/Basic)
             {
                 'name': 'Certificate of Indigency',
                 'slug': 'indigency',
                 'tier': 'community',
-                'description': 'Certificate for indigent residents to avail of social services',
-                'default_price': 0.00,
-                'template_file': 'certificates/print/indigency.html',
+                'price': 0.00,
+                'template': 'certificates/print/indigency.html'
             },
             {
                 'name': 'Certificate of Residency',
                 'slug': 'residency',
                 'tier': 'community',
-                'description': 'Proof of residence for various legal requirements',
-                'default_price': 50.00,
-                'template_file': 'certificates/print/residency.html',
+                'price': 50.00,
+                'template': 'certificates/print/residency.html'
             },
             {
-                'name': 'Business Clearance',
-                'slug': 'business-clearance',
+                'name': 'First-Time Jobseeker Oath',
+                'slug': 'jobseeker',
+                'tier': 'community',
+                'price': 0.00,
+                'template': 'certificates/print/jobseeker.html'
+            },
+            
+            # Pro (Business/Legal)
+            {
+                'name': 'Barangay Clearance',
+                'slug': 'clearance',
                 'tier': 'pro',
-                'description': 'Prerequisite for Mayor\'s Permit and business operations',
-                'default_price': 200.00,
-                'template_file': 'certificates/print/business_clearance.html',
+                'price': 100.00,
+                'template': 'certificates/print/clearance.html'
+            },
+            {
+                'name': 'Business Permit',
+                'slug': 'business-permit',
+                'tier': 'pro',
+                'price': 500.00,
+                'template': 'certificates/print/business_permit.html'
             },
             {
                 'name': 'Certificate of Good Moral',
                 'slug': 'good-moral',
                 'tier': 'pro',
-                'description': 'Certification of good character and law-abiding standing',
-                'default_price': 50.00,
-                'template_file': 'certificates/print/good_moral.html',
+                'price': 75.00,
+                'template': 'certificates/print/good_moral.html'
             },
+            
+            # Ultra (Specialized)
             {
-                'name': 'First Time Job Seeker',
-                'slug': 'job-seeker',
-                'tier': 'pro',
-                'description': 'RA 11261 - Free certification for first-time job applicants',
-                'default_price': 0.00,
-                'template_file': 'certificates/print/job_seeker.html',
-            },
+                'name': 'Special Permit',
+                'slug': 'special-permit',
+                'tier': 'ultra',
+                'price': 200.00,
+                'template': 'certificates/print/special.html'
+            }
         ]
-
-        created_count = 0
-        updated_count = 0
-
-        for cert_data in certificate_types:
-            cert_type, created = CertificateType.objects.update_or_create(
-                slug=cert_data['slug'],
-                defaults=cert_data
+        
+        for c in certs:
+            obj, created = CertificateType.objects.update_or_create(
+                slug=c['slug'],
+                defaults={
+                    'name': c['name'],
+                    'tier': c['tier'],
+                    'default_price': c['price'],
+                    'template_file': c['template']
+                }
             )
-            if created:
-                created_count += 1
-                self.stdout.write(
-                    self.style.SUCCESS(f'Created: {cert_type.name}')
-                )
-            else:
-                updated_count += 1
-                self.stdout.write(
-                    self.style.WARNING(f'Updated: {cert_type.name}')
-                )
-
-        self.stdout.write(
-            self.style.SUCCESS(
-                f'\nSeeding complete! Created: {created_count}, Updated: {updated_count}'
-            )
-        )
+            status = 'Created' if created else 'Updated'
+            self.stdout.write(f' - {status}: {obj.name} ({obj.tier})')
+            
+        self.stdout.write(self.style.SUCCESS('Certificate types seeded successfully.'))

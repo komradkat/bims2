@@ -15,6 +15,15 @@
     activeCertName: '',
     priceInput: '',
     isFree: false,
+    init() {
+        {% if preselect_cert %}
+            this.activeCertId = '{{ preselect_cert.id }}';
+            this.activeCertName = '{{ preselect_cert.name }}';
+            this.priceInput = '{{ preselect_cert.price }}';
+            this.isFree = {{ preselect_cert.is_free|yesno:'true,false' }};
+            document.getElementById('issue_modal').showModal();
+        {% endif %}
+    },
     resetForm() {
         this.selectedResident = '';
         this.selectedResidentId = '';
@@ -25,7 +34,12 @@
         this.isSubmitting = false;
     }
 }">
-    <h1 class="text-2xl font-bold mb-6">Certificate Center</h1>
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-2xl font-bold">Certificate Center</h1>
+        <a href="{% url 'certificates:list' %}" class="btn btn-ghost btn-sm">
+            <i class="fas fa-history mr-2"></i>View History
+        </a>
+    </div>
     
     {# Search Results for individual types (Optional) #}
     

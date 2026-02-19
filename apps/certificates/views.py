@@ -56,6 +56,20 @@ class CertificateCenterView(LoginRequiredMixin, ListView):
         context['pro_certs'] = queryset.filter(tier='pro')
         context['ultra_certs'] = queryset.filter(tier='ultra')
         
+        # Handle pre-selection
+        preselect = self.request.GET.get('preselect')
+        if preselect:
+            try:
+                cert = queryset.get(slug=preselect)
+                context['preselect_cert'] = {
+                    'id': cert.id,
+                    'name': cert.name,
+                    'price': float(cert.default_price),
+                    'is_free': cert.default_price == 0
+                }
+            except CertificateType.DoesNotExist:
+                pass
+        
         return context
 
     def post(self, request, *args, **kwargs):

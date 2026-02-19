@@ -84,11 +84,16 @@
 </head>
 <body>
     <div class="header">
-        {# Logos would go here if we had them #}
+        {% if barangay_info.logo_url %}
+            <img src="{{ barangay_info.logo_url }}" class="logo logo-left" alt="Logo">
+        {% endif %}
+        
         <h3>Republic of the Philippines</h3>
-        <h3>Province of {{ barangay.province }}</h3>
-        <h3>City of {{ barangay.city }}</h3>
-        <h2>BARANGAY {{ barangay.name|upper }}</h2>
+        {# Province/City would theoretically come from context, but we only have basic info now #}
+        <h3>Province of [PROVINCE]</h3> 
+        <h3>City/Municipality of [CITY]</h3>
+        
+        <h2>BARANGAY {{ barangay_info.name|upper }}</h2>
         <h1>OFFICE OF THE PUNONG BARANGAY</h1>
     </div>
 
