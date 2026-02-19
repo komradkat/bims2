@@ -23,7 +23,7 @@
         <h2 class="card-title mt-4">{{ type.name }}</h2>
         <p class="text-sm text-base-content/70">{{ type.description }}</p>
         <div class="card-actions justify-end mt-4">
-            <button class="btn btn-sm {% if type.tier == 'community' %}btn-success text-white{% elif type.tier == 'pro' %}btn-primary{% else %}btn-accent{% endif %}" 
+            <button type="button" class="btn btn-sm {% if type.tier == 'community' %}btn-success text-white{% elif type.tier == 'pro' %}btn-primary{% else %}btn-accent{% endif %}"
                 @click="activeCertName = '{{ type.name }}'; 
                         activeCertId = '{{ type.id }}'; 
                         priceInput = '{{ type.default_price }}';

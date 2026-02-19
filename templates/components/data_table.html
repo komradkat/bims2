@@ -60,9 +60,19 @@
 {% if pagination %}
 <div class="flex justify-center mt-4">
     <div class="join">
-        <button class="join-item btn btn-sm" {% if not pagination.has_previous %}disabled{% endif %}>«</button>
-        <button class="join-item btn btn-sm">Page {{ pagination.current }} of {{ pagination.total }}</button>
-        <button class="join-item btn btn-sm" {% if not pagination.has_next %}disabled{% endif %}>»</button>
+        {% if pagination.has_previous %}
+        <a href="?page={{ pagination.previous }}" class="join-item btn btn-sm">«</a>
+        {% else %}
+        <button type="button" class="join-item btn btn-sm" disabled>«</button>
+        {% endif %}
+
+        <button type="button" class="join-item btn btn-sm">Page {{ pagination.current }} of {{ pagination.total }}</button>
+
+        {% if pagination.has_next %}
+        <a href="?page={{ pagination.next }}" class="join-item btn btn-sm">»</a>
+        {% else %}
+        <button type="button" class="join-item btn btn-sm" disabled>»</button>
+        {% endif %}
     </div>
 </div>
 {% endif %}
