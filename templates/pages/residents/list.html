@@ -154,7 +154,7 @@
                                 </a>
                                 
                                 <div class="dropdown dropdown-end">
-                                    <button tabindex="0" class="btn btn-ghost btn-xs btn-circle tooltip tooltip-left" data-tip="More Options">
+                                    <button type="button" tabindex="0" class="btn btn-ghost btn-xs btn-circle tooltip tooltip-left" data-tip="More Options">
                                         <i class="fas fa-ellipsis-v opacity-50"></i>
                                     </button>
                                     <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52 border border-base-200">
@@ -192,18 +192,18 @@
                 <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if purok_filter %}&purok={{ purok_filter }}{% endif %}{% if sector_filter %}&sector={{ sector_filter }}{% endif %}" class="join-item btn btn-sm">«</a>
                 <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if purok_filter %}&purok={{ purok_filter }}{% endif %}{% if sector_filter %}&sector={{ sector_filter }}{% endif %}" class="join-item btn btn-sm">‹</a>
                 {% else %}
-                <button class="join-item btn btn-sm btn-disabled">«</button>
-                <button class="join-item btn btn-sm btn-disabled">‹</button>
+                <button type="button" class="join-item btn btn-sm btn-disabled">«</button>
+                <button type="button" class="join-item btn btn-sm btn-disabled">‹</button>
                 {% endif %}
                 
-                <button class="join-item btn btn-sm">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</button>
+                <button type="button" class="join-item btn btn-sm">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</button>
                 
                 {% if page_obj.has_next %}
                 <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if purok_filter %}&purok={{ purok_filter }}{% endif %}{% if sector_filter %}&sector={{ sector_filter }}{% endif %}" class="join-item btn btn-sm">›</a>
                 <a href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if purok_filter %}&purok={{ purok_filter }}{% endif %}{% if sector_filter %}&sector={{ sector_filter }}{% endif %}" class="join-item btn btn-sm">»</a>
                 {% else %}
-                <button class="join-item btn btn-sm btn-disabled">›</button>
-                <button class="join-item btn btn-sm btn-disabled">»</button>
+                <button type="button" class="join-item btn btn-sm btn-disabled">›</button>
+                <button type="button" class="join-item btn btn-sm btn-disabled">»</button>
                 {% endif %}
             </div>
         </div>

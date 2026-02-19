@@ -81,7 +81,7 @@
                         </td>
                         <td class="text-right">
                             <div class="dropdown dropdown-end">
-                                <button tabindex="0" class="btn btn-ghost btn-xs btn-circle">
+                                    <button type="button" class="btn btn-ghost btn-xs btn-circle" tabindex="0">
                                     <i class="fas fa-ellipsis-v"></i>
                                 </button>
                                 <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
@@ -122,7 +122,7 @@
             {% if page_obj.has_previous %}
             <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="join-item btn btn-sm">«</a>
             {% endif %}
-            <button class="join-item btn btn-sm">Page {{ page_obj.number }} of {{ paginator.num_pages }}</button>
+            <button type="button" class="join-item btn btn-sm">Page {{ page_obj.number }} of {{ paginator.num_pages }}</button>
             {% if page_obj.has_next %}
             <a href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="join-item btn btn-sm">»</a>
             {% endif %}

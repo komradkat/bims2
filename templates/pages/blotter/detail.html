@@ -21,7 +21,7 @@
             </h1>
         </div>
         <div class="flex gap-2 w-full md:w-auto">
-            <button class="btn btn-ghost border-base-300">
+            <button type="button" class="btn btn-ghost border-base-300" onclick="window.print()">
                 <i class="fas fa-print mr-2 opacity-60"></i> Print Case Folder
             </button>
             <div class="dropdown dropdown-end">
@@ -209,7 +209,7 @@
                     <h2 class="font-bold flex items-center gap-2">
                         <i class="fas fa-calendar-alt text-warning"></i> Hearing Timeline
                     </h2>
-                    <button class="btn btn-ghost btn-xs text-primary font-bold">Add New</button>
+                    <button type="button" class="btn btn-ghost btn-xs text-primary font-bold" onclick="document.getElementById('hearing_modal').showModal()">Add New</button>
                 </div>
                 <div class="card-body p-6">
                     {% if hearings %}
