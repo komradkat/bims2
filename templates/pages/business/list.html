@@ -11,10 +11,12 @@
             <p class="text-sm opacity-60">Manage barangay business clearances and revenue</p>
         </div>
         <div class="flex gap-2">
-            <button class="btn btn-outline" onclick="alert('Showing permits expiring in 30 days...')">
-                <span class="indicator-item badge badge-secondary badge-xs">5</span>
-                Expiring Soon
-            </button>
+            <form method="get">
+                <button type="submit" name="filter" value="expiring" class="btn btn-outline">
+                    <span class="indicator-item badge badge-secondary badge-xs">5</span>
+                    Expiring Soon
+                </button>
+            </form>
             <a href="{% url 'business:add' %}" class="btn btn-primary">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
                 New Business
@@ -66,7 +68,7 @@
                         <td><span class="badge badge-{{ business.status_color }} badge-sm">{{ business.get_status_display }}</span></td>
                         <td class="text-right">
                             <div class="dropdown dropdown-end">
-                                <button tabindex="0" class="btn btn-ghost btn-xs btn-circle">
+                                <button type="button" tabindex="0" class="btn btn-ghost btn-xs btn-circle">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" /></svg>
                                 </button>
                                 <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
