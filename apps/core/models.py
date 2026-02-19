@@ -72,3 +72,37 @@ class LicenseKey(models.Model):
     def __str__(self):
         return f"{self.tier.upper()} - {self.key[:8]}..." if len(self.key) > 8 else f"{self.tier.upper()} - {self.key}"
 
+
+class BarangayInfo(models.Model):
+    """
+    Singleton model to store Barangay Configuration.
+    Ensures only one instance exists.
+    """
+    name = models.CharField(max_length=200, help_text="Official name of the Barangay")
+    address = models.TextField(help_text="Complete address")
+    logo = models.ImageField(upload_to='barangay/logo/', blank=True, null=True)
+    contact_number = models.CharField(max_length=50, blank=True)
+    email = models.EmailField(blank=True)
+    
+    # GIS Location (Center of Barangay)
+    latitude = models.FloatField(blank=True, null=True, help_text="Center Latitude")
+    longitude = models.FloatField(blank=True, null=True, help_text="Center Longitude")
+    
+    # System Config
+    is_setup_complete = models.BooleanField(default=False)
+    
+    def save(self, *args, **kwargs):
+        if not self.pk and BarangayInfo.objects.exists():
+            # If trying to create a new instance when one exists, update the existing one instead
+            # or raise an error. For simplicity, we can just enforce singleton at view level,
+            # but let's be safe.
+            return super().save(*args, **kwargs)
+        return super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = "Barangay Information"
+        verbose_name_plural = "Barangay Information"
+

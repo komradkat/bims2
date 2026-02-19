@@ -2,13 +2,28 @@
 
 def barangay_info(request):
     """Provide barangay information to all templates"""
-    return {
-        'barangay_info': {
-            'name': 'Barangay 53',
-            'full_name': 'Barangay 53, Caloocan City',
-            'logo_url': None,  # TODO: Add logo path when available
+    from apps.core.models import BarangayInfo
+    
+    info = BarangayInfo.objects.first()
+    
+    if info:
+        data = {
+            'name': info.name,
+            'full_name': f"{info.name}, {info.address}",
+            'logo_url': info.logo.url if info.logo else None,
+            'address': info.address,
+            'contact': info.contact_number,
+            'email': info.email,
         }
-    }
+    else:
+        # Fallback for initial setup
+        data = {
+            'name': 'BIMS Setup',
+            'full_name': 'Barangay Information Management System',
+            'logo_url': None,
+        }
+        
+    return {'barangay_info': data}
 
 
 def user_info(request):

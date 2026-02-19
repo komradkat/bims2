@@ -258,3 +258,107 @@ class LicenseActivationView(LoginRequiredMixin, View):
         except LicenseKey.DoesNotExist:
             messages.error(request, "Invalid license key. Please check and try again.")
             return redirect('core:license_activation')
+        except LicenseKey.DoesNotExist:
+            messages.error(request, "Invalid license key. Please check and try again.")
+            return redirect('core:license_activation')
+
+
+class SetupView(View):
+    """
+    Initial System Setup Wizard.
+    Allows setting Barangay Info and creating/updating the Admin account.
+    """
+    template_name = 'core/setup.html'
+    
+    def get(self, request):
+        from apps.core.models import BarangayInfo
+        
+        # If setup is already complete, redirect to dashboard
+        if BarangayInfo.objects.filter(is_setup_complete=True).exists():
+            return redirect('core:dashboard')
+            
+        return render(request, self.template_name)
+        
+    def post(self, request):
+        from apps.core.models import BarangayInfo
+        from django.contrib.auth import get_user_model
+        
+        User = get_user_model()
+        
+        # 1. Barangay Info
+        name = request.POST.get('barangay_name')
+        address = request.POST.get('barangay_address')
+        contact = request.POST.get('contact_number', '')
+        email = request.POST.get('barangay_email', '')
+        # captain = request.POST.get('barangay_captain') # Removed
+        # secretary = request.POST.get('barangay_secretary') # Removed
+        # treasurer = request.POST.get('barangay_treasurer') # Removed
+        
+        # New: GIS Coordinates
+        latitude = request.POST.get('latitude')
+        longitude = request.POST.get('longitude')
+        
+        logo = request.FILES.get('barangay_logo')
+        
+        # 2. Admin Account
+        username = request.POST.get('admin_username')
+        password = request.POST.get('admin_password')
+        # admin_email = request.POST.get('admin_email') # Removed requirement for separate email in this step
+        
+        # Basic Validation
+        if not all([name, address, username, password]):
+            messages.error(request, "Please fill in all required fields.")
+            return render(request, self.template_name)
+            
+        try:
+            # Save Barangay Info
+            # Singleton: Get existing or create new
+            info = BarangayInfo.objects.first()
+            if not info:
+                info = BarangayInfo()
+                
+            info.name = name
+            info.address = address
+            info.contact_number = contact
+            info.email = email
+            
+            # Save coordinates if provided
+            if latitude and longitude:
+                try:
+                    info.latitude = float(latitude)
+                    info.longitude = float(longitude)
+                except ValueError:
+                    pass # Ignore invalid floats
+            
+            if logo:
+                info.logo = logo
+            
+            info.is_setup_complete = True
+            info.save()
+            
+            # Create/Update Admin User
+            # Check if admin exists
+            if User.objects.filter(username=username).exists():
+                user = User.objects.get(username=username)
+                user.set_password(password)
+                # user.email = admin_email 
+                user.role = 'admin'
+                user.is_superuser = True
+                user.is_staff = True
+                user.save()
+            else:
+                User.objects.create_superuser(
+                    username=username,
+                    # email=admin_email,
+                    email='',
+                    password=password,
+                    role='admin',
+                    barangay_position='Administrator'
+                )
+                
+            messages.success(request, "System Setup Completed Successfully! Please login.")
+            return redirect('core:login')
+            
+        except Exception as e:
+            messages.error(request, f"An error occurred: {str(e)}")
+            return render(request, self.template_name)

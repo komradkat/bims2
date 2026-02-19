@@ -1,0 +1,116 @@
+{% extends 'base_simple.html' %}
+{% load static %}
+
+{% block title %}System Setup | BIMS{% endblock %}
+
+{% block body_class %}bg-base-200 min-h-screen flex items-center justify-center{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl w-full mx-auto p-4">
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <h2 class="card-title text-2xl font-bold text-primary mb-4 text-center block">
+                Welcome to BIMS Setup
+            </h2>
+            <p class="text-center text-gray-500 mb-8">
+                Please configure your Barangay Information and Administrator Account to get started.
+            </p>
+
+            <form method="post" enctype="multipart/form-data" class="space-y-6">
+                {% csrf_token %}
+                
+                {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} shadow-lg">
+                        <div>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current flex-shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <span>{{ message }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Section 1: Barangay Information -->
+                    <div>
+                        <h3 class="font-bold text-lg border-b pb-2 mb-4">🏠 Barangay Information</h3>
+                        
+                        <div class="form-control w-full mb-3">
+                            <label class="label"><span class="label-text">Barangay Name *</span></label>
+                            <input type="text" name="barangay_name" placeholder="e.g. Barangay 123" class="input input-bordered w-full" required />
+                        </div>
+
+                        <div class="form-control w-full mb-3">
+                            <label class="label"><span class="label-text">Address *</span></label>
+                            <textarea name="barangay_address" class="textarea textarea-bordered h-24" placeholder="Complete Address" required></textarea>
+                        </div>
+                        
+                        <div class="form-control w-full mb-3">
+                            <label class="label"><span class="label-text">Logo</span></label>
+                            <input type="file" name="barangay_logo" class="file-input file-input-bordered w-full" accept="image/*" />
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2 mb-3">
+                            <div class="form-control w-full">
+                                <label class="label"><span class="label-text">Contact No.</span></label>
+                                <input type="text" name="contact_number" placeholder="Hotline/Tel" class="input input-bordered w-full" />
+                            </div>
+                            <div class="form-control w-full">
+                                <label class="label"><span class="label-text">Email Address</span></label>
+                                <input type="email" name="barangay_email" placeholder="official@brgy.gov.ph" class="input input-bordered w-full" />
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-2">
+                             <div class="form-control w-full">
+                                <label class="label"><span class="label-text">Latitude</span></label>
+                                <input type="number" step="any" name="latitude" placeholder="e.g. 14.5995" class="input input-bordered w-full" />
+                            </div>
+                             <div class="form-control w-full">
+                                <label class="label"><span class="label-text">Longitude</span></label>
+                                <input type="number" step="any" name="longitude" placeholder="e.g. 120.9842" class="input input-bordered w-full" />
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">Coordinates for the barangay center (GIS Map).</p>
+                    </div>
+
+                    <!-- Section 2: Admin Account -->
+                    <div>
+                        <h3 class="font-bold text-lg border-b pb-2 mb-4">👤 Administrator Account</h3>
+                        <p class="text-sm text-gray-500 mb-4">Create the master superuser account.</p>
+
+                        <div class="form-control w-full mb-3">
+                            <label class="label"><span class="label-text">Username *</span></label>
+                            <input type="text" name="admin_username" placeholder="admin" class="input input-bordered w-full" required />
+                        </div>
+
+                        <div class="form-control w-full mb-3">
+                            <label class="label"><span class="label-text">Password *</span></label>
+                            <input type="password" name="admin_password" placeholder="********" class="input input-bordered w-full" required />
+                        </div>
+                        
+                        <div class="alert alert-info shadow-sm mt-8">
+                            <div>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current flex-shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span class="text-xs">
+                                    By clicking "Complete Setup", you confirm that the information provided is accurate. The system will now be locked to this configuration.
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-actions justify-end mt-8">
+                    <button type="submit" class="btn btn-primary btn-lg w-full md:w-auto">
+                        Complete Setup 🚀
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div class="text-center mt-6 text-gray-500 text-sm">
+        Barangay Information Management System (BIMS) v2.0
+    </div>
+</div>
+{% endblock %}
