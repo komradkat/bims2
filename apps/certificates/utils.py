@@ -1,24 +1,66 @@
 from django.conf import settings
 from django.template.loader import render_to_string
+from django.contrib.staticfiles import finders
+import os
+from io import BytesIO
+from xhtml2pdf import pisa
+
+def link_callback(uri, rel):
+    """
+    Convert HTML URIs to absolute system paths so xhtml2pdf can access those resources
+    """
+    sUrl = settings.STATIC_URL        # Typically /static/
+    sRoot = settings.STATIC_ROOT      # Typically /home/userX/project_static/
+    mUrl = settings.MEDIA_URL         # Typically /media/
+    mRoot = settings.MEDIA_ROOT       # Typically /home/userX/project_static/media/
+
+    # Handle Media Files
+    if uri.startswith(mUrl):
+        path = os.path.join(mRoot, uri.replace(mUrl, "", 1))
+    
+    # Handle Static Files
+    elif uri.startswith(sUrl):
+        relative_path = uri.replace(sUrl, "", 1)
+        # Try finding it using Django finders (works in dev)
+        found = finders.find(relative_path)
+        if found:
+            path = found
+        else:
+            # Fallback to STATIC_ROOT
+            path = os.path.join(sRoot, relative_path)
+    
+    # Handle relative paths or other files
+    else:
+        found = finders.find(uri)
+        if found:
+            path = found
+        else:
+            return uri
+
+    # make sure that file exists
+    if not os.path.isfile(path):
+        # Don't raise error, just return None or uri so xhtml2pdf ignores it gracefully
+        # or print a warning
+        print(f"Warning: URI not found: {uri} -> {path}")
+        return uri
+        
+    return path
 
 def generate_pdf(template_name, context):
     """
-    Renders an HTML template with context and converts it to PDF using WeasyPrint.
+    Renders an HTML template with context and converts it to PDF using xhtml2pdf (ReportLab).
     """
-    try:
-        from weasyprint import HTML
-    except OSError as e:
-        raise ImportError(
-            "WeasyPrint could not find its system dependencies (GTK). "
-            "Please install GTK for Windows to enable PDF generation. "
-            f"Original error: {str(e)}"
-        )
-
     html_string = render_to_string(template_name, context)
-    html = HTML(string=html_string, base_url=settings.BASE_DIR)
+    result = BytesIO()
     
-    # Optional: Add base CSS
-    # css = CSS(string='@page { size: A4; margin: 1cm }')
+    # Create the PDF
+    pdf = pisa.pisaDocument(
+        BytesIO(html_string.encode("UTF-8")),
+        result,
+        link_callback=link_callback
+    )
     
-    pdf_file = html.write_pdf()
-    return pdf_file
+    if pdf.err:
+        return None
+        
+    return result.getvalue()

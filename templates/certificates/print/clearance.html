@@ -1,22 +1,23 @@
 {% extends "certificates/print/base_document.html" %}
 
+{% extends "certificates/print/base_document.html" %}
+
 {% block document_content %}
-<p style="text-indent: 1cm;"><strong>TO WHOM IT MAY CONCERN:</strong></p>
+<div class="salutation">TO WHOM IT MAY CONCERN:</div>
 
-<p style="text-indent: 1cm;">This is to certify that <strong>{{ certificate.resident.full_name|upper }}</strong>, 
-{{ certificate.resident.age }} years of age, 
-{% if certificate.resident.sex == 'M' %}Male{% else %}Female{% endif %}, 
-{{ certificate.resident.get_civil_status_display }}, is a 
-bona fide resident of Barangay {{ barangay.name }}, {{ barangay.city }}, {{ barangay.province }} 
-with postal address at {{ certificate.resident.address }}.</p>
+<p style="text-indent: 1cm; line-height: 2;">
+    This is to certify that <span class="bold">{{ certificate.resident.full_name }}</span>, 
+    of legal age, {{ certificate.resident.citizenship }}, and a resident of 
+    <span class="italic">{{ certificate.resident.address }}</span>, has 
+    <span class="bold uppercase">NO DEROGATORY RECORD</span> on file with this office as of this date.
+</p>
 
-<p style="text-indent: 1cm;">This further certifies that the above-named person is a person of good moral 
-character and law-abiding citizen in this community, and that he/she has 
-<strong>NO DEROGATORY RECORD</strong> on file in this office as of this date.</p>
+<p style="text-indent: 1cm; margin-top: 1cm;">
+    This certification is being issued upon the request of the above-mentioned person for 
+    <span class="bold italic">{{ certificate.purpose }}</span> and for whatever legal purpose it may serve.
+</p>
 
-<p style="text-indent: 1cm;">This certification is being issued upon the request of the interested party 
-for <strong>{{ certificate.purpose|upper }}</strong> and for whatever legal purpose it may serve.</p>
-
-<p style="text-indent: 1cm;">Issued this {{ today|date:"jS" }} day of {{ today|date:"F, Y" }} 
-at the Barangay Hall of {{ barangay.name }}, {{ barangay.city }}, Philippines.</p>
+<div class="date-issued">
+    Issued this {{ today|date:"jS" }} day of {{ today|date:"F, Y" }} at the Office of the Punong Barangay.
+</div>
 {% endblock %}

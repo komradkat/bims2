@@ -21,7 +21,25 @@
             </div>
         </div>
         <h2 class="card-title mt-4">{{ type.name }}</h2>
-        <p class="text-sm text-base-content/70">{{ type.description }}</p>
+        <p class="text-xs text-base-content/70 mt-2 h-10 line-clamp-2">
+            {% if type.slug == 'indigency' %}
+                For residents seeking financial assistance, medical aid, or scholarship requirements.
+            {% elif type.slug == 'residency' %}
+                Proof of residence for bank applications, school enrollment, or ID requirements.
+            {% elif type.slug == 'jobseeker' %}
+                (RA 11261) Free certification for first-time job applicants to waive government fees.
+            {% elif type.slug == 'clearance' %}
+                Standard clearance for employment, business, or other legal purposes.
+            {% elif type.slug == 'business-permit' %}
+                Official permit to operate a business within the Barangay jurisdiction.
+            {% elif type.slug == 'good-moral' %}
+                Certification of good standing and no derogatory record in the community.
+            {% elif type.slug == 'special-permit' %}
+                For special activities, construction, or other specific Barangay transactional needs.
+            {% else %}
+                {{ type.description|default:"Official Barangay Certificate" }}
+            {% endif %}
+        </p>
         <div class="card-actions justify-end mt-4">
             <button type="button" class="btn btn-sm {% if type.tier == 'community' %}btn-success text-white{% elif type.tier == 'pro' %}btn-primary{% else %}btn-accent{% endif %}"
                 @click="activeCertName = '{{ type.name }}'; 

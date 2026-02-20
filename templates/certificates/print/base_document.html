@@ -6,123 +6,117 @@
     <style>
         @page {
             size: A4;
-            margin: 1.5cm;
+            margin: 0; /* Remove default margin to handle border positioning */
         }
         body {
             font-family: 'Times New Roman', serif;
             font-size: 12pt;
             line-height: 1.5;
             color: #000;
+            margin: 0;
+            padding: 1.25cm; /* Outer padding */
         }
-        .header {
-            text-align: center;
-            margin-bottom: 2cm;
+        
+        /* Double Border Container */
+        .border-container {
+            border: 3px solid #3366CC; /* Thick outer blue border */
+            padding: 3px;
+            height: 27cm; /* Approximate A4 height minus margins */
             position: relative;
         }
-        .logo {
-            position: absolute;
-            top: 0;
-            width: 80px;
-            height: 80px;
+        .inner-border {
+            border: 1px solid #3366CC; /* Thin inner blue border */
+            height: 100%;
+            padding: 1cm;
+            box-sizing: border-box;
+            position: relative;
         }
-        .logo-left { left: 0; }
-        .logo-right { right: 0; }
-        .header h1 { font-size: 16pt; margin: 0; text-transform: uppercase; }
-        .header h2 { font-size: 14pt; margin: 0; }
-        .header h3 { font-size: 12pt; margin: 0; font-weight: normal; }
         
-        .title {
+        /* Corner Dots (Optional decorative touch matching reference) */
+        .corner-dot {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background-color: #3366CC;
+            z-index: 10;
+        }
+        .tl { top: -4px; left: -4px; }
+        .tr { top: -4px; right: -4px; }
+        .bl { bottom: -4px; left: -4px; }
+        .br { bottom: -4px; right: -4px; }
+
+        /* Header / Banner */
+        .header-banner {
             text-align: center;
+            margin-top: 1cm;
+            margin-bottom: 0.5cm;
+            border: 2px solid #99BBFF; /* Light blue border */
+            background-color: #E6F0FF; /* Very light blue background */
+            padding: 10px 0;
+            position: relative;
+        }
+        
+        .header-title {
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+            font-size: 22pt;
+            color: #003366; /* Dark Blue */
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 0;
+        }
+        
+        /* Dashes on side of title - Moved to HTML for PDF compatibility */
+        
+        .control-number {
+            text-align: center;
+            color: #6666FF; /* Purple-ish Blue */
+            font-style: italic;
+            font-weight: bold;
+            font-size: 11pt;
             margin-bottom: 1.5cm;
         }
-        .title h1 {
-            font-size: 20pt;
-            text-decoration: underline;
-            text-transform: uppercase;
-        }
-        
+
+        /* Body Content */
         .content {
+            margin: 0 1cm;
             text-align: justify;
-            margin-bottom: 2cm;
-        }
-        .content p { margin-bottom: 1cm; }
-        
-        .seal {
-            position: absolute;
-            bottom: 4cm;
-            left: 2cm;
-            opacity: 0.1;
+            font-size: 13pt; /* Slightly larger for readability */
         }
         
-        .footer {
-            margin-top: 3cm;
-            display: flex;
-            justify-content: space-between;
-        }
-        .signature-block {
-            text-align: center;
-            width: 300px;
-        }
-        .signature-line {
-            border-top: 1px solid #000;
-            margin-top: 2cm;
-            padding-top: 0.2cm;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-        .signature-title {
-            font-size: 10pt;
-        }
+        /* ... existing styles ... */
         
-        .meta-info {
-            font-size: 9pt;
-            margin-top: 1cm;
-            border-top: 1px solid #eee;
-            padding-top: 0.2cm;
-        }
     </style>
 </head>
 <body>
-    <div class="header">
-        {% if barangay_info.logo_url %}
-            <img src="{{ barangay_info.logo_url }}" class="logo logo-left" alt="Logo">
-        {% endif %}
+    <div class="border-container">
+        <!-- Corner Dots -->
+        <div class="corner-dot tl"></div>
+        <div class="corner-dot tr"></div>
+        <div class="corner-dot bl"></div>
+        <div class="corner-dot br"></div>
         
-        <h3>Republic of the Philippines</h3>
-        {# Province/City would theoretically come from context, but we only have basic info now #}
-        <h3>Province of [PROVINCE]</h3> 
-        <h3>City/Municipality of [CITY]</h3>
-        
-        <h2>BARANGAY {{ barangay_info.name|upper }}</h2>
-        <h1>OFFICE OF THE PUNONG BARANGAY</h1>
-    </div>
+        <div class="inner-border">
+            
+            <!-- Banner Header -->
+            <div class="header-banner">
+                <h1 class="header-title">&mdash; {{ certificate.certificate_type.name }} &mdash;</h1>
+            </div>
+            
+            <div class="control-number">No. {{ certificate.transaction_number|slice:"-4:" }}</div>
 
-    <div class="title">
-        <h1>{{ certificate.certificate_type.name }}</h1>
-    </div>
+            <div class="content">
+                {% block document_content %}{% endblock %}
+            </div>
 
-    <div class="content">
-        {% block document_content %}{% endblock %}
-    </div>
-
-    <div class="footer">
-        <div style="float: left;" class="signature-block">
-            <div class="signature-line" style="visibility: hidden;">Placeholder</div>
-            <div class="signature-title">Thumb Mark / Signature of Applicant</div>
+            <div class="signature-section">
+                <div style="display: inline-block; text-align: center;">
+                    <div class="signatory-name">HON. RICARDO VELASCO</div>
+                    <div class="signatory-title">Punong Barangay</div>
+                </div>
+            </div>
+            
         </div>
-        
-        <div style="float: right;" class="signature-block">
-            <div class="signature-line">HON. Juan Dela Cruz</div>
-            <div class="signature-title">Punong Barangay</div>
-        </div>
-        <div style="clear: both;"></div>
-    </div>
-
-    <div class="meta-info">
-        <div>Control No: {{ certificate.transaction_number }}</div>
-        <div>O.R. No: {{ certificate.or_number|default:"N/A" }}</div>
-        <div>Issued on: {{ certificate.issued_at|date:"F d, Y" }}</div>
-        <div>Processed by: {{ certificate.issued_by.get_full_name|default:certificate.issued_by.username }}</div>
     </div>
 </body>
 </html>
