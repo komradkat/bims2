@@ -302,9 +302,6 @@ class SetupView(View):
         zip_code = request.POST.get('barangay_zip_code', '')
         contact = request.POST.get('contact_number', '')
         email = request.POST.get('barangay_email', '')
-        # captain = request.POST.get('barangay_captain') # Removed
-        # secretary = request.POST.get('barangay_secretary') # Removed
-        # treasurer = request.POST.get('barangay_treasurer') # Removed
         
         # New: GIS Coordinates
         latitude = request.POST.get('latitude')

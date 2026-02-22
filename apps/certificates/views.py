@@ -15,22 +15,37 @@ class CertificatePrintView(LoginRequiredMixin, DetailView):
     def get(self, request, *args, **kwargs):
         certificate = self.get_object()
         
-        # Prepare context for the template
+        # Pull real barangay info from the singleton DB record
+        from apps.core.models import BarangayInfo
+        try:
+            info = BarangayInfo.objects.get()
+        except BarangayInfo.DoesNotExist:
+            info = None
+
+        barangay = {
+            'name': info.name if info else 'Barangay',
+            'city': info.city_municipality if info else '',
+            'province': info.province if info else '',
+            'region': info.region if info else '',
+            'logo_url': info.logo.url if (info and info.logo) else None,
+            'captain_name': (info.captain_name or '').upper() if info else 'PUNONG BARANGAY',
+            'contact': info.contact_number if info else '',
+            'email': info.email if info else '',
+        }
+
         context = {
             'certificate': certificate,
-            'barangay': {
-                'name': 'Barangay San Jose', # This should ideally come from context processor/settings
-                'city': 'San Fernando',
-                'province': 'Pampanga',
-            },
+            'barangay': barangay,
             'today': timezone.now(),
         }
         
-        # Use the template defined in CertificateType
         template_name = certificate.certificate_type.template_file
         
         try:
             pdf = generate_pdf(template_name, context)
+            if pdf is None:
+                messages.error(request, "PDF generation failed — the template rendered with errors. Check the server log.")
+                return redirect('certificates:center')
             response = HttpResponse(pdf, content_type='application/pdf')
             response['Content-Disposition'] = f'inline; filename="{certificate.transaction_number}.pdf"'
             return response

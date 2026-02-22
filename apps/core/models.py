@@ -90,6 +90,11 @@ class BarangayInfo(models.Model):
     logo = models.ImageField(upload_to='barangay/logo/', blank=True, null=True)
     contact_number = models.CharField(max_length=50, blank=True)
     email = models.EmailField(blank=True)
+    captain_name = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text="Full name of the Punong Barangay (used on printed certificates)"
+    )
 
     # GIS Location (Center of Barangay)
     latitude = models.FloatField(blank=True, null=True, help_text="Center Latitude")

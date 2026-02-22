@@ -49,6 +49,7 @@ def link_callback(uri, rel):
 def generate_pdf(template_name, context):
     """
     Renders an HTML template with context and converts it to PDF using xhtml2pdf (ReportLab).
+    Raises ValueError on pisa errors so callers get a useful message.
     """
     html_string = render_to_string(template_name, context)
     result = BytesIO()
@@ -61,6 +62,8 @@ def generate_pdf(template_name, context):
     )
     
     if pdf.err:
-        return None
+        import sys
+        print(f"xhtml2pdf error(s) while rendering '{template_name}': {pdf.err}", file=sys.stderr)
+        raise ValueError(f"PDF rendering failed for template '{template_name}' ({pdf.err} error(s)). Check server logs.")
         
     return result.getvalue()
