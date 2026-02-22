@@ -3,22 +3,27 @@
 {% block title %}Certificate Center{% endblock %}
 
 {% block content %}
-<div class="container mx-auto" x-data="{ 
-    selectedResident: '', 
-    selectedResidentId: '', 
-    searchQuery: '', 
-    searchResults: false, 
-    purpose: '', 
-    orNumber: '', 
-    isSubmitting: false, 
-    activeCertId: '', 
+<div class="container mx-auto" x-data="{
+    selectedResident: '',
+    selectedResidentId: '',
+    searchQuery: '',
+    searchResults: false,
+    purpose: '',
+    orNumber: '',
+    isSubmitting: false,
+    activeCertId: '',
     activeCertName: '',
+    activeCertSlug: '',
     priceInput: '',
     isFree: false,
+    get isBusinessCert() { return this.activeCertSlug === 'business-permit'; },
+    get purposeLabel() { return this.isBusinessCert ? 'Business Name / Operator' : 'Purpose'; },
+    get purposePlaceholder() { return this.isBusinessCert ? 'e.g. ABC Sari-Sari Store / Juan dela Cruz' : 'e.g. Scholarship, Employment, Loan'; },
     init() {
         {% if preselect_cert %}
             this.activeCertId = '{{ preselect_cert.id }}';
             this.activeCertName = '{{ preselect_cert.name }}';
+            this.activeCertSlug = '{{ preselect_cert.slug }}';
             this.priceInput = '{{ preselect_cert.price }}';
             this.isFree = {{ preselect_cert.is_free|yesno:'true,false' }};
             document.getElementById('issue_modal').showModal();
@@ -40,30 +45,81 @@
             <i class="fas fa-history mr-2"></i>View History
         </a>
     </div>
-    
-    {# Search Results for individual types (Optional) #}
-    
+
     <div class="space-y-12 mb-12">
-        {# Community Tier #}
-        {% if community_certs %}
+
+        {# ── Tier 1: Community ─────────────────────────────────────────── #}
         <section>
             <div class="flex items-center gap-3 mb-6">
                 <div class="p-2 rounded-lg bg-success/10 text-success">
                     <i class="fas fa-users-cog"></i>
                 </div>
                 <h2 class="text-xl font-bold">Tier 1: Community Edition</h2>
-                <div class="badge badge-success badge-outline">Basic</div>
+                <div class="badge badge-success badge-outline">Basic · Free</div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {% for type in community_certs %}
-                    {% include 'pages/certificates/partials/cert_card.html' with type=type %}
-                {% endfor %}
+
+                {# Certificate of Indigency #}
+                <div class="card bg-base-100 shadow-sm border border-base-200 hover:border-success transition-all hover:shadow-md group">
+                    <div class="card-body">
+                        <div class="flex items-start justify-between">
+                            <div class="p-3 rounded-lg bg-success/10 text-success group-hover:bg-success group-hover:text-success-content transition-colors">
+                                <i class="fas fa-hand-holding-heart fa-lg"></i>
+                            </div>
+                            <div class="badge badge-success text-white">Free</div>
+                        </div>
+                        <h2 class="card-title mt-4">Certificate of Indigency</h2>
+                        <p class="text-xs text-base-content/70 mt-2 h-10 line-clamp-2">
+                            For residents seeking financial assistance, medical aid (DSWD/PAO), or scholarship requirements.
+                        </p>
+                        <div class="card-actions justify-end mt-4">
+                            <a href="?preselect=indigency" class="btn btn-sm btn-success text-white">Issue Now</a>
+                        </div>
+                    </div>
+                </div>
+
+                {# Certificate of Residency #}
+                <div class="card bg-base-100 shadow-sm border border-base-200 hover:border-success transition-all hover:shadow-md group">
+                    <div class="card-body">
+                        <div class="flex items-start justify-between">
+                            <div class="p-3 rounded-lg bg-success/10 text-success group-hover:bg-success group-hover:text-success-content transition-colors">
+                                <i class="fas fa-home fa-lg"></i>
+                            </div>
+                            <div class="badge badge-success text-white">Free</div>
+                        </div>
+                        <h2 class="card-title mt-4">Certificate of Residency</h2>
+                        <p class="text-xs text-base-content/70 mt-2 h-10 line-clamp-2">
+                            Proof of residence for bank applications, school enrollment, or local ID requirements.
+                        </p>
+                        <div class="card-actions justify-end mt-4">
+                            <a href="?preselect=residency" class="btn btn-sm btn-success text-white">Issue Now</a>
+                        </div>
+                    </div>
+                </div>
+
+                {# First-Time Jobseeker Certification #}
+                <div class="card bg-base-100 shadow-sm border border-base-200 hover:border-success transition-all hover:shadow-md group">
+                    <div class="card-body">
+                        <div class="flex items-start justify-between">
+                            <div class="p-3 rounded-lg bg-success/10 text-success group-hover:bg-success group-hover:text-success-content transition-colors">
+                                <i class="fas fa-briefcase fa-lg"></i>
+                            </div>
+                            <div class="badge badge-success text-white">Free</div>
+                        </div>
+                        <h2 class="card-title mt-4">First-Time Jobseeker Cert.</h2>
+                        <p class="text-xs text-base-content/70 mt-2 h-10 line-clamp-2">
+                            (RA 11261) Free certification for first-time job applicants to waive national government fees.
+                        </p>
+                        <div class="card-actions justify-end mt-4">
+                            <a href="?preselect=jobseeker" class="btn btn-sm btn-success text-white">Issue Now</a>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </section>
-        {% endif %}
 
-        {# Pro Tier #}
-        {% if pro_certs %}
+        {# ── Tier 2: Pro ───────────────────────────────────────────────── #}
         <section>
             <div class="flex items-center gap-3 mb-6">
                 <div class="p-2 rounded-lg bg-primary/10 text-primary">
@@ -73,15 +129,98 @@
                 <div class="badge badge-primary badge-outline">Standard</div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {% for type in pro_certs %}
-                    {% include 'pages/certificates/partials/cert_card.html' with type=type %}
-                {% endfor %}
+
+                {# Barangay Clearance #}
+                {% if tier_info.features.business %}
+                <div class="card bg-base-100 shadow-sm border border-base-200 hover:border-primary transition-all hover:shadow-md group">
+                    <div class="card-body">
+                        <div class="flex items-start justify-between">
+                            <div class="p-3 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-content transition-colors">
+                                <i class="fas fa-certificate fa-lg"></i>
+                            </div>
+                            <div class="badge badge-ghost">₱ 50.00</div>
+                        </div>
+                        <h2 class="card-title mt-4">Barangay Clearance</h2>
+                        <p class="text-xs text-base-content/70 mt-2 h-10 line-clamp-2">
+                            Standard clearance for employment, business registration, or other legal purposes.
+                        </p>
+                        <div class="card-actions justify-end mt-4">
+                            <a href="?preselect=clearance" class="btn btn-sm btn-primary">Issue Now</a>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="card bg-base-200/50 border-2 border-dashed border-base-300">
+                    <div class="card-body items-center text-center py-8">
+                        <i class="fas fa-lock fa-xl opacity-30 mb-3"></i>
+                        <h2 class="card-title opacity-40 text-base">Barangay Clearance</h2>
+                        <p class="text-xs opacity-40">Requires Pro tier</p>
+                    </div>
+                </div>
+                {% endif %}
+
+                {# Certificate of Good Moral Character #}
+                {% if tier_info.features.business %}
+                <div class="card bg-base-100 shadow-sm border border-base-200 hover:border-primary transition-all hover:shadow-md group">
+                    <div class="card-body">
+                        <div class="flex items-start justify-between">
+                            <div class="p-3 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-content transition-colors">
+                                <i class="fas fa-user-check fa-lg"></i>
+                            </div>
+                            <div class="badge badge-ghost">₱ 30.00</div>
+                        </div>
+                        <h2 class="card-title mt-4">Good Moral Character</h2>
+                        <p class="text-xs text-base-content/70 mt-2 h-10 line-clamp-2">
+                            Certification of good standing and no derogatory record in the community.
+                        </p>
+                        <div class="card-actions justify-end mt-4">
+                            <a href="?preselect=good-moral" class="btn btn-sm btn-primary">Issue Now</a>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="card bg-base-200/50 border-2 border-dashed border-base-300">
+                    <div class="card-body items-center text-center py-8">
+                        <i class="fas fa-lock fa-xl opacity-30 mb-3"></i>
+                        <h2 class="card-title opacity-40 text-base">Good Moral Character</h2>
+                        <p class="text-xs opacity-40">Requires Pro tier</p>
+                    </div>
+                </div>
+                {% endif %}
+
+                {# Barangay Business Clearance #}
+                {% if tier_info.features.business %}
+                <div class="card bg-base-100 shadow-sm border border-base-200 hover:border-primary transition-all hover:shadow-md group">
+                    <div class="card-body">
+                        <div class="flex items-start justify-between">
+                            <div class="p-3 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-content transition-colors">
+                                <i class="fas fa-store fa-lg"></i>
+                            </div>
+                            <div class="badge badge-ghost">₱ 150.00</div>
+                        </div>
+                        <h2 class="card-title mt-4">Business Clearance</h2>
+                        <p class="text-xs text-base-content/70 mt-2 h-10 line-clamp-2">
+                            Official permit to operate a business within the Barangay jurisdiction.
+                        </p>
+                        <div class="card-actions justify-end mt-4">
+                            <a href="?preselect=business-permit" class="btn btn-sm btn-primary">Issue Now</a>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="card bg-base-200/50 border-2 border-dashed border-base-300">
+                    <div class="card-body items-center text-center py-8">
+                        <i class="fas fa-lock fa-xl opacity-30 mb-3"></i>
+                        <h2 class="card-title opacity-40 text-base">Business Clearance</h2>
+                        <p class="text-xs opacity-40">Requires Pro tier</p>
+                    </div>
+                </div>
+                {% endif %}
+
             </div>
         </section>
-        {% endif %}
 
-        {# Ultra Tier #}
-        {% if ultra_certs %}
+        {# ── Tier 3: Ultra ─────────────────────────────────────────────── #}
         <section>
             <div class="flex items-center gap-3 mb-6">
                 <div class="p-2 rounded-lg bg-accent/10 text-accent">
@@ -91,27 +230,55 @@
                 <div class="badge badge-accent badge-outline">Premium</div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {% for type in ultra_certs %}
-                    {% include 'pages/certificates/partials/cert_card.html' with type=type %}
-                {% endfor %}
+
+                {# Special Permit #}
+                {% if tier_info.features.gis_map %}
+                <div class="card bg-base-100 shadow-sm border border-base-200 hover:border-accent transition-all hover:shadow-md group">
+                    <div class="card-body">
+                        <div class="flex items-start justify-between">
+                            <div class="p-3 rounded-lg bg-accent/10 text-accent group-hover:bg-accent group-hover:text-accent-content transition-colors">
+                                <i class="fas fa-file-contract fa-lg"></i>
+                            </div>
+                            <div class="badge badge-ghost">₱ 100.00</div>
+                        </div>
+                        <h2 class="card-title mt-4">Special Permit</h2>
+                        <p class="text-xs text-base-content/70 mt-2 h-10 line-clamp-2">
+                            For special activities, construction, or other specific Barangay transactional needs.
+                        </p>
+                        <div class="card-actions justify-end mt-4">
+                            <a href="?preselect=special-permit" class="btn btn-sm btn-accent">Issue Now</a>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="card bg-base-200/50 border-2 border-dashed border-base-300">
+                    <div class="card-body items-center text-center py-8">
+                        <i class="fas fa-lock fa-xl opacity-30 mb-3"></i>
+                        <h2 class="card-title opacity-40 text-base">Special Permit</h2>
+                        <p class="text-xs opacity-40">Requires Ultra tier</p>
+                    </div>
+                </div>
+                {% endif %}
+
+                {# QR-Verified Certificate (placeholder for Ultra) #}
+                <div class="card bg-base-200/50 border-2 border-dashed border-base-300">
+                    <div class="card-body items-center text-center py-8">
+                        <i class="fas fa-qrcode fa-xl opacity-30 mb-3"></i>
+                        <h2 class="card-title opacity-40 text-base">QR-Verified Docs</h2>
+                        <p class="text-xs opacity-40">Ultra — all certificates include QR authentication codes</p>
+                    </div>
+                </div>
+
             </div>
         </section>
-        {% else %}
-        <div class="p-8 rounded-2xl bg-base-200/50 border-2 border-dashed border-base-300 text-center">
-            <div class="inline-flex p-4 rounded-full bg-base-100 text-base-content/30 mb-4">
-                <i class="fas fa-lock fa-2xl"></i>
-            </div>
-            <h3 class="text-lg font-bold opacity-40">Ultra Features Locked</h3>
-            <p class="text-sm opacity-40 max-w-xs mx-auto">Upgrade to Ultra tier to unlock advanced certificates like GIS Map and Audit certificates.</p>
-        </div>
-        {% endif %}
-    </div>
 
-    {# Issue Modal #}
+    </div>{# end space-y-12 #}
+
+    {# Issue Modal — opens via ?preselect=<slug> resolved by view #}
     <dialog id="issue_modal" class="modal" @close="resetForm()">
         <div class="modal-box max-w-lg">
             <h3 class="font-bold text-lg mb-4">Issue <span x-text="activeCertName"></span></h3>
-            
+
             <form method="post" action="{% url 'certificates:center' %}" @submit="isSubmitting = true">
                 {% csrf_token %}
                 <input type="hidden" name="certificate_type" :value="activeCertId">
@@ -120,9 +287,9 @@
                 <div class="form-control w-full mb-4 relative">
                     <label class="label"><span class="label-text">Select Resident</span></label>
                     <div class="relative">
-                        <input type="text" 
+                        <input type="text"
                                name="q"
-                               placeholder="Search resident name..." 
+                               placeholder="Search resident name..."
                                class="input input-bordered w-full"
                                x-model="searchQuery"
                                @input="searchResults = true"
@@ -136,13 +303,11 @@
                             <span class="loading loading-spinner loading-xs"></span>
                         </div>
                     </div>
-                    
-                    {# Search Results #}
-                    <div id="search-results" 
-                         class="relative" 
-                         x-show="searchResults && searchQuery.length >= 2" 
+
+                    <div id="search-results"
+                         class="relative"
+                         x-show="searchResults && searchQuery.length >= 2"
                          @click.away="searchResults = false">
-                        {# HTMX will inject results here #}
                     </div>
 
                     <template x-if="selectedResident">
@@ -160,8 +325,8 @@
                 </div>
 
                 <div class="form-control w-full mb-4">
-                    <label class="label"><span class="label-text">Purpose</span></label>
-                    <input type="text" name="purpose" x-model="purpose" placeholder="e.g. Scholarship, Employment, Loan" class="input input-bordered w-full" required />
+                    <label class="label"><span class="label-text" x-text="purposeLabel">Purpose</span></label>
+                    <input type="text" name="purpose" x-model="purpose" :placeholder="purposePlaceholder" class="input input-bordered w-full" required />
                 </div>
 
                 <div class="form-control w-full mb-6" x-show="!isFree">
@@ -171,11 +336,11 @@
 
                 <div class="modal-action">
                     <button type="button" class="btn btn-ghost" onclick="document.getElementById('issue_modal').close()">Cancel</button>
-                    <button type="submit" 
-                            class="btn btn-primary ml-2 px-8" 
+                    <button type="submit"
+                            class="btn btn-primary ml-2 px-8"
                             :disabled="!selectedResidentId || isSubmitting">
                         <span x-show="isSubmitting" class="loading loading-spinner loading-xs mr-2"></span>
-                        Generate & Issue
+                        Generate &amp; Issue
                     </button>
                 </div>
             </form>

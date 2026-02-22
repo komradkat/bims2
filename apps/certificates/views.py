@@ -64,6 +64,7 @@ class CertificateCenterView(LoginRequiredMixin, ListView):
                 context['preselect_cert'] = {
                     'id': cert.id,
                     'name': cert.name,
+                    'slug': cert.slug,
                     'price': float(cert.default_price),
                     'is_free': cert.default_price == 0
                 }
