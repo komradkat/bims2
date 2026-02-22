@@ -79,17 +79,36 @@ class BarangayInfo(models.Model):
     Ensures only one instance exists.
     """
     name = models.CharField(max_length=200, help_text="Official name of the Barangay")
-    address = models.TextField(help_text="Complete address")
+
+    # Structured address fields
+    street = models.CharField(max_length=200, blank=True, help_text="Street / Purok / Sitio")
+    city_municipality = models.CharField(max_length=100, help_text="City or Municipality")
+    province = models.CharField(max_length=100, help_text="Province")
+    region = models.CharField(max_length=100, blank=True, help_text="Region")
+    zip_code = models.CharField(max_length=10, blank=True)
+
     logo = models.ImageField(upload_to='barangay/logo/', blank=True, null=True)
     contact_number = models.CharField(max_length=50, blank=True)
     email = models.EmailField(blank=True)
-    
+
     # GIS Location (Center of Barangay)
     latitude = models.FloatField(blank=True, null=True, help_text="Center Latitude")
     longitude = models.FloatField(blank=True, null=True, help_text="Center Longitude")
-    
+
     # System Config
     is_setup_complete = models.BooleanField(default=False)
+
+    @property
+    def full_address(self):
+        """Return a composed full address string."""
+        parts = filter(None, [
+            self.street,
+            self.city_municipality,
+            self.province,
+            self.region,
+            self.zip_code,
+        ])
+        return ", ".join(parts)
     
     def save(self, *args, **kwargs):
         if not self.pk and BarangayInfo.objects.exists():

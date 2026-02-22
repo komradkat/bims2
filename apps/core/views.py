@@ -295,7 +295,11 @@ class SetupView(View):
         
         # 1. Barangay Info
         name = request.POST.get('barangay_name')
-        address = request.POST.get('barangay_address')
+        street = request.POST.get('barangay_street', '')
+        city_municipality = request.POST.get('barangay_city_municipality')
+        province = request.POST.get('barangay_province')
+        region = request.POST.get('barangay_region', '')
+        zip_code = request.POST.get('barangay_zip_code', '')
         contact = request.POST.get('contact_number', '')
         email = request.POST.get('barangay_email', '')
         # captain = request.POST.get('barangay_captain') # Removed
@@ -314,7 +318,7 @@ class SetupView(View):
         # admin_email = request.POST.get('admin_email') # Removed requirement for separate email in this step
         
         # Basic Validation
-        if not all([name, address, username, password]):
+        if not all([name, city_municipality, province, username, password]):
             messages.error(request, "Please fill in all required fields.")
             return render(request, self.template_name)
             
@@ -326,7 +330,11 @@ class SetupView(View):
                 info = BarangayInfo()
                 
             info.name = name
-            info.address = address
+            info.street = street
+            info.city_municipality = city_municipality
+            info.province = province
+            info.region = region
+            info.zip_code = zip_code
             info.contact_number = contact
             info.email = email
             

@@ -9,9 +9,14 @@ def barangay_info(request):
     if info:
         data = {
             'name': info.name,
-            'full_name': f"{info.name}, {info.address}",
+            'full_name': f"{info.name}, {info.full_address}",
             'logo_url': info.logo.url if info.logo else None,
-            'address': info.address,
+            'address': info.full_address,
+            'street': info.street,
+            'city': info.city_municipality,
+            'province': info.province,
+            'region': info.region,
+            'zip_code': info.zip_code,
             'contact': info.contact_number,
             'email': info.email,
         }
