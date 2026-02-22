@@ -22,11 +22,19 @@
 <div class="card w-96 bg-base-100 shadow-xl">
     <div class="card-body">
         <div class="text-center mb-6">
+            {% if barangay_info.logo_url %}
+            <div class="avatar mb-4">
+                <div class="w-24 rounded-full">
+                    <img src="{{ barangay_info.logo_url }}" alt="{{ barangay_info.name }} Logo">
+                </div>
+            </div>
+            {% else %}
             <div class="avatar placeholder mb-4">
-                <div class="bg-primary text-primary-content rounded-full w-16">
+                <div class="bg-primary text-primary-content rounded-full w-24">
                     <span class="text-3xl font-bold">{{ barangay_info.name|slice:":1" }}</span>
                 </div>
             </div>
+            {% endif %}
             <h2 class="card-title justify-center text-2xl font-bold">{{ barangay_info.name }}</h2>
             <p class="text-sm opacity-70">Barangay Information Management System</p>
         </div>
@@ -64,7 +72,7 @@
 
             <div class="form-control mt-2">
                 <label class="label cursor-pointer justify-start gap-2">
-                    <input type="checkbox" class="checkbox checkbox-sm" />
+                    <input type="checkbox" name="remember_me" class="checkbox checkbox-sm" />
                     <span class="label-text text-sm">Remember me</span>
                 </label>
             </div>

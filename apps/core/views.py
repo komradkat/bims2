@@ -20,7 +20,15 @@ from apps.finance.models import OfficialReceipt
 class CustomLoginView(LoginView):
     template_name = 'auth/login.html'
     redirect_authenticated_user = True
-    
+
+    def form_valid(self, form):
+        remember_me = self.request.POST.get('remember_me')
+        response = super().form_valid(form)
+        if not remember_me:
+            # Session expires when the browser is closed
+            self.request.session.set_expiry(0)
+        return response
+
     def get_success_url(self):
         return reverse_lazy('core:dashboard')
 

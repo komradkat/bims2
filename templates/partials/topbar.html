@@ -1,7 +1,7 @@
 {% load static %}
 
 {# Top Navigation Bar - Extracted from prototype/static/js/layout.js #}
-<div class="navbar bg-[#1e3a8a] text-white shadow-md z-30 h-16 shrink-0 px-4 justify-between">
+<div class="navbar bg-[#1e3a8a] text-white shadow-md z-30 h-20 shrink-0 px-4 justify-between">
     {# Left: Branding #}
     <div class="flex items-center gap-3">
         {# Mobile Toggle (visible only on small screens) #}
@@ -11,7 +11,7 @@
 
         {# Logo Placeholder #}
         <div class="avatar placeholder">
-            <div class="w-10 h-10 rounded-full bg-base-200 flex items-center justify-center overflow-hidden border border-base-300">
+            <div class="w-14 h-14 rounded-full bg-base-200 flex items-center justify-center overflow-hidden border border-base-300">
                 {% if barangay_info.logo_url %}
                     <img src="{{ barangay_info.logo_url }}" alt="Logo" class="w-full h-full object-cover">
                 {% else %}
