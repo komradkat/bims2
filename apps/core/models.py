@@ -130,3 +130,77 @@ class BarangayInfo(models.Model):
         verbose_name = "Barangay Information"
         verbose_name_plural = "Barangay Information"
 
+
+class BarangayOfficial(models.Model):
+    """
+    Barangay council members and officials.
+    One official can be marked as Punong Barangay; their name is used on printed certificates.
+    """
+
+    POSITION_CHOICES = [
+        ('punong_barangay', 'Punong Barangay'),
+        ('kagawad', 'Barangay Kagawad'),
+        ('sk_chairman', 'SK Chairman'),
+        ('secretary', 'Barangay Secretary'),
+        ('treasurer', 'Barangay Treasurer'),
+        ('lupong_tagapamayapa', 'Lupong Tagapamayapa'),
+        ('other', 'Other'),
+    ]
+
+    COMMITTEE_CHOICES = [
+        ('', '— None —'),
+        ('peace_order', 'Peace & Order'),
+        ('health', 'Health & Sanitation'),
+        ('education', 'Education & Culture'),
+        ('infrastructure', 'Infrastructure'),
+        ('livelihood', 'Livelihood & Entrepreneurship'),
+        ('environment', 'Environment & Natural Resources'),
+        ('finance', 'Finance & Appropriation'),
+        ('women', 'Women & Family'),
+        ('youth', 'Youth & Sports'),
+        ('senior', 'Senior Citizen Affairs'),
+    ]
+
+    position = models.CharField(max_length=30, choices=POSITION_CHOICES)
+    committee = models.CharField(max_length=50, choices=COMMITTEE_CHOICES, blank=True)
+
+    # Personal details
+    honorific = models.CharField(max_length=10, blank=True, help_text="e.g. Hon., Dr.")
+    first_name = models.CharField(max_length=100)
+    middle_name = models.CharField(max_length=100, blank=True)
+    last_name = models.CharField(max_length=100)
+    suffix = models.CharField(max_length=10, blank=True, help_text="e.g. Jr., Sr.")
+
+    photo = models.ImageField(upload_to='officials/photos/', blank=True, null=True)
+
+    # Term info
+    term_start = models.DateField(null=True, blank=True)
+    term_end = models.DateField(null=True, blank=True)
+
+    contact_number = models.CharField(max_length=50, blank=True)
+    email = models.EmailField(blank=True)
+
+    is_active = models.BooleanField(default=True)
+    order = models.PositiveSmallIntegerField(default=0, help_text="Display order (lower = first)")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['order', 'position', 'last_name']
+        verbose_name = 'Barangay Official'
+        verbose_name_plural = 'Barangay Officials'
+
+    @property
+    def full_name(self):
+        parts = filter(None, [self.honorific, self.first_name, self.middle_name, self.last_name, self.suffix])
+        return ' '.join(parts)
+
+    @property
+    def display_name(self):
+        """Name without honorific, for document signatures."""
+        parts = filter(None, [self.first_name, self.middle_name, self.last_name, self.suffix])
+        return ' '.join(parts)
+
+    def __str__(self):
+        return f"{self.full_name} — {self.get_position_display()}"

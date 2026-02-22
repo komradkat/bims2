@@ -375,3 +375,135 @@ class SetupView(View):
         except Exception as e:
             messages.error(request, f"An error occurred: {str(e)}")
             return render(request, self.template_name)
+
+
+# ── Officials ──────────────────────────────────────────────────────────────
+
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from apps.core.models import BarangayOfficial
+
+
+class OfficialsListView(LoginRequiredMixin, ListView):
+    model = BarangayOfficial
+    template_name = 'pages/officials/list.html'
+    context_object_name = 'officials'
+
+    def get_queryset(self):
+        return BarangayOfficial.objects.all()
+
+
+class OfficialCreateView(LoginRequiredMixin, View):
+    template_name = 'pages/officials/form.html'
+
+    def get(self, request):
+        from apps.core.models import BarangayOfficial as BOf
+        return render(request, self.template_name, {
+            'position_choices': BOf.POSITION_CHOICES,
+            'committee_choices': BOf.COMMITTEE_CHOICES,
+            'action': 'Add',
+        })
+
+    def post(self, request):
+        from apps.core.models import BarangayOfficial as BOf
+        try:
+            official = BOf()
+            official.position = request.POST.get('position')
+            official.committee = request.POST.get('committee', '')
+            official.honorific = request.POST.get('honorific', '')
+            official.first_name = request.POST.get('first_name')
+            official.middle_name = request.POST.get('middle_name', '')
+            official.last_name = request.POST.get('last_name')
+            official.suffix = request.POST.get('suffix', '')
+            if request.FILES.get('photo'):
+                official.photo = request.FILES['photo']
+            official.term_start = request.POST.get('term_start') or None
+            official.term_end = request.POST.get('term_end') or None
+            official.contact_number = request.POST.get('contact_number', '')
+            official.email = request.POST.get('email', '')
+            official.is_active = request.POST.get('is_active') == 'on'
+            official.order = int(request.POST.get('order', 0))
+            official.save()
+
+            # If this is Punong Barangay, update captain_name on BarangayInfo
+            if official.position == 'punong_barangay':
+                from apps.core.models import BarangayInfo
+                info = BarangayInfo.objects.first()
+                if info:
+                    info.captain_name = official.display_name.upper()
+                    info.save(update_fields=['captain_name'])
+
+            messages.success(request, f"{official.full_name} has been added.")
+            return redirect('core:officials')
+        except Exception as e:
+            messages.error(request, f"Error: {str(e)}")
+            return render(request, self.template_name, {
+                'position_choices': BOf.POSITION_CHOICES,
+                'committee_choices': BOf.COMMITTEE_CHOICES,
+                'action': 'Add',
+            })
+
+
+class OfficialUpdateView(LoginRequiredMixin, View):
+    template_name = 'pages/officials/form.html'
+
+    def get(self, request, pk):
+        from django.shortcuts import get_object_or_404
+        from apps.core.models import BarangayOfficial as BOf
+        official = get_object_or_404(BOf, pk=pk)
+        return render(request, self.template_name, {
+            'official': official,
+            'position_choices': BOf.POSITION_CHOICES,
+            'committee_choices': BOf.COMMITTEE_CHOICES,
+            'action': 'Edit',
+        })
+
+    def post(self, request, pk):
+        from django.shortcuts import get_object_or_404
+        from apps.core.models import BarangayOfficial as BOf
+        official = get_object_or_404(BOf, pk=pk)
+        try:
+            official.position = request.POST.get('position')
+            official.committee = request.POST.get('committee', '')
+            official.honorific = request.POST.get('honorific', '')
+            official.first_name = request.POST.get('first_name')
+            official.middle_name = request.POST.get('middle_name', '')
+            official.last_name = request.POST.get('last_name')
+            official.suffix = request.POST.get('suffix', '')
+            if request.FILES.get('photo'):
+                official.photo = request.FILES['photo']
+            official.term_start = request.POST.get('term_start') or None
+            official.term_end = request.POST.get('term_end') or None
+            official.contact_number = request.POST.get('contact_number', '')
+            official.email = request.POST.get('email', '')
+            official.is_active = request.POST.get('is_active') == 'on'
+            official.order = int(request.POST.get('order', 0))
+            official.save()
+
+            if official.position == 'punong_barangay':
+                from apps.core.models import BarangayInfo
+                info = BarangayInfo.objects.first()
+                if info:
+                    info.captain_name = official.display_name.upper()
+                    info.save(update_fields=['captain_name'])
+
+            messages.success(request, f"{official.full_name} has been updated.")
+            return redirect('core:officials')
+        except Exception as e:
+            messages.error(request, f"Error: {str(e)}")
+            return render(request, self.template_name, {
+                'official': official,
+                'position_choices': BOf.POSITION_CHOICES,
+                'committee_choices': BOf.COMMITTEE_CHOICES,
+                'action': 'Edit',
+            })
+
+
+class OfficialDeleteView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        from django.shortcuts import get_object_or_404
+        official = get_object_or_404(BarangayOfficial, pk=pk)
+        name = official.full_name
+        official.delete()
+        messages.success(request, f"{name} has been removed.")
+        return redirect('core:officials')

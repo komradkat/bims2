@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ action }} Official{% endblock %}
+
+{% block content %}
+<div class="container mx-auto max-w-3xl">
+
+  {# Breadcrumb #}
+  <div class="text-sm breadcrumbs mb-4">
+    <ul>
+      <li><a href="{% url 'core:officials' %}">Officials</a></li>
+      <li>{{ action }} Official</li>
+    </ul>
+  </div>
+
+  <div class="card bg-base-100 shadow border border-base-200">
+    <div class="card-body p-6 sm:p-8">
+      <h2 class="card-title text-xl mb-6">{{ action }} Official</h2>
+
+      <form method="post" enctype="multipart/form-data"
+            action="{% if official %}{% url 'core:official_edit' official.pk %}{% else %}{% url 'core:official_add' %}{% endif %}">
+        {% csrf_token %}
+
+        {# Position & Committee #}
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+          <div class="form-control w-full">
+            <label class="label"><span class="label-text font-medium">Position *</span></label>
+            <select name="position" class="select select-bordered w-full" required>
+              <option value="" disabled {% if not official %}selected{% endif %}>— Select Position —</option>
+              {% for value, label in position_choices %}
+                <option value="{{ value }}" {% if official.position == value %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-control w-full">
+            <label class="label"><span class="label-text font-medium">Committee</span></label>
+            <select name="committee" class="select select-bordered w-full">
+              {% for value, label in committee_choices %}
+                <option value="{{ value }}" {% if official.committee == value %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        {# Name row #}
+        <div class="mb-2">
+          <label class="label"><span class="label-text font-medium">Full Name *</span></label>
+        </div>
+        <div class="grid grid-cols-12 gap-2 mb-4">
+          <div class="col-span-2 form-control">
+            <input type="text" name="honorific" value="{{ official.honorific|default:'' }}"
+                   placeholder="Hon." class="input input-bordered w-full" maxlength="10" />
+            <label class="label"><span class="label-text-alt">Honorific</span></label>
+          </div>
+          <div class="col-span-4 form-control">
+            <input type="text" name="first_name" value="{{ official.first_name|default:'' }}"
+                   placeholder="First Name" class="input input-bordered w-full" required />
+            <label class="label"><span class="label-text-alt">First Name *</span></label>
+          </div>
+          <div class="col-span-3 form-control">
+            <input type="text" name="middle_name" value="{{ official.middle_name|default:'' }}"
+                   placeholder="Middle" class="input input-bordered w-full" />
+            <label class="label"><span class="label-text-alt">Middle Name</span></label>
+          </div>
+          <div class="col-span-2 form-control">
+            <input type="text" name="last_name" value="{{ official.last_name|default:'' }}"
+                   placeholder="Last Name" class="input input-bordered w-full" required />
+            <label class="label"><span class="label-text-alt">Last Name *</span></label>
+          </div>
+          <div class="col-span-1 form-control">
+            <input type="text" name="suffix" value="{{ official.suffix|default:'' }}"
+                   placeholder="Jr." class="input input-bordered w-full" maxlength="10" />
+            <label class="label"><span class="label-text-alt">Suffix</span></label>
+          </div>
+        </div>
+
+        {# Term dates #}
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+          <div class="form-control w-full">
+            <label class="label"><span class="label-text font-medium">Term Start</span></label>
+            <input type="date" name="term_start" value="{{ official.term_start|date:'Y-m-d'|default:'' }}"
+                   class="input input-bordered w-full" />
+          </div>
+          <div class="form-control w-full">
+            <label class="label"><span class="label-text font-medium">Term End</span></label>
+            <input type="date" name="term_end" value="{{ official.term_end|date:'Y-m-d'|default:'' }}"
+                   class="input input-bordered w-full" />
+          </div>
+        </div>
+
+        {# Contact #}
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+          <div class="form-control w-full">
+            <label class="label"><span class="label-text font-medium">Contact Number</span></label>
+            <input type="text" name="contact_number" value="{{ official.contact_number|default:'' }}"
+                   placeholder="09XXXXXXXXX" class="input input-bordered w-full" />
+          </div>
+          <div class="form-control w-full">
+            <label class="label"><span class="label-text font-medium">Email</span></label>
+            <input type="email" name="email" value="{{ official.email|default:'' }}"
+                   placeholder="official@brgy.gov.ph" class="input input-bordered w-full" />
+          </div>
+        </div>
+
+        {# Photo #}
+        <div class="form-control w-full mb-4">
+          <label class="label"><span class="label-text font-medium">Photo</span></label>
+          {% if official.photo %}
+            <div class="flex items-center gap-4 mb-2">
+              <img src="{{ official.photo.url }}" alt="Current photo" class="w-16 h-16 rounded-full object-cover border" />
+              <span class="text-sm text-base-content/60">Current photo. Upload a new one to replace it.</span>
+            </div>
+          {% endif %}
+          <input type="file" name="photo" class="file-input file-input-bordered w-full" accept="image/*" />
+        </div>
+
+        {# Order & Status #}
+        <div class="grid grid-cols-2 gap-4 mb-6">
+          <div class="form-control w-full">
+            <label class="label"><span class="label-text font-medium">Display Order</span></label>
+            <input type="number" name="order" value="{{ official.order|default:0 }}" min="0"
+                   class="input input-bordered w-full" />
+            <label class="label"><span class="label-text-alt">Lower number = appears first</span></label>
+          </div>
+          <div class="form-control justify-end pb-2">
+            <label class="label cursor-pointer justify-start gap-3">
+              <input type="checkbox" name="is_active" class="toggle toggle-success"
+                     {% if not official or official.is_active %}checked{% endif %} />
+              <span class="label-text font-medium">Currently Active / Serving</span>
+            </label>
+          </div>
+        </div>
+
+        {# Punong Barangay notice #}
+        <div class="alert alert-info mb-6 text-sm py-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+          <span>If position is set to <strong>Punong Barangay</strong>, the name will automatically be used as the signatory on all printed certificates.</span>
+        </div>
+
+        {# Buttons #}
+        <div class="flex gap-3 justify-end">
+          <a href="{% url 'core:officials' %}" class="btn btn-ghost">Cancel</a>
+          <button type="submit" class="btn btn-primary">
+            {% if action == 'Edit' %}Save Changes{% else %}Add Official{% endif %}
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

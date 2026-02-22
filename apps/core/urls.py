@@ -19,7 +19,13 @@ urlpatterns = [
     path('users/<int:pk>/edit/', views.UserUpdateView.as_view(), name='user_edit'),
     # Dashboard
     path('', views.DashboardView.as_view(), name='dashboard'),
-    
+
+    # Officials
+    path('officials/', views.OfficialsListView.as_view(), name='officials'),
+    path('officials/add/', views.OfficialCreateView.as_view(), name='official_add'),
+    path('officials/<int:pk>/edit/', views.OfficialUpdateView.as_view(), name='official_edit'),
+    path('officials/<int:pk>/delete/', views.OfficialDeleteView.as_view(), name='official_delete'),
+
     # GIS Map (Ultra only)
     path('gis-map/', views.GisMapView.as_view(), name='gis_map'),
 ]

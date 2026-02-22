@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Barangay Officials{% endblock %}
+
+{% block content %}
+<div class="container mx-auto">
+
+  {# Page Header #}
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+    <div>
+      <h1 class="text-2xl font-bold">Barangay Officials</h1>
+      <p class="text-base-content/60 text-sm mt-0.5">Manage the Barangay Council roster.</p>
+    </div>
+    <a href="{% url 'core:official_add' %}" class="btn btn-primary gap-2">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+      Add Official
+    </a>
+  </div>
+
+  {# Flash messages #}
+  {% if messages %}
+    {% for msg in messages %}
+      <div class="alert alert-{{ msg.tags|default:'info' }} mb-4">
+        <span>{{ msg }}</span>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  {% if officials %}
+
+    {# Stats strip #}
+    {% with total=officials.count %}
+    <div class="stats shadow mb-6 w-full">
+      <div class="stat">
+        <div class="stat-title">Total Officials</div>
+        <div class="stat-value text-primary">{{ officials|length }}</div>
+      </div>
+      <div class="stat">
+        <div class="stat-title">Active</div>
+        <div class="stat-value text-success">{{ officials|dictsort:"is_active"|length }}</div>
+        <div class="stat-desc">Serving members</div>
+      </div>
+    </div>
+    {% endwith %}
+
+    {# Officials Grid — Punong Barangay first, then others #}
+    {% regroup officials by get_position_display as position_groups %}
+
+    {% for group in position_groups %}
+      <h2 class="text-sm font-semibold text-base-content/50 uppercase tracking-wider mb-3 mt-5">{{ group.grouper }}</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-2">
+        {% for official in group.list %}
+        <div class="card bg-base-100 shadow border border-base-200 hover:shadow-md transition-shadow">
+          <div class="card-body p-5">
+
+            {# Avatar + name #}
+            <div class="flex items-center gap-3 mb-3">
+              <div class="avatar {% if not official.photo %}placeholder{% endif %}">
+                <div class="w-12 rounded-full {% if not official.photo %}bg-primary text-primary-content{% endif %}">
+                  {% if official.photo %}
+                    <img src="{{ official.photo.url }}" alt="{{ official.full_name }}" />
+                  {% else %}
+                    <span class="text-lg font-bold">{{ official.first_name|first }}{{ official.last_name|first }}</span>
+                  {% endif %}
+                </div>
+              </div>
+              <div class="min-w-0">
+                <p class="font-semibold leading-tight truncate">{{ official.full_name }}</p>
+                <p class="text-xs text-base-content/50 truncate">{{ official.get_position_display }}</p>
+              </div>
+            </div>
+
+            {# Committee badge #}
+            {% if official.committee %}
+              <div class="mb-2">
+                <span class="badge badge-outline badge-sm">{{ official.get_committee_display }}</span>
+              </div>
+            {% endif %}
+
+            {# Term #}
+            {% if official.term_start %}
+              <p class="text-xs text-base-content/50 mb-1">
+                Term: {{ official.term_start|date:"Y" }}{% if official.term_end %} – {{ official.term_end|date:"Y" }}{% endif %}
+              </p>
+            {% endif %}
+
+            {# Contact #}
+            {% if official.contact_number %}
+              <p class="text-xs text-base-content/60 mb-1">📞 {{ official.contact_number }}</p>
+            {% endif %}
+
+            {# Status badge #}
+            <div class="mt-1 mb-3">
+              {% if official.is_active %}
+                <span class="badge badge-success badge-sm gap-1">Active</span>
+              {% else %}
+                <span class="badge badge-ghost badge-sm gap-1">Inactive</span>
+              {% endif %}
+            </div>
+
+            {# Actions #}
+            <div class="card-actions justify-end gap-2 pt-2 border-t border-base-200">
+              <a href="{% url 'core:official_edit' official.pk %}" class="btn btn-ghost btn-xs gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                Edit
+              </a>
+              {# Delete — inline form with confirmation #}
+              <button type="button" class="btn btn-ghost btn-xs text-error gap-1"
+                onclick="document.getElementById('del-modal-{{ official.pk }}').showModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                Remove
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {# Delete confirm modal #}
+        <dialog id="del-modal-{{ official.pk }}" class="modal">
+          <div class="modal-box">
+            <h3 class="font-bold text-lg">Remove Official</h3>
+            <p class="py-4">Are you sure you want to remove <strong>{{ official.full_name }}</strong>?</p>
+            <div class="modal-action">
+              <form method="post" action="{% url 'core:official_delete' official.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-error">Yes, Remove</button>
+              </form>
+              <form method="dialog"><button class="btn">Cancel</button></form>
+            </div>
+          </div>
+        </dialog>
+
+        {% endfor %}
+      </div>
+    {% endfor %}
+
+  {% else %}
+    {# Empty state #}
+    <div class="flex flex-col items-center justify-center py-24 text-center">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-base-content/20 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+      </svg>
+      <h2 class="text-xl font-semibold mb-1">No officials yet</h2>
+      <p class="text-base-content/50 mb-6 max-w-xs">Add the Punong Barangay and council members to complete the roster.</p>
+      <a href="{% url 'core:official_add' %}" class="btn btn-primary">Add First Official</a>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}
