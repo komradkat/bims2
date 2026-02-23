@@ -1,85 +1,229 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}{{ action }} User{% endblock %}
+{% block title %}{{ action }} User — BIMS{% endblock %}
 
 {% block content %}
-<div class="container mx-auto max-w-2xl">
-    <div class="flex items-center gap-2 mb-6">
-        <a href="{% url 'core:user_list' %}" class="btn btn-ghost btn-circle btn-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-        </a>
-        <h1 class="text-2xl font-bold">{{ action }} User</h1>
-    </div>
-
-    <div class="card bg-base-100 shadow-xl border border-base-200">
-        <div class="card-body">
-            <form method="post">
-                {% csrf_token %}
-                
-                {% if form.non_field_errors %}
-                <div class="alert alert-error mb-4">
-                    {{ form.non_field_errors }}
-                </div>
-                {% endif %}
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {# Username #}
-                    <div class="form-control w-full">
-                        <label class="label"><span class="label-text">Username *</span></label>
-                        <input type="text" name="username" value="{{ form.username.value|default:'' }}" class="input input-bordered w-full" required />
-                        {% if form.username.errors %}<span class="text-error text-xs mt-1">{{ form.username.errors.0 }}</span>{% endif %}
-                    </div>
-
-                    {# Email #}
-                    <div class="form-control w-full">
-                        <label class="label"><span class="label-text">Email Address</span></label>
-                        <input type="email" name="email" value="{{ form.email.value|default:'' }}" class="input input-bordered w-full" />
-                    </div>
-
-                    {# Role #}
-                    <div class="form-control w-full">
-                        <label class="label"><span class="label-text">Role *</span></label>
-                        <select name="role" class="select select-bordered w-full">
-                            {% for value, label in form.fields.role.choices %}
-                            <option value="{{ value }}" {% if form.role.value == value %}selected{% endif %}>{{ label }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    {# Position #}
-                    <div class="form-control w-full">
-                        <label class="label"><span class="label-text">Official Position</span></label>
-                        <input type="text" name="barangay_position" value="{{ form.barangay_position.value|default:'' }}" class="input input-bordered w-full" placeholder="e.g. Secretary" />
-                    </div>
-                </div>
-
-                {% if action == 'Add' %}
-                <div class="divider">Password</div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="form-control w-full">
-                        <label class="label"><span class="label-text">Password *</span></label>
-                        <input type="password" name="password" class="input input-bordered w-full" required />
-                    </div>
-                    <div class="form-control w-full">
-                        <label class="label"><span class="label-text">Confirm Password *</span></label>
-                        <input type="password" name="confirm_password" class="input input-bordered w-full" required />
-                    </div>
-                </div>
-                {% endif %}
-
-                <div class="form-control mt-6">
-                    <label class="label cursor-pointer justify-start gap-2">
-                        <input type="checkbox" name="is_active" class="checkbox checkbox-sm" {% if form.is_active.value %}checked{% endif %} />
-                        <span class="label-text">Active User Account</span>
-                    </label>
-                </div>
-
-                <div class="card-actions justify-end mt-6">
-                    <a href="{% url 'core:user_list' %}" class="btn btn-ghost">Cancel</a>
-                    <button type="submit" class="btn btn-primary">Save User</button>
-                </div>
-            </form>
+<div class="container mx-auto max-w-4xl py-8">
+    {# Header & Breadcrumbs #}
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div class="flex items-center gap-4">
+            <a href="{% url 'core:user_list' %}" class="btn btn-ghost btn-circle shadow-sm bg-base-100 border-base-300">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+            </a>
+            <div>
+                <h1 class="text-3xl font-black tracking-tight text-base-content">{{ action }} User</h1>
+                <p class="text-sm text-base-content/60 uppercase tracking-widest font-bold">System Access Management</p>
+            </div>
+        </div>
+        
+        <div class="badge badge-lg badge-primary font-bold py-4">
+            {% if action == 'Add' %}NEW ACCOUNT{% else %}EDITING: {{ form.username.value }}{% endif %}
         </div>
     </div>
+
+    <form method="post" class="space-y-6">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+        <div class="alert alert-error shadow-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <span>{{ form.non_field_errors }}</span>
+        </div>
+        {% endif %}
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {# Left Column: Account Details #}
+            <div class="lg:col-span-2 space-y-6">
+                {# Section 1: Basic Information #}
+                <div class="card bg-base-100 shadow-xl border border-base-200">
+                    <div class="card-body">
+                        <h2 class="card-title text-primary mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                            Account Credentials
+                        </h2>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {# Username #}
+                            <div class="form-control w-full">
+                                <label class="label">
+                                    <span class="label-text font-bold">Username</span>
+                                    <span class="label-text-alt text-error">* required</span>
+                                </label>
+                                <div class="join w-full">
+                                    <span class="join-item btn btn-ghost bg-base-200 pointer-events-none">@</span>
+                                    <input type="text" name="username" value="{{ form.username.value|default:'' }}" 
+                                           class="input input-bordered w-full join-item focus:input-primary transition-all" 
+                                           placeholder="jdoe" required />
+                                </div>
+                                {% if form.username.errors %}<p class="text-error text-xs mt-1 font-medium">{{ form.username.errors.0 }}</p>{% endif %}
+                            </div>
+
+                            {# Email #}
+                            <div class="form-control w-full">
+                                <label class="label">
+                                    <span class="label-text font-bold">Email Address</span>
+                                </label>
+                                <input type="email" name="email" value="{{ form.email.value|default:'' }}" 
+                                       class="input input-bordered w-full focus:input-primary transition-all" 
+                                       placeholder="official@barangay.gov.ph" />
+                                {% if form.email.errors %}<p class="text-error text-xs mt-1 font-medium">{{ form.email.errors.0 }}</p>{% endif %}
+                            </div>
+
+                            {% if action == 'Add' %}
+                            {# Password #}
+                            <div class="form-control w-full">
+                                <label class="label">
+                                    <span class="label-text font-bold">Initial Password</span>
+                                </label>
+                                <input type="password" name="password" class="input input-bordered w-full focus:input-primary transition-all" required />
+                            </div>
+                            
+                            {# Confirm Password #}
+                            <div class="form-control w-full">
+                                <label class="label">
+                                    <span class="label-text font-bold">Confirm Password</span>
+                                </label>
+                                <input type="password" name="confirm_password" class="input input-bordered w-full focus:input-primary transition-all" required />
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                {# Section 2: Role & Linkage #}
+                <div class="card bg-base-100 shadow-xl border border-base-200 overflow-visible">
+                    <div class="card-body">
+                        <h2 class="card-title text-secondary mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                            Official Association & Access
+                        </h2>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {# Role Select #}
+                            <div class="form-control w-full">
+                                <label class="label">
+                                    <span class="label-text font-bold">System Role</span>
+                                </label>
+                                <select name="role" class="select select-bordered w-full focus:select-secondary">
+                                    {% for value, label in form.fields.role.choices %}
+                                    <option value="{{ value }}" {% if form.role.value == value %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                                <label class="label">
+                                    <span class="label-text-alt opacity-60 italic">Determines module access.</span>
+                                </label>
+                            </div>
+
+                            {# Position Text #}
+                            <div class="form-control w-full">
+                                <label class="label">
+                                    <span class="label-text font-bold">Barangay Position</span>
+                                </label>
+                                <input type="text" name="barangay_position" value="{{ form.barangay_position.value|default:'' }}" 
+                                       class="input input-bordered w-full focus:input-secondary" placeholder="e.g. Barangay Secretary" />
+                            </div>
+
+                            {# Official Linkage Dropdown #}
+                            <div class="form-control w-full md:col-span-2">
+                                <label class="label">
+                                    <span class="label-text font-bold">Link to Real Official Profile</span>
+                                    <span class="badge badge-ghost badge-sm font-bold">IDENTITY VERIFICATION</span>
+                                </label>
+                                <select name="official" class="select select-bordered w-full focus:select-secondary">
+                                    <option value="">— Unlinked / System User —</option>
+                                    {% for official in officials %}
+                                    <option value="{{ official.id }}" {% if form.official.value|stringformat:"s" == official.id|stringformat:"s" %}selected{% endif %}>
+                                        {{ official.full_name }} ({{ official.get_position_display }})
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                <p class="text-xs opacity-60 mt-2 italic px-1">
+                                    Required for this account to perform operational tasks (Residents, Blotter, etc.) if restricted accounts are enabled.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# Right Column: Status & Options #}
+            <div class="lg:col-span-1 space-y-6">
+                <div class="card bg-base-100 shadow-xl border border-base-200">
+                    <div class="card-body">
+                        <h2 class="card-title text-accent mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>
+                            Account Status
+                        </h2>
+                        
+                        <div class="form-control bg-base-200 p-4 rounded-xl border border-base-300">
+                            <label class="label cursor-pointer justify-between">
+                                <div class="flex flex-col">
+                                    <span class="label-text font-bold">Login Access</span>
+                                    <span class="label-text-alt opacity-60">Allow user to authenticate</span>
+                                </div>
+                                <input type="checkbox" name="is_active" class="toggle toggle-success toggle-md" 
+                                       {% if form.is_active.value %}checked{% endif %} />
+                            </label>
+                        </div>
+
+                        {% if action == 'Add' and request.user.is_bootstrap %}
+                        <div class="divider text-xs opacity-40 uppercase font-black tracking-widest">Setup Phase</div>
+                        
+                        <div class="alert alert-warning p-4 rounded-xl shadow-inner border border-warning/30">
+                            <div class="flex flex-col gap-3">
+                                <div class="flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                                    <p class="text-xs font-bold uppercase tracking-tight">Handover Option</p>
+                                </div>
+                                <label class="label cursor-pointer justify-start gap-4 p-0">
+                                    <input type="checkbox" name="link_as_bootstrap" class="checkbox checkbox-primary shadow-sm" />
+                                    <div class="flex flex-col">
+                                        <span class="text-[11px] font-bold leading-tight">LINK TO CURRENT BOOTSTRAP</span>
+                                        <span class="text-[9px] opacity-70 leading-tight">Apply this official profile to your current session. You will no longer be in bootstrap mode.</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <div class="mt-8 space-y-3">
+                            <button type="submit" class="btn btn-primary w-full shadow-lg shadow-primary/20">
+                                {% if action == 'Add' %}Create User Account{% else %}Apply Changes{% endif %}
+                            </button>
+                            <a href="{% url 'core:user_list' %}" class="btn btn-ghost w-full">
+                                Cancel & Return
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                {# Info Card #}
+                <div class="card bg-primary text-primary-content shadow-xl">
+                    <div class="card-body p-6">
+                        <h3 class="font-black text-lg mb-2 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            Role Permissions
+                        </h3>
+                        <div class="space-y-3 text-xs opacity-90">
+                            <p><strong>Administrator:</strong> Full access to all modules and system settings.</p>
+                            <p><strong>Clerk:</strong> Access to Residents, Blotter, and Certificates issuance.</p>
+                            <p><strong>Treasurer:</strong> Focus on Finance, Fees, and Collection records.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
 </div>
+
+<style>
+    @keyframes pulse-subtle {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+    }
+    .focus-ring:focus {
+        @apply ring-2 ring-primary ring-offset-2;
+    }
+</style>
 {% endblock %}

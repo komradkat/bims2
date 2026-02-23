@@ -52,12 +52,14 @@ class UserListView(LoginRequiredMixin, ListView):
 class UserCreateView(LoginRequiredMixin, CreateView):
     model = User
     template_name = 'auth/user_form.html'
-    fields = ['username', 'email', 'role', 'barangay_position', 'is_active']
+    fields = ['username', 'email', 'role', 'barangay_position', 'official', 'is_active']
     success_url = reverse_lazy('core:user_list')
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['action'] = 'Add'
+        from apps.core.models import BarangayOfficial
+        context['officials'] = BarangayOfficial.objects.filter(is_active=True, user_account__isnull=True)
         return context
         
     def form_valid(self, form):
@@ -65,19 +67,36 @@ class UserCreateView(LoginRequiredMixin, CreateView):
         password = self.request.POST.get('password')
         if password:
             user.set_password(password)
+        
+        # Link as Bootstrap logic
+        link_as_bootstrap = self.request.POST.get('link_as_bootstrap') == 'on'
+        if link_as_bootstrap and self.request.user.is_bootstrap:
+            # Transfer official to current user instead of creating new
+            self.request.user.official = form.cleaned_data.get('official')
+            self.request.user.is_bootstrap = False
+            self.request.user.save()
+            messages.success(self.request, f"Bootstrap account successfully linked to {self.request.user.official.full_name}. You are no longer in bootstrap mode.")
+            return redirect('core:profile')
+
         user.save()
+        messages.success(self.request, f"User {user.username} created successfully.")
         return super().form_valid(form)
 
 @method_decorator(role_required(['admin']), name='dispatch')
 class UserUpdateView(LoginRequiredMixin, UpdateView):
     model = User
     template_name = 'auth/user_form.html'
-    fields = ['username', 'email', 'role', 'barangay_position', 'is_active']
+    fields = ['username', 'email', 'role', 'barangay_position', 'official', 'is_active']
     success_url = reverse_lazy('core:user_list')
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['action'] = 'Edit'
+        from apps.core.models import BarangayOfficial
+        # Show all officials but prioritize the currently linked one
+        context['officials'] = BarangayOfficial.objects.filter(
+            models.Q(user_account__isnull=True) | models.Q(user_account=self.object)
+        )
         return context
 
 
