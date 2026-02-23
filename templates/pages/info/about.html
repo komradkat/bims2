@@ -4,40 +4,153 @@
 {% block title %}About BIMS{% endblock %}
 
 {% block content %}
-<div class="container mx-auto max-w-4xl py-12">
+<div class="container mx-auto max-w-4xl py-12 px-4">
+
+    {# ── Hero Header ── #}
     <div class="text-center mb-12">
-        <h1 class="text-4xl font-black tracking-tight mb-4">About <span class="text-primary">BIMS</span></h1>
-        <p class="text-xl opacity-60">Barangay Information Management System v2.0</p>
+        <h1 class="text-4xl font-black tracking-tight mb-3">About <span class="text-primary">BIMS</span></h1>
+        <p class="text-base opacity-50 font-mono">v1.0.0 — Community Edition</p>
     </div>
 
+    {# ── Purpose Statement ── #}
     <div class="card bg-base-100 shadow-xl border border-base-200 mb-8">
         <div class="card-body prose prose-slate dark:prose-invert max-w-none">
-            <h2 class="text-primary">Our Mission</h2>
+            <h2 class="text-primary flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                What is BIMS?
+            </h2>
             <p>
-                BIMS is designed to empower local barangays in the Philippines by providing a modern, efficient, and transparent way to manage community data and services. 
-                Our goal is to digitize the manual processes of governance, making it easier for officials to serve their constituents.
-            </p>
-
-            <h2 class="text-primary">Key Features</h2>
-            <ul>
-                <li><strong>Resident Information:</strong> Securely store and manage resident records and demographics.</li>
-                <li><strong>Automated Certificates:</strong> Generate clearances, permits, and certifications with professional templates.</li>
-                <li><strong>Justice & Blotter:</strong> Track community cases, hearings, and resolutions.</li>
-                <li><strong>Financial Tracking:</strong> Manage assessments, payments, and official receipts.</li>
-                <li><strong>GIS Mapping:</strong> Visualize community layout and infrastructure with integrated spatial data.</li>
-            </ul>
-
-            <h2 class="text-primary">Commitment to Security</h2>
-            <p>
-                Data privacy is our top priority. BIMS implements industry-standard encryption, role-based access control, and comprehensive audit logging to ensure that 
-                sensitive barangay information remains protected and used only for official purposes.
+                <strong>BIMS</strong> is a specialized <strong>Barangay Information Management System</strong> designed to digitize local governance 
+                and streamline the issuance of Barangay clearances, social certifications, and community records. It replaces 
+                manual logbooks with a fast, searchable, and secure digital system — purpose-built for Philippine 
+                Barangay operations.
             </p>
         </div>
     </div>
 
-    <div class="text-center opacity-50 text-xs">
+    {# ── System Tier Status ── #}
+    <div class="card bg-base-100 shadow-xl border border-base-200 mb-8">
+        <div class="card-body">
+            <h2 class="card-title text-primary flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" /></svg>
+                System Edition &amp; Tier
+            </h2>
+
+            <div class="overflow-x-auto mt-4">
+                <table class="table table-zebra w-full">
+                    <thead>
+                        <tr>
+                            <th>Feature</th>
+                            <th>
+                                <div class="flex items-center gap-2">
+                                    <div class="badge badge-primary badge-outline font-bold">ACTIVE</div>
+                                    Community
+                                </div>
+                            </th>
+                            <th class="opacity-40">Pro</th>
+                            <th class="opacity-40">Ultra</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="font-semibold">Residents</td>
+                            <td>Unlimited</td>
+                            <td class="opacity-40">+ Photos</td>
+                            <td class="opacity-40">+ Biometrics</td>
+                        </tr>
+                        <tr>
+                            <td class="font-semibold">Certificates</td>
+                            <td>Social (3 Types)</td>
+                            <td class="opacity-40">All Templates</td>
+                            <td class="opacity-40">QR-Verified</td>
+                        </tr>
+                        <tr>
+                            <td class="font-semibold">Business Module</td>
+                            <td>—</td>
+                            <td class="opacity-40">Yes</td>
+                            <td class="opacity-40">+ Expiry Alerts</td>
+                        </tr>
+                        <tr>
+                            <td class="font-semibold">Blotter / Justice</td>
+                            <td>Read-Only</td>
+                            <td class="opacity-40">Full</td>
+                            <td class="opacity-40">Full + Legal Docs</td>
+                        </tr>
+                        <tr>
+                            <td class="font-semibold">Finance</td>
+                            <td>—</td>
+                            <td class="opacity-40">Daily Ledger</td>
+                            <td class="opacity-40">Full Reports</td>
+                        </tr>
+                        <tr>
+                            <td class="font-semibold">Security</td>
+                            <td>Basic</td>
+                            <td class="opacity-40">Hardware Lock</td>
+                            <td class="opacity-40">Audit Logs</td>
+                        </tr>
+                        <tr>
+                            <td class="font-semibold">Updates</td>
+                            <td>Manual</td>
+                            <td class="opacity-40">GitHub Pull</td>
+                            <td class="opacity-40">Auto-Update</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p class="text-xs opacity-50 mt-4">
+                Features marked with reduced opacity are available in higher tiers. 
+                Contact the developer for upgrade inquiries.
+            </p>
+        </div>
+    </div>
+
+    {# ── Key Features ── #}
+    <div class="card bg-base-100 shadow-xl border border-base-200 mb-8">
+        <div class="card-body prose prose-slate dark:prose-invert max-w-none">
+            <h2 class="text-primary flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
+                Key Features (Community Edition)
+            </h2>
+            <ul>
+                <li><strong>Unlimited Resident Profiling:</strong> Full bio-data with sectoral tagging (Senior Citizen, PWD, Solo Parent, 4Ps, Indigent).</li>
+                <li><strong>Household Mapping:</strong> Group residents by household head and purok/sitio for census-style tracking.</li>
+                <li><strong>Instant HTMX Search:</strong> Find any resident among thousands in milliseconds.</li>
+                <li><strong>Social Certificate Printing:</strong> Indigency, Residency, and First-Time Jobseeker certifications.</li>
+                <li><strong>Excel/CSV Export:</strong> Download the entire masterlist for backup or external reporting.</li>
+            </ul>
+        </div>
+    </div>
+
+    {# ── Version & Developer Credit ── #}
+    <div class="card bg-base-200/50 border border-base-300 mb-8">
+        <div class="card-body text-center">
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-6">
+                <div>
+                    <div class="text-xs uppercase tracking-widest opacity-40 font-bold mb-1">Version</div>
+                    <div class="font-mono text-lg font-bold">v1.0.0</div>
+                    <div class="badge badge-primary badge-sm mt-1">Community Edition</div>
+                </div>
+                <div class="divider divider-horizontal hidden sm:flex"></div>
+                <div>
+                    <div class="text-xs uppercase tracking-widest opacity-40 font-bold mb-1">Developed By</div>
+                    <div class="font-bold text-lg">KomradKat</div>
+                    <a href="https://seanraquel.space" class="link link-primary text-sm">seanraquel.space</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# ── Footer Links ── #}
+    <div class="flex flex-wrap justify-center gap-4 text-sm opacity-60 mt-8">
+        <a href="{% url 'core:privacy' %}" class="link link-hover">Privacy Policy</a>
+        <span>•</span>
+        <a href="{% url 'core:terms' %}" class="link link-hover">Terms &amp; Conditions</a>
+    </div>
+
+    <div class="text-center opacity-40 text-xs mt-6">
         <p>Built with ❤️ for the Filipino Community.</p>
-        <p class="mt-2">© 2026 Barangay Information Management System</p>
+        <p class="mt-1">© 2026 Barangay Information Management System. All rights reserved.</p>
     </div>
 </div>
 {% endblock %}
