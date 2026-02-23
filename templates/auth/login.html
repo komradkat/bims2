@@ -12,22 +12,24 @@
         align-items: center;
         justify-content: center;
         min-height: 100vh;
-        background: #0d1117;
+        background: oklch(18% 0.025 255);  /* matches --b2 */
     }
 
     .login-wrap {
         display: flex;
         width: 820px;
         min-height: 480px;
-        border-radius: 1.25rem;
+        border-radius: 0.75rem;
         overflow: hidden;
-        box-shadow: 0 32px 64px rgba(0,0,0,0.6);
+        box-shadow: 0 32px 64px rgba(0,0,0,0.5);
+        border: 1px solid oklch(30% 0.028 250);
     }
 
-    /* Left panel — brand */
+    /* Left panel */
     .login-brand {
         width: 42%;
-        background: linear-gradient(160deg, #1e3a8a 0%, #0f172a 100%);
+        background: oklch(55% 0.20 262);  /* --p */
+        background: linear-gradient(160deg, oklch(45% 0.22 262) 0%, oklch(22% 0.03 255) 100%);
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -76,20 +78,20 @@
     /* Right panel — form */
     .login-form-panel {
         flex: 1;
-        background: #161b27;
+        background: oklch(24% 0.030 252);
         padding: 2.5rem;
         display: flex;
         flex-direction: column;
         justify-content: center;
     }
     .login-form-panel h2 {
-        color: #e2e8f0;
+        color: oklch(88% 0.015 245);
         font-size: 1.3rem;
         font-weight: 700;
         margin: 0 0 0.25rem;
     }
     .login-form-panel .tagline {
-        color: #475569;
+        color: oklch(48% 0.02 250);
         font-size: 0.8rem;
         margin: 0 0 1.75rem;
     }
@@ -97,7 +99,7 @@
     .field { margin-bottom: 1rem; }
     .field label {
         display: block;
-        color: #64748b;
+        color: oklch(55% 0.02 250);
         font-size: 0.78rem;
         font-weight: 600;
         text-transform: uppercase;
@@ -107,10 +109,10 @@
     .field input[type="text"],
     .field input[type="password"] {
         width: 100%;
-        background: #0d1117;
-        border: 1px solid #1e293b;
+        background: oklch(30% 0.028 250);
+        border: 1px solid oklch(35% 0.025 252);
         border-radius: 0.5rem;
-        color: #e2e8f0;
+        color: oklch(88% 0.015 245);
         padding: 0.6rem 0.85rem;
         font-size: 0.9rem;
         outline: none;
@@ -118,10 +120,10 @@
         transition: border-color 0.2s, box-shadow 0.2s;
     }
     .field input:focus {
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+        border-color: oklch(55% 0.20 262);
+        box-shadow: 0 0 0 3px oklch(55% 0.20 262 / 0.15);
     }
-    .field input::placeholder { color: #334155; }
+    .field input::placeholder { color: oklch(38% 0.02 252); }
 
     .form-footer {
         display: flex;

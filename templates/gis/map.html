@@ -2,92 +2,372 @@
 
 {% block title %}GIS Map | BIMS{% endblock %}
 
+{% block extra_css %}
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+<style>
+    /* ── Dark Theme Leaflet Customization ── */
+    .leaflet-container {
+        background: oklch(16% 0.022 255); /* Matches --b2 */
+    }
+    .leaflet-top, .leaflet-bottom { z-index: 10 !important; }
+    
+    .leaflet-popup-content-wrapper {
+        background: oklch(24% 0.030 252); /* Matches --b1 */
+        color: oklch(90% 0.012 245);
+        border: 1px solid oklch(34% 0.028 252);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+        border-radius: 8px;
+    }
+    .leaflet-popup-tip { background: oklch(24% 0.030 252); }
+    .leaflet-popup-close-button { color: oklch(75% 0.014 248) !important; padding: 10px !important; }
+    
+    .leaflet-control-zoom a {
+        background: oklch(24% 0.030 252) !important;
+        color: oklch(90% 0.012 245) !important;
+        border-color: oklch(34% 0.028 252) !important;
+    }
+    .leaflet-control-zoom a:hover {
+        background: oklch(32% 0.030 252) !important;
+    }
+    .leaflet-control-attribution {
+        background: rgba(0,0,0,0.5) !important;
+        color: oklch(60% 0.014 250) !important;
+    }
+    .leaflet-control-attribution a { color: oklch(58% 0.20 262) !important; }
+
+    /* Loading Overlay */
+    #map-loading {
+        background: oklch(16% 0.022 255);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="h-[calc(100vh-4rem)] flex flex-col">
-    <div class="bg-white p-4 shadow-sm border-b flex justify-between items-center z-10">
+{# Full height container #}
+<div class="-m-6 flex flex-col overflow-hidden" style="height: calc(100vh - 80px);">
+    
+    {# Header Bar #}
+    <div class="bg-base-100 border-b border-base-300 px-6 py-3 flex justify-between items-center shrink-0 z-20 shadow-sm">
         <div>
-            <h1 class="text-xl font-bold text-gray-800">Barangay Map</h1>
-            <p class="text-sm text-gray-500">Geographic Information System</p>
+            <h1 class="text-xl font-bold flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                {{ barangay_name }} — GIS Map
+            </h1>
+            <p class="text-xs text-base-content/60">Community Geographic Information System (Live)</p>
         </div>
-        <div class="flex gap-2">
-            <button onclick="map.setView([14.5995, 120.9842], 15)" class="btn btn-sm btn-ghost">Reset View</button>
-            <div class="dropdown dropdown-end">
-                <label tabindex="0" class="btn btn-sm btn-outline">Layers</label>
-                <ul tabindex="0" class="dropdown-content z-[1000] menu p-2 shadow bg-base-100 rounded-box w-52">
-                    <li><a onclick="setLayer('streets')">Streets</a></li>
-                    <li><a onclick="setLayer('satellite')">Satellite</a></li>
-                </ul>
+        <div class="flex items-center gap-3">
+            <div class="join">
+                <button id="layer-streets" onclick="updateLayer('streets')" class="btn btn-xs join-item btn-primary">Dark Maps</button>
+                <button id="layer-satellite" onclick="updateLayer('satellite')" class="btn btn-xs join-item btn-outline">Satellite</button>
+            </div>
+            <button onclick="resetMapView()" class="btn btn-xs btn-ghost gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+                Centre
+            </button>
+        </div>
+    </div>
+
+    {# No Coords Warning #}
+    {% if not has_coords %}
+    <div class="alert alert-warning rounded-none border-none py-2 px-6 flex justify-between shrink-0">
+        <div class="flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+            <span class="text-sm font-medium">Barangay coordinates not set. Showing country view.</span>
+        </div>
+        <a href="{% url 'core:setup' %}" class="btn btn-xs btn-ghost text-xs">Configure Setup →</a>
+    </div>
+    {% endif %}
+
+    {# Map Container with Relative Positioning for Loading Overlay #}
+    <div class="relative flex-1 group/map">
+        {# Map Div - Guaranteed to have size #}
+        <div id="map" class="absolute inset-0 z-0"></div>
+
+        {# ── GTA Style Legend ── #}
+        <div id="map-legend" class="absolute top-6 left-6 z-20 w-64 bg-black/80 border-l-4 border-primary backdrop-blur-md shadow-2xl transition-all duration-300 -translate-x-[calc(100%+24px)] group-hover/map:translate-x-0">
+            <div class="p-4 border-b border-white/10 flex justify-between items-center bg-primary/20">
+                <h3 class="text-xs uppercase tracking-widest font-black text-white">Map Legend</h3>
+                <span class="text-[10px] text-primary font-bold">BIMS v2.0</span>
+            </div>
+            
+            <div class="p-3 space-y-4 max-h-[calc(100vh-250px)] overflow-y-auto">
+                {# Admin Centre #}
+                <div class="flex items-center gap-3 group/item cursor-help">
+                    <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center border-2 border-white shadow-lg shrink-0">
+                        <div class="w-2 h-2 rounded-full bg-white animate-pulse"></div>
+                    </div>
+                    <div class="flex-1">
+                        <div class="text-[11px] font-black text-white uppercase leading-none mb-1">Brgy Hall</div>
+                        <div class="text-[9px] text-white/50 uppercase leading-none">Admin Centre</div>
+                    </div>
+                </div>
+
+                {# Police #}
+                <div class="flex items-center gap-3 group/item cursor-help">
+                    <div class="w-8 h-8 rounded-full bg-[oklch(55%_0.25_260)] flex items-center justify-center border-2 border-white shadow-lg shrink-0 text-xs">
+                        👮
+                    </div>
+                    <div class="flex-1">
+                        <div class="text-[11px] font-black text-white uppercase leading-none mb-1">Police</div>
+                        <div class="text-[9px] text-white/50 uppercase leading-none">Emergency Hub</div>
+                    </div>
+                </div>
+
+                {# Fire #}
+                <div class="flex items-center gap-3 group/item cursor-help">
+                    <div class="w-8 h-8 rounded-full bg-[oklch(60%_0.25_25)] flex items-center justify-center border-2 border-white shadow-lg shrink-0 text-xs">
+                        🚒
+                    </div>
+                    <div class="flex-1">
+                        <div class="text-[11px] font-black text-white uppercase leading-none mb-1">Fire Stn</div>
+                        <div class="text-[9px] text-white/50 uppercase leading-none">Emergency Hub</div>
+                    </div>
+                </div>
+
+                {# Hospital #}
+                <div class="flex items-center gap-3 group/item cursor-help">
+                    <div class="w-8 h-8 rounded-full bg-[oklch(70%_0.20_150)] flex items-center justify-center border-2 border-white shadow-lg shrink-0 text-xs">
+                        🏥
+                    </div>
+                    <div class="flex-1">
+                        <div class="text-[11px] font-black text-white uppercase leading-none mb-1">Hospitals</div>
+                        <div class="text-[9px] text-white/50 uppercase leading-none">Emergency Hub</div>
+                    </div>
+                </div>
+
+                {# Residents #}
+                <div class="flex items-center gap-3 group/item cursor-help">
+                    <div class="w-8 h-8 rounded-full bg-[oklch(58%_0.20_262)] flex items-center justify-center border-2 border-white shadow-lg shrink-0 scale-75">
+                         <div class="w-2 h-2 rounded-full bg-white"></div>
+                    </div>
+                    <div class="flex-1">
+                        <div class="text-[11px] font-black text-white uppercase leading-none mb-1">Household</div>
+                        <div class="text-[9px] text-white/50 uppercase leading-none">Resident Point</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-2 bg-black/40 text-[9px] text-center text-white/30 uppercase tracking-tighter">
+                Hover to interact • Escape to close
+            </div>
+        </div>
+
+        {# Legend Toggle Button #}
+        <button onclick="toggleLegend()" class="absolute bottom-6 left-6 z-30 btn btn-circle btn-primary shadow-2xl border-2 border-white group/btn">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 transition-transform group-hover/btn:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+            </svg>
+        </button>
+        
+        {# Loading Overlay #}
+        <div id="map-loading" class="absolute inset-0 z-10 transition-opacity duration-500">
+            <div class="flex flex-col items-center">
+                <span class="loading loading-spinner loading-lg text-primary mb-4"></span>
+                <p class="text-base-content/40 font-medium animate-pulse">Initializing GIS Interface...</p>
             </div>
         </div>
     </div>
-    
-    <div id="map" class="flex-grow w-full z-0"></div>
 </div>
+{% endblock %}
 
-<!-- Leaflet CSS -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRS9BMY="
-     crossorigin=""/>
-
-<!-- Leaflet JS -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-     crossorigin=""></script>
-
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script>
-    // Initialize map (Default to Manila coordinates, should be adjustable via settings)
-    const map = L.map('map').setView([14.5995, 120.9842], 15);
-    
-    // Tile Layers
-    const streets = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    // ── Context Variables ──
+    const LAT = {{ barangay_lat }};
+    const LNG = {{ barangay_lng }};
+    const ZOOM = {{ barangay_zoom }};
+
+    // ── Initialize Map ──
+    const map = L.map('map', {
+        center: [LAT, LNG],
+        zoom: ZOOM,
+        zoomControl: true,
+        fadeAnimation: true
     });
-    
+
+    // ── Tile Layers ──
+    // Using CartoDB Dark Matter for better dark mode experience
+    const darkMap = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        subdomains: 'abcd',
+        maxZoom: 20
+    });
+
     const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, USDA, USGS, and the GIS User Community'
     });
-    
-    streets.addTo(map);
-    
-    function setLayer(type) {
+
+    // Force tile layer load check
+    darkMap.on('tileload', () => {
+        const loader = document.getElementById('map-loading');
+        if (loader) {
+            loader.style.opacity = '0';
+            setTimeout(() => loader.remove(), 500);
+        }
+    });
+
+    darkMap.addTo(map);
+
+    function updateLayer(type) {
         if (type === 'streets') {
             map.removeLayer(satellite);
-            streets.addTo(map);
+            darkMap.addTo(map);
+            document.getElementById('layer-streets').className = 'btn btn-xs join-item btn-primary';
+            document.getElementById('layer-satellite').className = 'btn btn-xs join-item btn-outline';
         } else {
-            map.removeLayer(streets);
+            map.removeLayer(darkMap);
             satellite.addTo(map);
+            document.getElementById('layer-satellite').className = 'btn btn-xs join-item btn-primary';
+            document.getElementById('layer-streets').className = 'btn btn-xs join-item btn-outline';
         }
     }
-    
-    // Custom Icons
-    const residentIcon = L.divIcon({
-        className: 'custom-div-icon',
-        html: "<div style='background-color:#3b82f6; width:10px; height:10px; border-radius:50%; border:2px solid white;'></div>",
-        iconSize: [10, 10],
-        iconAnchor: [5, 5]
+
+    function resetMapView() {
+        map.flyTo([LAT, LNG], ZOOM, { duration: 1.5 });
+    }
+
+    // ── Legend Toggle ──
+    const legend = document.getElementById('map-legend');
+    let isLegendOpen = false;
+
+    function toggleLegend() {
+        isLegendOpen = !isLegendOpen;
+        if (isLegendOpen) {
+            legend.classList.replace('-translate-x-[calc(100%+24px)]', 'translate-x-0');
+        } else {
+            legend.classList.replace('translate-x-0', '-translate-x-[calc(100%+24px)]');
+        }
+    }
+
+    // Close on Escape
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && isLegendOpen) toggleLegend();
     });
 
-    // Fetch Resident Data
+    // ── Fix Gray Box Issue (Invalidate Size) ──
+    // Sometimes Leaflet doesn't know its size if inside hidden containers or transitions
+    setTimeout(() => {
+        map.invalidateSize();
+    }, 400);
+
+    // ── Barangay Centre Marker ──
+    {% if has_coords %}
+    const centreIcon = L.divIcon({
+        className: '',
+        html: `<div style="
+            width:18px; height:18px;
+            background: oklch(78% 0.16 78); /* Philippine Gold */
+            border: 3px solid #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 0 4px oklch(78% 0.16 78 / 0.3);
+            cursor: pointer;
+        "></div>`,
+        iconSize: [18,18], iconAnchor: [9,9]
+    });
+    L.marker([LAT, LNG], {icon: centreIcon})
+     .bindPopup('<div class="p-1"><b class="text-lg">{{ barangay_name }}</b><br>Administrative Centre</div>')
+     .addTo(map);
+    {% endif %}
+
+    // ── Residents GeoJSON ──
+    const residentIcon = (purok) => L.divIcon({
+        className: '',
+        html: `<div style="
+            width:10px; height:10px;
+            background: oklch(58% 0.20 262); /* Philippine Blue */
+            border: 2px solid #fff;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        "></div>`,
+        iconSize: [10,10], iconAnchor: [5,5]
+    });
+
     fetch('{% url "gis:resident_geojson" %}')
-        .then(response => response.json())
+        .then(r => r.json())
         .then(data => {
             L.geoJSON(data, {
-                pointToLayer: function (feature, latlng) {
-                    return L.marker(latlng, {icon: residentIcon});
-                },
-                onEachFeature: function (feature, layer) {
+                pointToLayer: (feature, latlng) => L.marker(latlng, {icon: residentIcon(feature.properties.purok)}),
+                onEachFeature: (feature, layer) => {
                     if (feature.properties) {
+                        const p = feature.properties;
                         layer.bindPopup(`
-                            <div class="font-bold">${feature.properties.name}</div>
-                            <div class="text-xs text-gray-500">${feature.properties.address}</div>
-                            <div class="text-xs text-badge badge-ghost mt-1">${feature.properties.purok}</div>
-                            <a href="/residents/${feature.properties.id}/" class="btn btn-xs btn-primary mt-2 w-full text-white">View Profile</a>
+                            <div class="min-w-[180px] p-1">
+                                <div class="font-bold text-sm mb-1">${p.name}</div>
+                                <div class="text-xs opacity-70 mb-2 truncate">${p.address || 'No address recorded'}</div>
+                                <div class="flex justify-between items-center mb-3">
+                                    <span class="badge badge-xs text-[10px] py-1 h-auto">${p.purok || 'Unknown Purok'}</span>
+                                    <span class="text-[10px] opacity-40">#${p.id}</span>
+                                </div>
+                                <a href="/residents/${p.id}/" 
+                                   class="btn btn-xs btn-primary w-full text-[11px] no-underline" 
+                                   style="color:white !important; text-decoration:none !important;">
+                                    View Full Profile
+                                </a>
+                            </div>
                         `);
                     }
                 }
             }).addTo(map);
         })
-        .catch(error => console.error('Error loading resident data:', error));
+        .catch(err => console.error('Residents Load Error:', err));
+
+    // ── Emergency Services GeoJSON ──
+    const getEmergencyIcon = (type) => {
+        let color = 'oklch(60% 0.15 250)'; // Default
+        let icon = '🚨';
+        
+        if (type === 'police') { color = 'oklch(55% 0.25 260)'; icon = '👮'; }
+        if (type === 'fire') { color = 'oklch(60% 0.25 25)'; icon = '🚒'; }
+        if (type === 'hospital') { color = 'oklch(70% 0.20 150)'; icon = '🏥'; }
+
+        return L.divIcon({
+            className: '',
+            html: `<div style="
+                width:32px; height:32px;
+                background: ${color};
+                border: 3px solid #fff;
+                border-radius: 50%;
+                display: flex; align-items: center; justify-content: center;
+                font-size: 16px;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+                cursor: pointer;
+            ">${icon}</div>`,
+            iconSize: [32,32], iconAnchor: [16,16]
+        });
+    };
+
+    fetch('{% url "gis:emergency_service_geojson" %}')
+        .then(r => r.json())
+        .then(data => {
+            L.geoJSON(data, {
+                pointToLayer: (feature, latlng) => L.marker(latlng, {icon: getEmergencyIcon(feature.properties.type)}),
+                onEachFeature: (feature, layer) => {
+                    if (feature.properties) {
+                        const p = feature.properties;
+                        const typeLabel = p.type.charAt(0).toUpperCase() + p.type.slice(1);
+                        layer.bindPopup(`
+                            <div class="min-w-[200px] p-2">
+                                <div class="text-[10px] uppercase tracking-wider font-bold opacity-50 mb-1">${typeLabel}</div>
+                                <div class="font-bold text-base mb-2">${p.name}</div>
+                                <div class="flex items-center gap-2 mb-3 p-2 bg-base-300 rounded-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-error" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+                                    <span class="font-bold text-sm tracking-tight">${p.contact || 'N/A'}</span>
+                                </div>
+                                <div class="text-xs opacity-70 italic">${p.address || 'Address not listed'}</div>
+                            </div>
+                        `);
+                    }
+                }
+            }).addTo(map);
+        })
+        .catch(err => console.error('Emergency Load Error:', err));
 </script>
 {% endblock %}
