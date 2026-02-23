@@ -3,10 +3,22 @@ Base settings for BIMS2 project.
 """
 
 import os
+import environ
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+# Initialize environ
+env = environ.Env(
+    DEBUG=(bool, False),
+    ALLOWED_HOSTS=(list, []),
+)
+
+# Read .env file if it exists
+ENV_FILE = BASE_DIR / '.env'
+if ENV_FILE.exists():
+    environ.Env.read_env(str(ENV_FILE))
 
 # System Versioning
 VERSION_FILE = BASE_DIR / 'VERSION'
@@ -18,12 +30,12 @@ else:
 
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-q^n26_lr7(^ha^yk7n-m+dn5zdjs(&606at*gqrt4z*)*mjtj&')
+SECRET_KEY = env('SECRET_KEY', default='django-insecure-fallback-key-change-me')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env('DEBUG')
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = env('ALLOWED_HOSTS')
 
 
 # Application definition
@@ -94,10 +106,10 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': env.db(
+        'DATABASE_URL',
+        default=f'sqlite:///{BASE_DIR / "db.sqlite3"}'
+    )
 }
 
 
@@ -157,11 +169,15 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # External Storage for Certificates (Safe from project deletion/temp cleanup)
-# FALLBACK: If DEBUG=True, save to project media for easier developer access.
-if DEBUG:
-    BIMS_CERTIFICATE_STORAGE_ROOT = MEDIA_ROOT / 'certificates' / 'issued'
+# FALLBACK: If DEBUG=True and no storage root is set, save to project media.
+_default_storage = MEDIA_ROOT / 'certificates' / 'issued'
+BIMS_CERTIFICATE_STORAGE_ROOT = env('BIMS_CERTIFICATE_STORAGE_ROOT', default=str(_default_storage))
+
+# If it's a relative path or empty in DEBUG mode, ensure it's absolute within MEDIA_ROOT
+if DEBUG and (not BIMS_CERTIFICATE_STORAGE_ROOT or BIMS_CERTIFICATE_STORAGE_ROOT == str(_default_storage)):
+    BIMS_CERTIFICATE_STORAGE_ROOT = _default_storage
 else:
-    BIMS_CERTIFICATE_STORAGE_ROOT = Path("C:/BIMS_Data/Issued_Certificates")
+    BIMS_CERTIFICATE_STORAGE_ROOT = Path(BIMS_CERTIFICATE_STORAGE_ROOT)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

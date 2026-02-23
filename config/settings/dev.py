@@ -4,9 +4,7 @@ Development settings for BIMS2 project.
 
 from .base import *
 
-DEBUG = True
-
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+# ALLOWED_HOSTS is now handled via .env in base.py
 
 # Development-specific apps
 INSTALLED_APPS += [

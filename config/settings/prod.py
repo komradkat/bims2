@@ -4,9 +4,7 @@ Production settings for BIMS2 project.
 
 from .base import *
 
-DEBUG = False
-
-ALLOWED_HOSTS = ['*']  # Configure with actual domain in production
+# DEBUG and ALLOWED_HOSTS are now handled via .env in base.py
 
 # Security settings for production
 SECURE_SSL_REDIRECT = True
