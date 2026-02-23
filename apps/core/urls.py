@@ -29,4 +29,9 @@ urlpatterns = [
 
     # GIS Map (Ultra only)
     path('gis-map/', views.GisMapView.as_view(), name='gis_map'),
+
+    # Informational Pages
+    path('about/', views.AboutView.as_view(), name='about'),
+    path('privacy/', views.PrivacyView.as_view(), name='privacy'),
+    path('terms/', views.TermsView.as_view(), name='terms'),
 ]

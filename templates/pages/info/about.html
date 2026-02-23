@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}About BIMS{% endblock %}
+
+{% block content %}
+<div class="container mx-auto max-w-4xl py-12">
+    <div class="text-center mb-12">
+        <h1 class="text-4xl font-black tracking-tight mb-4">About <span class="text-primary">BIMS</span></h1>
+        <p class="text-xl opacity-60">Barangay Information Management System v2.0</p>
+    </div>
+
+    <div class="card bg-base-100 shadow-xl border border-base-200 mb-8">
+        <div class="card-body prose prose-slate dark:prose-invert max-w-none">
+            <h2 class="text-primary">Our Mission</h2>
+            <p>
+                BIMS is designed to empower local barangays in the Philippines by providing a modern, efficient, and transparent way to manage community data and services. 
+                Our goal is to digitize the manual processes of governance, making it easier for officials to serve their constituents.
+            </p>
+
+            <h2 class="text-primary">Key Features</h2>
+            <ul>
+                <li><strong>Resident Information:</strong> Securely store and manage resident records and demographics.</li>
+                <li><strong>Automated Certificates:</strong> Generate clearances, permits, and certifications with professional templates.</li>
+                <li><strong>Justice & Blotter:</strong> Track community cases, hearings, and resolutions.</li>
+                <li><strong>Financial Tracking:</strong> Manage assessments, payments, and official receipts.</li>
+                <li><strong>GIS Mapping:</strong> Visualize community layout and infrastructure with integrated spatial data.</li>
+            </ul>
+
+            <h2 class="text-primary">Commitment to Security</h2>
+            <p>
+                Data privacy is our top priority. BIMS implements industry-standard encryption, role-based access control, and comprehensive audit logging to ensure that 
+                sensitive barangay information remains protected and used only for official purposes.
+            </p>
+        </div>
+    </div>
+
+    <div class="text-center opacity-50 text-xs">
+        <p>Built with ❤️ for the Filipino Community.</p>
+        <p class="mt-2">© 2026 Barangay Information Management System</p>
+    </div>
+</div>
+{% endblock %}

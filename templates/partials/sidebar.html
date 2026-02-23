@@ -92,15 +92,23 @@
   </ul>
   
   {# Footer in Sidebar - Fixed at bottom #}
-  <div class="p-4 border-t border-base-300 bg-base-100 shrink-0">
-    <p class="text-xs text-center text-base-content/60">
-      © 2026 <strong>{{ barangay_info.name }}</strong>
-    </p>
-    <p class="text-xs text-center text-base-content/60 mt-1">
-      <span class="badge badge-xs badge-{{ tier_info.badge_color }}">{{ tier_info.name }}</span>
-      <span class="mx-1">•</span>
-      <span>v1.0.0</span>
-    </p>
+  <div class="p-6 border-t border-base-300 bg-base-100 shrink-0">
+    <div class="flex flex-wrap justify-center gap-x-4 gap-y-2 mb-4">
+      <a href="{% url 'core:about' %}" class="text-[10px] font-bold uppercase tracking-widest opacity-40 hover:opacity-100 hover:text-primary transition-all">About</a>
+      <a href="{% url 'core:privacy' %}" class="text-[10px] font-bold uppercase tracking-widest opacity-40 hover:opacity-100 hover:text-primary transition-all">Privacy</a>
+      <a href="{% url 'core:terms' %}" class="text-[10px] font-bold uppercase tracking-widest opacity-40 hover:opacity-100 hover:text-primary transition-all">Terms</a>
+    </div>
+    
+    <div class="text-center space-y-2">
+      <p class="text-[10px] text-base-content/40 uppercase tracking-tighter">
+        © 2026 <strong>{{ barangay_info.name }}</strong>
+      </p>
+      
+      <div class="flex items-center justify-center gap-2">
+        <span class="badge badge-outline badge-xs opacity-50 text-[9px] px-2 py-1">v2.0.4-LTS</span>
+        <span class="badge badge-{{ tier_info.badge_color }} badge-xs font-black text-[9px] uppercase px-2 py-1">{{ tier_info.name }}</span>
+      </div>
+    </div>
   </div>
   </div>
 </div>

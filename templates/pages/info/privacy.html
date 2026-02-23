@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Privacy Policy | BIMS{% endblock %}
+
+{% block content %}
+<div class="container mx-auto max-w-4xl py-12">
+    <div class="text-center mb-12">
+        <h1 class="text-4xl font-black tracking-tight mb-4">Privacy <span class="text-secondary">Policy</span></h1>
+        <p class="text-xl opacity-60 italic">Committed to Data Protection and Transparency</p>
+    </div>
+
+    <div class="card bg-base-100 shadow-xl border border-base-200 mb-8">
+        <div class="card-body prose prose-slate dark:prose-invert max-w-none">
+            <p class="lead">
+                This Privacy Policy outlines how the Barangay Information Management System (BIMS) collects, uses, and protects personal information 
+                in compliance with the <strong>Data Privacy Act of 2012 (Republic Act No. 10173)</strong>.
+            </p>
+
+            <h2 class="text-secondary">1. Information Collection</h2>
+            <p>
+                We collect personal information necessary for official barangay administration and services, including:
+            </p>
+            <ul>
+                <li><strong>Identity Data:</strong> Full name, date of birth, gender, and nationality.</li>
+                <li><strong>Contact Data:</strong> Address, contact numbers, and email addresses.</li>
+                <li><strong>Official Records:</strong> Civil status, occupation, and community-related documentation.</li>
+            </ul>
+
+            <h2 class="text-secondary">2. Use of Information</h2>
+            <p>
+                Collected information is used exclusively for:
+            </p>
+            <ul>
+                <li>Issuance of official certificates, clearances, and permits.</li>
+                <li>Community census and demographic analysis.</li>
+                <li>Public safety, disaster response, and justice administration (Blotter records).</li>
+                <li>Maintenance of accurate resident registries.</li>
+            </ul>
+
+            <h2 class="text-secondary">3. Data Security</h2>
+            <p>
+                BIMS employs physical, technical, and organizational security measures to protect data against unauthorized access, use, or disclosure. 
+                This includes encryption and strictly regulated role-based access for barangay staff.
+            </p>
+
+            <h2 class="text-secondary">4. Rights of the Data Subject</h2>
+            <p>
+                Residents have the right to request access to their personal data, correct inaccuracies, or inquire about the use of their information 
+                by contacting the Barangay Administration Office.
+            </p>
+        </div>
+    </div>
+
+    <div class="text-center opacity-50 text-xs">
+        <p>Last updated: February 23, 2026</p>
+    </div>
+</div>
+{% endblock %}

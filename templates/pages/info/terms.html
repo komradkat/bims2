@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Terms of Service | BIMS{% endblock %}
+
+{% block content %}
+<div class="container mx-auto max-w-4xl py-12">
+    <div class="text-center mb-12">
+        <h1 class="text-4xl font-black tracking-tight mb-4">Terms of <span class="text-warning">Service</span></h1>
+        <p class="text-xl opacity-60">Barangay Information Management System v2.0</p>
+    </div>
+
+    <div class="card bg-base-100 shadow-xl border border-base-200 mb-8">
+        <div class="card-body prose prose-slate dark:prose-invert max-w-none">
+            <h2 class="text-warning">1. Acceptance of Terms</h2>
+            <p>
+                By accessing and using BIMS, you agree to be bound by these Terms of Service. This system is for the exclusive use of authorized 
+                barangay officials and staff for official government business only.
+            </p>
+
+            <h2 class="text-warning">2. Authorized Use</h2>
+            <p>
+                All users are responsible for maintaining the confidentiality of their login credentials. Unauthorized sharing of accounts or 
+                accessing data beyond one's assigned role is strictly prohibited and may lead to administrative or legal action.
+            </p>
+
+            <h2 class="text-warning">3. Data Accuracy</h2>
+            <p>
+                Barangay officials are responsible for ensuring the accuracy and integrity of all data entered into the system. BIMS is a tool 
+                to facilitate management, but the final responsibility for official documentation rests with the issuing officer.
+            </p>
+
+            <h2 class="text-warning">4. Prohibited Activities</h2>
+            <p>
+                Users shall not:
+            </p>
+            <ul>
+                <li>Modify system code or architecture without official authorization.</li>
+                <li>Extract data for unofficial or personal use.</li>
+                <li>Use the system to process information not related to barangay operations.</li>
+            </ul>
+
+            <h2 class="text-warning">5. System Availability</h2>
+            <p>
+                The BIMS team strives to maintain high system availability. However, we are not liable for any losses or delays caused by 
+                unforeseen technical downtime or maintenance periods.
+            </p>
+        </div>
+    </div>
+
+    <div class="text-center opacity-50 text-xs">
+        <p>© 2026 BIMS Development Team. All rights reserved.</p>
+    </div>
+</div>
+{% endblock %}

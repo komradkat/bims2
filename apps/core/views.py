@@ -540,3 +540,14 @@ class OfficialDeleteView(LoginRequiredMixin, View):
         official.delete()
         messages.success(request, f"{name} has been removed.")
         return redirect('core:officials')
+
+# ── Informational Pages ──────────────────────────────────────────────────
+
+class AboutView(LoginRequiredMixin, TemplateView):
+    template_name = 'pages/info/about.html'
+
+class PrivacyView(LoginRequiredMixin, TemplateView):
+    template_name = 'pages/info/privacy.html'
+
+class TermsView(LoginRequiredMixin, TemplateView):
+    template_name = 'pages/info/terms.html'
