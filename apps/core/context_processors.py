@@ -48,6 +48,8 @@ def tier_info(request):
     """Provide tier/license information to all templates"""
     # Get license data from middleware (attached to request)
     license_data = getattr(request, 'license', None)
+    from apps.core.utils.hardware import get_hardware_id
+    hardware_id = get_hardware_id()
     
     if not license_data:
         # Fallback to Community if middleware hasn't run yet
@@ -108,6 +110,8 @@ def tier_info(request):
         config['expiry_date'] = license_data.get('expiry_date')
         config['max_users'] = license_data.get('max_users', 5)
         config['key_preview'] = license_data.get('key_preview', 'Community (Free)')
+    
+    config['hardware_id'] = hardware_id
     
     return {'tier_info': config}
 

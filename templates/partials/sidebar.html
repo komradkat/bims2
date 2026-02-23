@@ -110,6 +110,7 @@
   <div class="p-6 border-t border-base-300 bg-base-100 shrink-0">
     <div class="flex flex-wrap justify-center gap-x-4 gap-y-2 mb-4">
       <a href="{% url 'core:about' %}" class="text-[10px] font-bold uppercase tracking-widest opacity-40 hover:opacity-100 hover:text-primary transition-all">About</a>
+      <a href="{% url 'core:license-info' %}" class="text-[10px] font-bold uppercase tracking-widest opacity-40 hover:opacity-100 hover:text-primary transition-all">License</a>
       <a href="{% url 'core:privacy' %}" class="text-[10px] font-bold uppercase tracking-widest opacity-40 hover:opacity-100 hover:text-primary transition-all">Privacy</a>
       <a href="{% url 'core:terms' %}" class="text-[10px] font-bold uppercase tracking-widest opacity-40 hover:opacity-100 hover:text-primary transition-all">Terms</a>
     </div>
@@ -121,7 +122,7 @@
       
       <div class="flex items-center justify-center gap-2">
         <span class="badge badge-outline badge-xs opacity-50 text-[9px] px-2 py-1">v{{ system_version }}</span>
-        <span class="badge badge-{{ tier_info.badge_color }} badge-xs font-black text-[9px] uppercase px-2 py-1">{{ tier_info.name }}</span>
+        <a href="{% url 'core:license-info' %}" class="badge badge-{{ tier_info.badge_color }} badge-xs font-black text-[9px] uppercase px-2 py-1 hover:scale-110 transition-transform">{{ tier_info.name }}</a>
       </div>
     </div>
   </div>

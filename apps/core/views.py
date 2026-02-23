@@ -1,12 +1,14 @@
 # Core views
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
-from django.views.generic import TemplateView, View
+from django.http import HttpResponse, HttpResponseRedirect
+from django.views.generic import TemplateView, View, ListView, CreateView, UpdateView
 from django.contrib.auth.views import LoginView
-from django.urls import reverse_lazy
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth import get_user_model
+from django.urls import reverse_lazy, reverse
 from django.contrib import messages
 from django.core.cache import cache
-from django.db.models import Sum
+from django.db.models import Sum, Q
 from django.utils import timezone
 from django.utils.safestring import mark_safe
 from datetime import timedelta
@@ -36,9 +38,8 @@ class CustomLoginView(LoginView):
         return reverse_lazy('core:dashboard')
 
 
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import ListView, CreateView, UpdateView
-from .models import User
+
+from .models import User, Notification, BarangayOfficial
 from .decorators import role_required, tier_required
 from django.utils.decorators import method_decorator
 
@@ -59,7 +60,6 @@ class UserCreateView(LoginRequiredMixin, CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['action'] = 'Add'
-        from apps.core.models import BarangayOfficial
         context['officials'] = BarangayOfficial.objects.filter(is_active=True, user_account__isnull=True)
         return context
         
@@ -72,16 +72,25 @@ class UserCreateView(LoginRequiredMixin, CreateView):
         # Link as Bootstrap logic
         link_as_bootstrap = self.request.POST.get('link_as_bootstrap') == 'on'
         if link_as_bootstrap and self.request.user.is_bootstrap:
-            # Transfer official to current user instead of creating new
-            self.request.user.official = form.cleaned_data.get('official')
+            # Transfer official to current user AND update credentials
+            self.request.user.username = user.username
+            self.request.user.email = user.email
+            self.request.user.official = user.official
+            self.request.user.role = user.role
+            self.request.user.barangay_position = user.barangay_position
             self.request.user.is_bootstrap = False
+            
+            if password:
+                self.request.user.set_password(password)
+            
             self.request.user.save()
-            messages.success(self.request, f"Bootstrap account successfully linked to {self.request.user.official.full_name}. You are no longer in bootstrap mode.")
+            messages.success(self.request, f"Account '{self.request.user.username}' successfully linked to Official: {self.request.user.official.full_name}. You are no longer in bootstrap mode.")
             return redirect('core:profile')
 
         user.save()
         messages.success(self.request, f"User {user.username} created successfully.")
-        return super().form_valid(form)
+        self.object = user
+        return HttpResponseRedirect(self.get_success_url())
 
 @method_decorator(role_required(['admin']), name='dispatch')
 class UserUpdateView(LoginRequiredMixin, UpdateView):
@@ -93,10 +102,9 @@ class UserUpdateView(LoginRequiredMixin, UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['action'] = 'Edit'
-        from apps.core.models import BarangayOfficial
         # Show all officials but prioritize the currently linked one
         context['officials'] = BarangayOfficial.objects.filter(
-            models.Q(user_account__isnull=True) | models.Q(user_account=self.object)
+            Q(user_account__isnull=True) | Q(user_account=self.object)
         )
         return context
 
@@ -320,6 +328,16 @@ class LicenseActivationView(LoginRequiredMixin, View):
         except LicenseKey.DoesNotExist:
             messages.error(request, "Invalid license key. Please check and try again.")
             return redirect('core:license_activation')
+
+
+class LicenseInfoView(LoginRequiredMixin, TemplateView):
+    """View to display detailed license and hardware information"""
+    template_name = 'auth/license_info.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'License Information'
+        return context
 
 
 class SetupView(View):

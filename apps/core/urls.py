@@ -12,6 +12,7 @@ urlpatterns = [
     path('settings/', views.SettingsView.as_view(), name='settings'),
     
     # License Management
+    path('license/', views.LicenseInfoView.as_view(), name='license-info'),
     path('license/activate/', views.LicenseActivationView.as_view(), name='license_activation'),
     
     # User Management
