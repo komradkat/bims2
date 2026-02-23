@@ -591,3 +591,9 @@ class MarkNotificationReadView(LoginRequiredMixin, View):
         
         # Return an empty response for HTMX (the item will be removed/updated in the UI)
         return HttpResponse("")
+# Error Views
+def error_404(request, exception):
+    return render(request, '404.html', status=404)
+
+def error_500(request):
+    return render(request, '500.html', status=500)

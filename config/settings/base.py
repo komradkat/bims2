@@ -151,8 +151,10 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
-    BASE_DIR / 'prototype' / 'static',
 ]
+_prototype_static = BASE_DIR / 'prototype' / 'static'
+if _prototype_static.exists():
+    STATICFILES_DIRS.append(_prototype_static)
 
 # WhiteNoise configuration
 STORAGES = {
@@ -167,6 +169,44 @@ STORAGES = {
 # Media files
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# Logging Configuration
+LOGS_DIR = BASE_DIR / 'logs'
+LOGS_DIR.mkdir(exist_ok=True)
+
+from django.utils.log import DEFAULT_LOGGING
+import copy
+
+LOGGING = copy.deepcopy(DEFAULT_LOGGING)
+
+# Add our custom rotating file handler for production errors
+LOGGING['handlers']['file'] = {
+    'level': 'ERROR',
+    'class': 'logging.handlers.RotatingFileHandler',
+    'filename': LOGS_DIR / 'bims2.log',
+    'maxBytes': 1024 * 1024 * 5,  # 5 MB
+    'backupCount': 5,
+    'formatter': 'verbose',
+}
+
+# Add verbose formatter
+LOGGING['formatters']['verbose'] = {
+    'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+    'style': '{',
+}
+
+# Attach to the main django logger without removing existing (console) handlers
+if 'django' not in LOGGING['loggers']:
+    LOGGING['loggers']['django'] = {'handlers': [], 'level': 'INFO', 'propagate': True}
+
+LOGGING['loggers']['django']['handlers'].append('file')
+
+# Support app-level logging
+LOGGING['loggers']['apps'] = {
+    'handlers': ['console', 'file'] if DEBUG else ['file'],
+    'level': 'DEBUG' if DEBUG else 'INFO',
+    'propagate': True,
+}
 
 # External Storage for Certificates (Safe from project deletion/temp cleanup)
 # FALLBACK: If DEBUG=True and no storage root is set, save to project media.
