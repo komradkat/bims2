@@ -1,6 +1,7 @@
 from django.shortcuts import redirect
 from django.views.generic import ListView, CreateView, DetailView, View
 from django.contrib.auth.mixins import LoginRequiredMixin
+from apps.core.mixins import NonBootstrapRequiredMixin
 from django.urls import reverse_lazy
 from django.db.models import Q
 from django.utils import timezone
@@ -8,7 +9,7 @@ from django.contrib import messages
 from .models import BlotterCase, Complainant, Respondent, Hearing
 
 
-class BlotterListView(LoginRequiredMixin, ListView):
+class BlotterListView(LoginRequiredMixin, NonBootstrapRequiredMixin, ListView):
     model = BlotterCase
     template_name = 'pages/blotter/list.html'
     context_object_name = 'cases'
@@ -57,7 +58,7 @@ class BlotterListView(LoginRequiredMixin, ListView):
         return context
 
 
-class BlotterCreateView(LoginRequiredMixin, CreateView):
+class BlotterCreateView(LoginRequiredMixin, NonBootstrapRequiredMixin, CreateView):
     model = BlotterCase
     template_name = 'pages/blotter/form.html'
     fields = ['incident_type', 'incident_date', 'incident_location', 'narrative', 'status']
@@ -132,7 +133,7 @@ class BlotterCreateView(LoginRequiredMixin, CreateView):
 
 
 
-class BlotterDetailView(LoginRequiredMixin, DetailView):
+class BlotterDetailView(LoginRequiredMixin, NonBootstrapRequiredMixin, DetailView):
     model = BlotterCase
     template_name = 'pages/blotter/detail.html'
     context_object_name = 'case'
@@ -146,7 +147,7 @@ class BlotterDetailView(LoginRequiredMixin, DetailView):
         return context
 
 
-class HearingCreateView(LoginRequiredMixin, CreateView):
+class HearingCreateView(LoginRequiredMixin, NonBootstrapRequiredMixin, CreateView):
     model = Hearing
     fields = ['scheduled_at', 'remarks']
     
@@ -161,7 +162,7 @@ class HearingCreateView(LoginRequiredMixin, CreateView):
         return reverse_lazy('blotter:detail', kwargs={'pk': self.kwargs.get('case_id')})
 
 
-class CaseStatusUpdateView(LoginRequiredMixin, View):
+class CaseStatusUpdateView(LoginRequiredMixin, NonBootstrapRequiredMixin, View):
     def post(self, request, pk):
         case = BlotterCase.objects.get(pk=pk)
         new_status = request.POST.get('status')

@@ -1,12 +1,13 @@
 from django.views.generic import TemplateView
 from django.http import JsonResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
+from apps.core.mixins import NonBootstrapRequiredMixin
 from django.views import View
 from apps.residents.models import Resident
 from apps.core.models import BarangayInfo
 from .models import EmergencyService
 
-class MapView(LoginRequiredMixin, TemplateView):
+class MapView(LoginRequiredMixin, NonBootstrapRequiredMixin, TemplateView):
     template_name = 'gis/map.html'
 
     def get_context_data(self, **kwargs):
@@ -33,7 +34,7 @@ class MapView(LoginRequiredMixin, TemplateView):
         return ctx
 
 
-class ResidentGeoJSONView(LoginRequiredMixin, View):
+class ResidentGeoJSONView(LoginRequiredMixin, NonBootstrapRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         # Filter residents with valid coordinates
         residents = Resident.objects.filter(
@@ -68,7 +69,7 @@ class ResidentGeoJSONView(LoginRequiredMixin, View):
         return JsonResponse(geojson)
 
 
-class EmergencyServiceGeoJSONView(LoginRequiredMixin, View):
+class EmergencyServiceGeoJSONView(LoginRequiredMixin, NonBootstrapRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         services = EmergencyService.objects.filter(is_active=True).values(
             'id', 'name', 'service_type', 'latitude', 'longitude', 'contact_number', 'address'

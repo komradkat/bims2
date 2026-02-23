@@ -1,5 +1,6 @@
 from django.views.generic import ListView, CreateView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
+from apps.core.mixins import NonBootstrapRequiredMixin
 from django.db.models import Sum, Q
 from django.urls import reverse_lazy
 from django.utils import timezone
@@ -7,7 +8,7 @@ from .models import BusinessPermit, BusinessClearance
 from .forms import BusinessPermitForm
 from django.contrib import messages
 
-class BusinessListView(LoginRequiredMixin, ListView):
+class BusinessListView(LoginRequiredMixin, NonBootstrapRequiredMixin, ListView):
     model = BusinessPermit
     template_name = 'pages/business/list.html'
     context_object_name = 'businesses'
@@ -41,7 +42,7 @@ class BusinessListView(LoginRequiredMixin, ListView):
 
         return context
 
-class BusinessCreateView(LoginRequiredMixin, CreateView):
+class BusinessCreateView(LoginRequiredMixin, NonBootstrapRequiredMixin, CreateView):
     model = BusinessPermit
     form_class = BusinessPermitForm
     template_name = 'pages/business/form.html'
@@ -73,7 +74,7 @@ class BusinessCreateView(LoginRequiredMixin, CreateView):
         messages.success(self.request, f"Business Permit for {form.instance.business_name} created successfully.")
         return response
 
-class BusinessUpdateView(LoginRequiredMixin, UpdateView):
+class BusinessUpdateView(LoginRequiredMixin, NonBootstrapRequiredMixin, UpdateView):
     model = BusinessPermit
     form_class = BusinessPermitForm
     template_name = 'pages/business/form.html'

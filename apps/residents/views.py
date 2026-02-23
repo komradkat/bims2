@@ -1,6 +1,8 @@
 # Residents views
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
+from apps.core.mixins import NonBootstrapRequiredMixin
+from apps.core.decorators import non_bootstrap_required
 from django.db.models import Q
 from django.http import HttpResponse
 from .models import Resident
@@ -9,7 +11,7 @@ from openpyxl.styles import Font, Alignment, PatternFill
 from datetime import datetime
 
 
-class ResidentsListView(LoginRequiredMixin, ListView):
+class ResidentsListView(LoginRequiredMixin, NonBootstrapRequiredMixin, ListView):
     """
     Residents list view with search, filtering, and pagination.
     """
@@ -94,6 +96,7 @@ class ResidentsListView(LoginRequiredMixin, ListView):
         return context
 
 
+@non_bootstrap_required
 def export_residents_excel(request):
     """
     Export residents list to Excel file.
@@ -173,7 +176,7 @@ def export_residents_excel(request):
     return response
 
 
-class ResidentCreateView(LoginRequiredMixin, CreateView):
+class ResidentCreateView(LoginRequiredMixin, NonBootstrapRequiredMixin, CreateView):
     """
     View for creating new resident profiles.
     """
@@ -206,7 +209,7 @@ class ResidentCreateView(LoginRequiredMixin, CreateView):
         return reverse('residents:list')
 
 
-class ResidentUpdateView(LoginRequiredMixin, UpdateView):
+class ResidentUpdateView(LoginRequiredMixin, NonBootstrapRequiredMixin, UpdateView):
     """
     View for editing existing resident profiles.
     """
@@ -239,7 +242,7 @@ class ResidentUpdateView(LoginRequiredMixin, UpdateView):
         return reverse('residents:list')
 
 
-class ResidentDetailView(LoginRequiredMixin, DetailView):
+class ResidentDetailView(LoginRequiredMixin, NonBootstrapRequiredMixin, DetailView):
     """
     Detailed view of a resident's profile.
     """
@@ -262,11 +265,16 @@ class ResidentDetailView(LoginRequiredMixin, DetailView):
             context['household_head'] = self.object.household_head
         
         return context
-class ResidentSearchView(LoginRequiredMixin, ListView):
+class ResidentSearchView(LoginRequiredMixin, NonBootstrapRequiredMixin, ListView):
     model = Resident
     template_name = 'pages/residents/partials/search_results.html'
     context_object_name = 'residents'
     
+    def get_template_names(self):
+        if self.request.GET.get('source') == 'global':
+            return ['partials/global_search_results.html']
+        return [self.template_name]
+
     def get_queryset(self):
         query = self.request.GET.get('q', '').strip()
         if len(query) < 2:

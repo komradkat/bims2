@@ -1,6 +1,8 @@
 from django.shortcuts import get_object_or_404, redirect
 from django.views.generic import ListView, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
+from apps.core.mixins import NonBootstrapRequiredMixin
+from apps.core.decorators import non_bootstrap_required
 from django.contrib import messages
 from django.utils import timezone
 from django.http import HttpResponse
@@ -9,7 +11,7 @@ from .utils import generate_pdf
 from apps.residents.models import Resident
 
 
-class CertificatePrintView(LoginRequiredMixin, DetailView):
+class CertificatePrintView(LoginRequiredMixin, NonBootstrapRequiredMixin, DetailView):
     model = Certificate
 
     def get(self, request, *args, **kwargs):
@@ -58,7 +60,7 @@ class CertificatePrintView(LoginRequiredMixin, DetailView):
             return redirect('certificates:center')
 
 
-class CertificateCenterView(LoginRequiredMixin, ListView):
+class CertificateCenterView(LoginRequiredMixin, NonBootstrapRequiredMixin, ListView):
     model = CertificateType
     template_name = 'pages/certificates/center.html'
     context_object_name = 'certificate_types'
@@ -120,7 +122,7 @@ class CertificateCenterView(LoginRequiredMixin, ListView):
         return redirect(reverse('certificates:print', kwargs={'pk': certificate.pk}))
 
 
-class CertificateListView(LoginRequiredMixin, ListView):
+class CertificateListView(LoginRequiredMixin, NonBootstrapRequiredMixin, ListView):
     model = Certificate
     template_name = 'pages/certificates/list.html'
     context_object_name = 'certificates'
@@ -145,6 +147,7 @@ class CertificateListView(LoginRequiredMixin, ListView):
         return context
 
 
+@non_bootstrap_required
 def void_certificate(request, pk):
     if request.method == 'POST':
         certificate = get_object_or_404(Certificate, pk=pk)

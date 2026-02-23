@@ -265,6 +265,24 @@
   </div>
 </div>
 
+<script>
+    // Global Keyboard Shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Toggle Search Focus on '/' key
+        if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+            e.preventDefault();
+            const searchInput = document.getElementById('global-search-input');
+            if (searchInput) {
+                searchInput.focus();
+                // Select all text when focused via shortcut
+                searchInput.select();
+            }
+        }
+    });
+
+    // Sidebar Clock Script (Handled in sidebar.html, but global logic can go here if needed)
+</script>
+
 {% block extra_js %}{% endblock %}
 
 </body>

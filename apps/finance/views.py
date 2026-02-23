@@ -1,10 +1,11 @@
 from django.views.generic import TemplateView, ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
+from apps.core.mixins import NonBootstrapRequiredMixin
 from django.db.models import Sum
 from django.utils import timezone
 from .models import OfficialReceipt
 
-class FinanceDashboardView(LoginRequiredMixin, TemplateView):
+class FinanceDashboardView(LoginRequiredMixin, NonBootstrapRequiredMixin, TemplateView):
     template_name = 'pages/finance/dashboard.html'
 
     def get_context_data(self, **kwargs):
@@ -37,7 +38,7 @@ class FinanceDashboardView(LoginRequiredMixin, TemplateView):
 
         return context
 
-class OfficialReceiptListView(LoginRequiredMixin, ListView):
+class OfficialReceiptListView(LoginRequiredMixin, NonBootstrapRequiredMixin, ListView):
     model = OfficialReceipt
     template_name = 'pages/finance/list.html' # Need to check if this template exists or if I should reuse dashboard
     context_object_name = 'receipts'

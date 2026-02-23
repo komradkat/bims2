@@ -36,6 +36,7 @@ class CustomLoginView(LoginView):
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView, CreateView, UpdateView
+from apps.core.mixins import NonBootstrapRequiredMixin
 from .models import User
 from .decorators import role_required, tier_required
 from django.utils.decorators import method_decorator
@@ -391,6 +392,7 @@ class SetupView(View):
                 user.role = 'admin'
                 user.is_superuser = True
                 user.is_staff = True
+                user.is_bootstrap = True # Set is_bootstrap to True
                 user.save()
             else:
                 User.objects.create_superuser(
@@ -399,7 +401,8 @@ class SetupView(View):
                     email='',
                     password=password,
                     role='admin',
-                    barangay_position='Administrator'
+                    barangay_position='Administrator',
+                    is_bootstrap=True # Set is_bootstrap to True
                 )
                 
             messages.success(request, "System Setup Completed Successfully! Please login.")
@@ -551,3 +554,21 @@ class PrivacyView(LoginRequiredMixin, TemplateView):
 
 class TermsView(LoginRequiredMixin, TemplateView):
     template_name = 'pages/info/terms.html'
+
+class ProfileView(LoginRequiredMixin, TemplateView):
+    template_name = 'core/profile.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Add any extra profile info here if needed
+        return context
+
+class MarkNotificationReadView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        from django.shortcuts import get_object_or_404
+        notification = get_object_or_404(Notification, pk=pk, user=request.user)
+        notification.is_read = True
+        notification.save()
+        
+        # Return an empty response for HTMX (the item will be removed/updated in the UI)
+        return HttpResponse("")

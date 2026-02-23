@@ -1,8 +1,9 @@
 from django.views.generic import ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
+from apps.core.mixins import NonBootstrapRequiredMixin
 from django.apps import apps
 
-class AuditLogsView(LoginRequiredMixin, ListView):
+class AuditLogsView(LoginRequiredMixin, NonBootstrapRequiredMixin, ListView):
     template_name = 'pages/audit/logs.html'
     context_object_name = 'logs'
     paginate_by = 50

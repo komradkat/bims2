@@ -34,4 +34,8 @@ urlpatterns = [
     path('about/', views.AboutView.as_view(), name='about'),
     path('privacy/', views.PrivacyView.as_view(), name='privacy'),
     path('terms/', views.TermsView.as_view(), name='terms'),
+
+    # Profile & Notifications
+    path('profile/', views.ProfileView.as_view(), name='profile'),
+    path('notifications/<int:pk>/read/', views.MarkNotificationReadView.as_view(), name='notification_read'),
 ]

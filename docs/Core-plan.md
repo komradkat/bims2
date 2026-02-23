@@ -38,18 +38,16 @@ Here is the detailed "BIMS-Pro" 2026 Web Stack.
 
 ### 3. The Modern Frontend (The "Stutter-Free" UI)
 
-* **Interactivity: HTMX**
-* *Why:* This is your "secret weapon." Instead of writing thousands of lines of JavaScript (React/Vue), HTMX lets you perform AJAX requests directly in HTML.
-* *Use case:* When a clerk types a name in the search bar, HTMX sends the letters to Django, and Django sends back just the "Table Row" results. The page never reloads.
+* **Interactivity: HTMX + Leaflet.js**
+* *Why:* **HTMX** is handled for AJAX data loading. **Leaflet.js** is used for the "Ultra Tier" GIS mapping, integrated with **CartoDB Dark Matter** tiles for a seamless dark-mode experience.
 
 
 * **Styling: Tailwind CSS + DaisyUI**
-* *Why:* **Tailwind** makes it fast to build custom layouts. **DaisyUI** is a component library built on top of Tailwind that gives you "Government-ready" UI elements (Modals, Tables, Alerts, Tabs) out of the box with zero custom CSS.
+* *Why:* **Tailwind** makes it fast to build custom layouts. **DaisyUI** is a component library built on top of Tailwind that gives you "Government-ready" UI elements. We've refined these with custom OKLCH color tokens for a premium aesthetic.
 
 
-* **Dynamic Logic: Alpine.js**
-* *Why:* For "client-side" only things like toggling a sidebar, opening a dropdown, or showing a confirmation modal before deleting a record. It’s lightweight and lives inside your HTML.
-
+* **Dynamic Logic: Alpine.js + Vanilla JS**
+* *Why:* For client-side toggles (sidebars, legends) and complex address cascading in the setup/settings forms.
 
 
 ---
@@ -57,25 +55,23 @@ Here is the detailed "BIMS-Pro" 2026 Web Stack.
 ### 4. Document & Report Engine (The Output)
 
 * **PDF Generation: WeasyPrint**
-* *Why:* It is the most modern way to turn HTML/CSS into PDFs. You can design your "Barangay Clearance" using Tailwind CSS, and WeasyPrint will turn it into a high-quality, printable PDF that looks exactly like your screen.
+* *Why:* It turns responsive HTML/CSS into high-quality PDFs. It is used for all social certificates and business clearances.
 
 
 * **QR Code Generation: python-qrcode**
-* *Why:* For the **Ultra Tier**, you’ll need this to generate the verification codes that get embedded into the printed certificates.
-
+* *Why:* For the **Ultra Tier**, embedding scannable verification codes into printed certificates.
 
 
 ---
 
-### 5. Specialized Security Layer
+### 5. Architectural Components
 
-* **License Management: Cryptography (Fernet)**
-* *Why:* You'll use this library to create and verify your hardware-locked license keys. It ensures that if someone tries to manually edit the license file, the system will know it was tampered with.
+* **System Configuration: Singleton Pattern**
+* *Why:* A specialized `BarangayInfo` model stores the centralized community identity, GIS coordinates, and logos, ensuring consistency across every module.
 
 
 * **Audit Logging: Django-Simple-History**
-* *Why:* For the **Ultra Tier**, this package automatically tracks every single change made to a model (who, what, when) without you having to write the tracking logic manually.
-
+* *Why:* Automatically tracks every change made to models for the **Ultra Tier**.
 
 
 ---
@@ -87,7 +83,8 @@ Here is the detailed "BIMS-Pro" 2026 Web Stack.
 | **Logic** | Django 5.x | Handling Tier logic, Auth, and Business Rules. |
 | **Database** | PostgreSQL | Secure, relational storage for thousands of residents. |
 | **UI Framework** | Tailwind / DaisyUI | Clean, mobile-friendly, professional interface. |
-| **UX Engine** | HTMX | "Stutter-free" search and no-reload form submissions. |
+| **UX Engine** | HTMX / Alpine.js | "Stutter-free" search and dynamic UI interactions. |
+| **Spatial Layer** | Leaflet.js | Interactive community mapping (Ultra Tier). |
 | **PDF Engine** | WeasyPrint | Turning HTML templates into printable certificates. |
 | **Security** | Python Cryptography | Encrypting Tier settings and Hardware IDs. |
 

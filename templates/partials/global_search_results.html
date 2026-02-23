@@ -1,0 +1,47 @@
+<div class="card bg-base-100 shadow-2xl border border-base-300 max-h-[70vh] overflow-y-auto overflow-x-hidden">
+    <div class="card-body p-2">
+        <div class="flex items-center justify-between px-3 py-1 mb-1 border-b border-base-200">
+            <span class="text-[10px] uppercase font-bold tracking-widest opacity-40">Resident Results</span>
+            <span class="text-[10px] opacity-40">{{ residents|length }} matches</span>
+        </div>
+        
+        {% for resident in residents %}
+        <a href="{% url 'residents:detail' resident.pk %}" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-primary/10 hover:text-primary transition-all group">
+            <div class="avatar placeholder">
+                <div class="bg-base-200 text-base-content/60 group-hover:bg-primary group-hover:text-primary-content rounded-full w-10 transition-colors">
+                    <span class="text-xs font-bold">{{ resident.first_name.0 }}{{ resident.last_name.0 }}</span>
+                </div>
+            </div>
+            <div class="flex-1 min-w-0">
+                <div class="font-bold text-sm truncate group-hover:translate-x-1 transition-transform inline-block">{{ resident.full_name }}</div>
+                <div class="text-[10px] opacity-60 flex items-center gap-2">
+                    <span class="badge badge-outline badge-xs opacity-50">{{ resident.purok }}</span>
+                    <span>ID: {{ resident.id }}</span>
+                </div>
+            </div>
+            <div class="opacity-0 group-hover:opacity-100 transition-opacity">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </div>
+        </a>
+        {% empty %}
+        <div class="py-8 px-4 text-center">
+            <div class="text-3xl mb-2">👤</div>
+            <div class="text-sm font-bold opacity-60">No residents found</div>
+            <div class="text-[10px] opacity-40 uppercase tracking-tighter">Try searching by name or ID</div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    // Close dropdown on click outside
+    document.addEventListener('click', function(event) {
+        const results = document.getElementById('global-search-results');
+        const input = document.getElementById('global-search-input');
+        if (results && !results.contains(event.target) && event.target !== input) {
+            results.innerHTML = '';
+        }
+    });
+</script>

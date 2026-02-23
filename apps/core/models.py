@@ -13,6 +13,18 @@ class User(AbstractUser):
     
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='clerk')
     barangay_position = models.CharField(max_length=100, blank=True, null=True, help_text="Official designation (e.g., Barangay Secretary)")
+    
+    # Bootstrap and Official Linkage
+    is_bootstrap = models.BooleanField(default=False, help_text="System-created account for initial setup")
+    official = models.OneToOneField(
+        'BarangayOfficial', 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='user_account',
+        help_text="Link to the real official profile"
+    )
+    
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
@@ -204,3 +216,29 @@ class BarangayOfficial(models.Model):
 
     def __str__(self):
         return f"{self.full_name} — {self.get_position_display()}"
+
+class Notification(models.Model):
+    """System and user notifications"""
+    
+    TYPES = [
+        ('info', 'Information'),
+        ('success', 'Success'),
+        ('warning', 'Warning'),
+        ('error', 'Error'),
+    ]
+    
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    title = models.CharField(max_length=200)
+    message = models.TextField()
+    type = models.CharField(max_length=20, choices=TYPES, default='info')
+    link = models.CharField(max_length=255, blank=True, null=True, help_text="Optional URL to redirect to")
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Notification'
+        verbose_name_plural = 'Notifications'
+
+    def __str__(self):
+        return f"{self.user.username} - {self.title}"

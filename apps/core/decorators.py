@@ -69,3 +69,24 @@ def tier_required(required_tiers):
         return _wrapped_view
     return decorator
 
+
+def non_bootstrap_required(view_func):
+    """
+    Decorator for views that checks if the user is a bootstrap account.
+    """
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect(f"{reverse('core:login')}?next={request.path}")
+            
+        if request.user.is_bootstrap:
+            messages.error(
+                request, 
+                "This function is disabled for bootstrapping accounts. Please create and use an official account."
+            )
+            return redirect('core:dashboard')
+            
+        return view_func(request, *args, **kwargs)
+        
+    return _wrapped_view
+
