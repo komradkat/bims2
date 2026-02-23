@@ -1,25 +1,50 @@
-{% extends "certificates/print/base_document.html" %}
+{% extends 'certificates/print/base_document.html' %}
 
 {% block document_content %}
-<p style="text-indent: 1cm;"><strong>TO WHOM IT MAY CONCERN:</strong></p>
 
-<p style="text-indent: 1cm;">Provisions of the New Barangay Tax Ordinance having been complied with, 
-Clearance is hereby granted to:</p>
+<p style="text-indent:0;"><strong>TO WHOM IT MAY CONCERN:</strong></p>
 
-<div style="text-align: center; margin: 1cm 0; border: 1px solid #000; padding: 0.5cm;">
-    <h2 style="margin: 0;">{{ certificate.purpose|upper }}</h2>
-    <p style="margin: 0.2cm 0 0 0;">(Operator/Owner/Business Name)</p>
+<p>
+  This is to certify that <strong>{{ certificate.resident.full_name|upper }}</strong>,
+  {% if certificate.resident.date_of_birth %}born on {{ certificate.resident.date_of_birth|date:"F j, Y" }},{% endif %}
+  {% if certificate.resident.sex == 'M' %}male{% else %}female{% endif %},
+  {{ certificate.resident.civil_status|default:"single"|title }},
+  Filipino citizen, residing at
+  <strong>{{ certificate.resident.address|default:"this Barangay" }},
+  Barangay {{ barangay.name }}, {{ barangay.city }}, {{ barangay.province }}</strong>,
+  is hereby granted a <strong>BARANGAY BUSINESS CLEARANCE</strong> for the purpose of
+  operating a business within the territorial jurisdiction of this Barangay.
+</p>
+
+<p>
+  Based on the verification conducted by this Office, the above-named individual
+  and/or the business establishment for which this clearance is issued have been
+  found to be in order and do not violate any existing Barangay ordinance,
+  resolution, or community regulation.
+</p>
+
+<p>
+  <strong>Purpose / Nature of Business:</strong> {{ certificate.purpose|upper }}
+</p>
+
+<p>
+  This clearance is valid for the current calendar year and subject to renewal.
+  Any violation of Barangay ordinances or misrepresentation of facts stated herein
+  shall be sufficient cause for the revocation of this clearance.
+</p>
+
+<p>
+  IN WITNESS WHEREOF, I have hereunto set my hand and caused the Official Dry Seal
+  of this Barangay to be affixed this <strong>{{ today|date:"F j, Y" }}</strong>
+  at Barangay {{ barangay.name }}, {{ barangay.city }}, {{ barangay.province }}.
+</p>
+
+{% if certificate.or_number %}
+<div style="font-size:9.5pt;margin-top:12px;border:1px solid #ccc;padding:5px 10px;display:inline-block;">
+  O.R. No.: <strong>{{ certificate.or_number }}</strong>
+  &bull; CTC No.: _________________________
+  &bull; Date Issued: _______________
 </div>
+{% endif %}
 
-<p style="text-indent: 1cm;">Located at <strong>{{ certificate.resident.address|upper }}</strong>, 
-Barangay {{ barangay.name }}, Philippines.</p>
-
-<p style="text-indent: 1cm;">This <strong>BUSINESS CLEARANCE</strong> is issued as a prerequisite for 
-the application of <strong>MAYOR'S PERMIT</strong> to operate the above-mentioned business.</p>
-
-<p style="text-indent: 1cm;">This clearance is valid until December 31, {{ today|date:"Y" }} 
-unless sooner revoked for violation of any existing laws and ordinances.</p>
-
-<p style="text-indent: 1cm;">Issued this {{ today|date:"jS" }} day of {{ today|date:"F, Y" }} 
-at the Barangay Hall of {{ barangay.name }}, Philippines.</p>
 {% endblock %}

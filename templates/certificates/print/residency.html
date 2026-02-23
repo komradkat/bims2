@@ -1,21 +1,45 @@
-{% extends "certificates/print/base_document.html" %}
+{% extends 'certificates/print/base_document.html' %}
 
 {% block document_content %}
-<p style="text-indent: 1cm;"><strong>TO WHOM IT MAY CONCERN:</strong></p>
 
-<p style="text-indent: 1cm;">This is to certify that <strong>{{ certificate.resident.full_name|upper }}</strong>, 
-{{ certificate.resident.age }} years of age, 
-{% if certificate.resident.sex == 'M' %}Male{% else %}Female{% endif %}, 
-{{ certificate.resident.get_civil_status_display }}, is a 
-bona fide resident of Barangay {{ barangay.name }}, {{ barangay.city }}, {{ barangay.province }} 
-with residence address at {{ certificate.resident.address }}.</p>
+<p style="text-indent:0;"><strong>TO WHOM IT MAY CONCERN:</strong></p>
 
-<p style="text-indent: 1cm;">This further certifies that {{ certificate.resident.first_name }} has been 
-residing in this Barangay since {{ certificate.resident.created_at|date:"Y" }}.</p>
+<p>
+  This is to certify that <strong>{{ certificate.resident.full_name|upper }}</strong>,
+  {% if certificate.resident.date_of_birth %}born on {{ certificate.resident.date_of_birth|date:"F j, Y" }},{% endif %}
+  {% if certificate.resident.sex == 'M' %}male{% else %}female{% endif %},
+  {{ certificate.resident.civil_status|default:"single"|title }},
+  Filipino citizen, is a <em>bona fide</em> resident of
+  <strong>{{ certificate.resident.address|default:"this Barangay" }},
+  Barangay {{ barangay.name }}, {{ barangay.city }}, {{ barangay.province }}</strong>,
+  and has been residing in said address for a considerable period of time.
+</p>
 
-<p style="text-indent: 1cm;">This certification is being issued upon the request of the interested party 
-for <strong>{{ certificate.purpose|upper }}</strong> and for whatever legal purpose it may serve.</p>
+<p>
+  This is to further certify that the above-named individual is duly recognized
+  by this Office as a <strong>LEGITIMATE RESIDENT</strong> of this Barangay and
+  is entitled to all the rights, privileges, and services accorded to bona fide
+  residents thereof.
+</p>
 
-<p style="text-indent: 1cm;">Issued this {{ today|date:"jS" }} day of {{ today|date:"F, Y" }} 
-at the Barangay Hall of {{ barangay.name }}, {{ barangay.city }}, Philippines.</p>
+<p>
+  This certification is being issued upon the formal request of the above-named
+  individual to be used for <strong>{{ certificate.purpose|upper }}</strong>
+  and for whatever legal intent and purpose it may serve.
+</p>
+
+<p>
+  IN WITNESS WHEREOF, I have hereunto set my hand and caused the Official Dry Seal
+  of this Barangay to be affixed this <strong>{{ today|date:"F j, Y" }}</strong>
+  at Barangay {{ barangay.name }}, {{ barangay.city }}, {{ barangay.province }}.
+</p>
+
+{% if certificate.or_number %}
+<div style="font-size:9.5pt;margin-top:12px;border:1px solid #ccc;padding:5px 10px;display:inline-block;">
+  O.R. No.: <strong>{{ certificate.or_number }}</strong>
+  &bull; CTC No.: _________________________
+  &bull; Date Issued: _______________
+</div>
+{% endif %}
+
 {% endblock %}

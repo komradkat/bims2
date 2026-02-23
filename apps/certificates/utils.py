@@ -1,69 +1,57 @@
 from django.conf import settings
 from django.template.loader import render_to_string
-from django.contrib.staticfiles import finders
 import os
 from io import BytesIO
-from xhtml2pdf import pisa
 
-def link_callback(uri, rel):
-    """
-    Convert HTML URIs to absolute system paths so xhtml2pdf can access those resources
-    """
-    sUrl = settings.STATIC_URL        # Typically /static/
-    sRoot = settings.STATIC_ROOT      # Typically /home/userX/project_static/
-    mUrl = settings.MEDIA_URL         # Typically /media/
-    mRoot = settings.MEDIA_ROOT       # Typically /home/userX/project_static/media/
+import weasyprint
 
-    # Handle Media Files
-    if uri.startswith(mUrl):
-        path = os.path.join(mRoot, uri.replace(mUrl, "", 1))
-    
-    # Handle Static Files
-    elif uri.startswith(sUrl):
-        relative_path = uri.replace(sUrl, "", 1)
-        # Try finding it using Django finders (works in dev)
-        found = finders.find(relative_path)
+
+def _url_fetcher(url):
+    """
+    Maps Django /static/ and /media/ URLs to local file paths for WeasyPrint.
+    """
+    from django.contrib.staticfiles import finders
+
+    static_url = settings.STATIC_URL
+    media_url  = settings.MEDIA_URL
+
+    if url.startswith("file://"):
+        return weasyprint.default_url_fetcher(url)
+
+    path = None
+
+    if url.startswith(media_url):
+        path = os.path.join(settings.MEDIA_ROOT, url[len(media_url):])
+    elif url.startswith(static_url):
+        relative = url[len(static_url):]
+        found = finders.find(relative)
         if found:
             path = found
-        else:
-            # Fallback to STATIC_ROOT
-            path = os.path.join(sRoot, relative_path)
-    
-    # Handle relative paths or other files
-    else:
-        found = finders.find(uri)
-        if found:
-            path = found
-        else:
-            return uri
+        elif hasattr(settings, "STATIC_ROOT") and settings.STATIC_ROOT:
+            path = os.path.join(settings.STATIC_ROOT, relative)
 
-    # make sure that file exists
-    if not os.path.isfile(path):
-        # Don't raise error, just return None or uri so xhtml2pdf ignores it gracefully
-        # or print a warning
-        print(f"Warning: URI not found: {uri} -> {path}")
-        return uri
-        
-    return path
+    if path and os.path.isfile(path):
+        with open(path, "rb") as f:
+            return {"file_obj": BytesIO(f.read()), "mime_type": None}
+
+    return weasyprint.default_url_fetcher(url)
+
 
 def generate_pdf(template_name, context):
     """
-    Renders an HTML template with context and converts it to PDF using xhtml2pdf (ReportLab).
-    Raises ValueError on pisa errors so callers get a useful message.
+    Renders a Django template and converts it to PDF using WeasyPrint.
+    Supports full CSS: flex, grid, border-radius, position:absolute, etc.
+    Returns bytes.
     """
     html_string = render_to_string(template_name, context)
-    result = BytesIO()
-    
-    # Create the PDF
-    pdf = pisa.pisaDocument(
-        BytesIO(html_string.encode("UTF-8")),
-        result,
-        link_callback=link_callback
-    )
-    
-    if pdf.err:
-        import sys
-        print(f"xhtml2pdf error(s) while rendering '{template_name}': {pdf.err}", file=sys.stderr)
-        raise ValueError(f"PDF rendering failed for template '{template_name}' ({pdf.err} error(s)). Check server logs.")
-        
-    return result.getvalue()
+    base_url = f"file:///{settings.BASE_DIR}/"
+
+    try:
+        pdf_bytes = (
+            weasyprint.HTML(string=html_string, base_url=base_url, url_fetcher=_url_fetcher)
+            .write_pdf()
+        )
+    except Exception as exc:
+        raise ValueError(f"PDF rendering failed for '{template_name}': {exc}") from exc
+
+    return pdf_bytes

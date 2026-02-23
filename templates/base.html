@@ -1,6 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en" data-theme="emerald">
+<html lang="en" data-theme="night">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -28,6 +28,26 @@
 
     <style>
         body { font-family: 'Inter', sans-serif; }
+
+        /* ── Dark palette overrides to match login page ── */
+        :root, [data-theme="night"] {
+            --b1: #161b27;   /* base-100 — sidebar, cards, dropdowns */
+            --b2: #0d1117;   /* base-200 — main content background */
+            --b3: #1e293b;   /* base-300 — borders, dividers */
+            --bc: #cbd5e1;   /* base-content — main text */
+            --p:  #1d4ed8;   /* primary — buttons, active states */
+            --pc: #ffffff;   /* primary-content */
+        }
+
+        /* Sidebar scrollbar */
+        .drawer-side ::-webkit-scrollbar { width: 4px; }
+        .drawer-side ::-webkit-scrollbar-track { background: #0d1117; }
+        .drawer-side ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 2px; }
+
+        /* Content area scrollbar */
+        .drawer-content ::-webkit-scrollbar { width: 6px; }
+        .drawer-content ::-webkit-scrollbar-track { background: #0d1117; }
+        .drawer-content ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
     </style>
 
     {% block extra_css %}{% endblock %}

@@ -1,21 +1,57 @@
-{% extends "certificates/print/base_document.html" %}
+{% extends 'certificates/print/base_document.html' %}
 
 {% block document_content %}
-<p style="text-indent: 1cm;"><strong>TO WHOM IT MAY CONCERN:</strong></p>
 
-<p style="text-indent: 1cm;">This is to certify that <strong>{{ certificate.resident.full_name|upper }}</strong>, 
-{{ certificate.resident.age }} years of age, is a 
-bona fide resident of Barangay {{ barangay.name }}, {{ barangay.city }}, {{ barangay.province }} 
-for at least six (6) months.</p>
+<p style="text-indent:0;"><strong>TO WHOM IT MAY CONCERN:</strong></p>
 
-<p style="text-indent: 1cm;">This certification is issued pursuant to <strong>Republic Act No. 11261</strong>, 
-otherwise known as the <strong>"First Time Jobseekers Assistance Act"</strong>, 
-granting exemption from the payment of fees and other charges on the issuance 
-of documents requested by first-time jobseekers.</p>
+<p>
+  This is to certify that <strong>{{ certificate.resident.full_name|upper }}</strong>,
+  {% if certificate.resident.date_of_birth %}born on {{ certificate.resident.date_of_birth|date:"F j, Y" }},{% endif %}
+  {% if certificate.resident.sex == 'M' %}male{% else %}female{% endif %},
+  {{ certificate.resident.civil_status|default:"single"|title }},
+  Filipino citizen, residing at
+  <strong>{{ certificate.resident.address|default:"this Barangay" }},
+  Barangay {{ barangay.name }}, {{ barangay.city }}, {{ barangay.province }}</strong>,
+  is a <strong>FIRST-TIME JOB SEEKER</strong> as defined under
+  <em>Republic Act No. 11261</em>, otherwise known as the
+  <em>First-Time Jobseekers Assistance Act</em>.
+</p>
 
-<p style="text-indent: 1cm;">The applicant is hereby informed that this certification is valid for 
-<strong>one (1) year</strong> from the date of issuance.</p>
+<p>
+  Prior to the issuance of this certification, the above-named individual has
+  personally appeared before this Office and presented valid identification
+  documents proving his/her identity and residency. Based on the records of this
+  Barangay, said individual is currently <strong>WITHOUT PRIOR EMPLOYMENT</strong>
+  in any private or government institution and has not received this certification
+  previously.
+</p>
 
-<p style="text-indent: 1cm;">Issued this {{ today|date:"jS" }} day of {{ today|date:"F, Y" }} 
-at the Barangay Hall of {{ barangay.name }}, {{ barangay.city }}, Philippines.</p>
+<p>
+  This certification entitles the above-named individual to avail of exemptions
+  from documentary stamp tax, fees, and other charges for the following documents
+  required in his/her job application: NBI Clearance, Police Clearance, Transcript
+  of Records, Diploma, Birth Certificate, Medical/Psychological Certificate,
+  Drug Test, and all Barangay-issued certifications.
+</p>
+
+<p>
+  This certification is issued upon the request of the above-named individual
+  for the purpose of <strong>{{ certificate.purpose|upper }}</strong> and for
+  whatever legal intent and purpose it may serve.
+</p>
+
+<p>
+  IN WITNESS WHEREOF, I have hereunto set my hand and caused the Official Dry Seal
+  of this Barangay to be affixed this <strong>{{ today|date:"F j, Y" }}</strong>
+  at Barangay {{ barangay.name }}, {{ barangay.city }}, {{ barangay.province }}.
+</p>
+
+{% if certificate.or_number %}
+<div style="font-size:9.5pt;margin-top:12px;border:1px solid #ccc;padding:5px 10px;display:inline-block;">
+  O.R. No.: <strong>{{ certificate.or_number }}</strong>
+  &bull; CTC No.: _________________________
+  &bull; Date Issued: _______________
+</div>
+{% endif %}
+
 {% endblock %}

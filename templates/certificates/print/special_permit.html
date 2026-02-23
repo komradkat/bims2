@@ -1,22 +1,51 @@
-{% extends "certificates/print/base_document.html" %}
+{% extends 'certificates/print/base_document.html' %}
 
 {% block document_content %}
-<p style="text-indent: 1cm;"><strong>TO WHOM IT MAY CONCERN:</strong></p>
 
-<p style="text-indent: 1cm;">This <strong>SPECIAL PERMIT</strong> is hereby granted to:</p>
+<p style="text-indent:0;"><strong>TO WHOM IT MAY CONCERN:</strong></p>
 
-<div style="text-align: center; margin: 1cm 0; border: 1px solid #000; padding: 0.5cm;">
-    <h2 style="margin: 0;">{{ certificate.resident.full_name|upper }}</h2>
-    <p style="margin: 0.2cm 0 0 0;">(Applicant/Requestor)</p>
+<p>
+  This is to certify that <strong>{{ certificate.resident.full_name|upper }}</strong>,
+  {% if certificate.resident.date_of_birth %}born on {{ certificate.resident.date_of_birth|date:"F j, Y" }},{% endif %}
+  {% if certificate.resident.sex == 'M' %}male{% else %}female{% endif %},
+  {{ certificate.resident.civil_status|default:"single"|title }},
+  Filipino citizen, residing at
+  <strong>{{ certificate.resident.address|default:"this Barangay" }},
+  Barangay {{ barangay.name }}, {{ barangay.city }}, {{ barangay.province }}</strong>,
+  is hereby granted this <strong>BARANGAY SPECIAL PERMIT</strong>.
+</p>
+
+<p>
+  This permit is issued after due evaluation by the undersigned and the Barangay
+  Council that the purpose stated herein does not violate any existing Barangay
+  ordinance, resolution, community regulation, or applicable provision of law.
+  The permit-holder is duly authorized to engage in the activity or purpose
+  described herein within the territorial jurisdiction of Barangay {{ barangay.name }}.
+</p>
+
+<p>
+  <strong>Purpose of Permit:</strong> {{ certificate.purpose|upper }}
+</p>
+
+<p>
+  This permit is valid from the date of issuance, <strong>{{ today|date:"F j, Y" }}</strong>,
+  subject to the continuing compliance of the permit-holder with all applicable
+  Barangay ordinances and national laws. This permit may be revoked at any time
+  upon violation of the conditions stated herein or by order of competent authority.
+</p>
+
+<p>
+  IN WITNESS WHEREOF, I have hereunto set my hand and caused the Official Dry Seal
+  of this Barangay to be affixed this <strong>{{ today|date:"F j, Y" }}</strong>
+  at Barangay {{ barangay.name }}, {{ barangay.city }}, {{ barangay.province }}.
+</p>
+
+{% if certificate.or_number %}
+<div style="font-size:9.5pt;margin-top:12px;border:1px solid #ccc;padding:5px 10px;display:inline-block;">
+  O.R. No.: <strong>{{ certificate.or_number }}</strong>
+  &bull; CTC No.: _________________________
+  &bull; Date Issued: _______________
 </div>
+{% endif %}
 
-<p style="text-indent: 1cm;">For the purpose of: <strong>{{ certificate.purpose|upper }}</strong></p>
-
-<p style="text-indent: 1cm;">This permit is issued upon the request of the interested party 
-subject to existing laws, ordinances, and regulations of this Barangay.</p>
-
-<p style="text-indent: 1cm;">This permit is valid until: <strong>[VALIDITY DATE]</strong></p>
-
-<p style="text-indent: 1cm;">Issued this {{ today|date:"jS" }} day of {{ today|date:"F, Y" }} 
-at the Barangay Hall of {{ barangay.name }}, {{ barangay.city }}, Philippines.</p>
 {% endblock %}
