@@ -9,7 +9,6 @@ from django.shortcuts import redirect
 from django.urls import reverse
 from django.core.cache import cache
 from django.conf import settings
-from decouple import config
 from apps.core.models import LicenseKey
 from apps.core.utils.hardware import get_hardware_id
 
@@ -32,7 +31,7 @@ class LicenseVerificationMiddleware:
     def __call__(self, request):
         # DEBUG MODE: Bypass license check and grant Ultra tier for development
         # Check both DEBUG setting and LICENSE_DEBUG_BYPASS env variable
-        license_debug_bypass = config('LICENSE_DEBUG_BYPASS', default=False, cast=bool)
+        license_debug_bypass = getattr(settings, 'LICENSE_DEBUG_BYPASS', False)
         
         if settings.DEBUG or license_debug_bypass:
             request.license = {

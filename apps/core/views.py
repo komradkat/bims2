@@ -320,9 +320,6 @@ class LicenseActivationView(LoginRequiredMixin, View):
         except LicenseKey.DoesNotExist:
             messages.error(request, "Invalid license key. Please check and try again.")
             return redirect('core:license_activation')
-        except LicenseKey.DoesNotExist:
-            messages.error(request, "Invalid license key. Please check and try again.")
-            return redirect('core:license_activation')
 
 
 class SetupView(View):

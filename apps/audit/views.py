@@ -3,6 +3,10 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from apps.core.mixins import NonBootstrapRequiredMixin
 from django.apps import apps
 
+from apps.core.decorators import tier_required
+from django.utils.decorators import method_decorator
+
+@method_decorator(tier_required(['pro', 'ultra']), name='dispatch')
 class AuditLogsView(LoginRequiredMixin, NonBootstrapRequiredMixin, ListView):
     template_name = 'pages/audit/logs.html'
     context_object_name = 'logs'

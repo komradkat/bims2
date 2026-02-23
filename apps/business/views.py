@@ -8,6 +8,10 @@ from .models import BusinessPermit, BusinessClearance
 from .forms import BusinessPermitForm
 from django.contrib import messages
 
+from apps.core.decorators import tier_required
+from django.utils.decorators import method_decorator
+
+@method_decorator(tier_required(['pro', 'ultra']), name='dispatch')
 class BusinessListView(LoginRequiredMixin, NonBootstrapRequiredMixin, ListView):
     model = BusinessPermit
     template_name = 'pages/business/list.html'
@@ -42,6 +46,7 @@ class BusinessListView(LoginRequiredMixin, NonBootstrapRequiredMixin, ListView):
 
         return context
 
+@method_decorator(tier_required(['pro', 'ultra']), name='dispatch')
 class BusinessCreateView(LoginRequiredMixin, NonBootstrapRequiredMixin, CreateView):
     model = BusinessPermit
     form_class = BusinessPermitForm
@@ -74,6 +79,7 @@ class BusinessCreateView(LoginRequiredMixin, NonBootstrapRequiredMixin, CreateVi
         messages.success(self.request, f"Business Permit for {form.instance.business_name} created successfully.")
         return response
 
+@method_decorator(tier_required(['pro', 'ultra']), name='dispatch')
 class BusinessUpdateView(LoginRequiredMixin, NonBootstrapRequiredMixin, UpdateView):
     model = BusinessPermit
     form_class = BusinessPermitForm
