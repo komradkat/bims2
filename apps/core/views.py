@@ -7,6 +7,7 @@ from django.contrib import messages
 from django.core.cache import cache
 from django.db.models import Sum
 from django.utils import timezone
+from django.utils.safestring import mark_safe
 from datetime import timedelta
 
 # Import models for Dashboard
@@ -193,12 +194,44 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                     a['time'],
                     a['activity'],
                     a['user'],
-                    f'<span class="badge badge-success">{a["status"]}</span>'
+                    mark_safe(f'<span class="badge badge-success">{a["status"]}</span>')
                 ]
             } for a in activities
         ]
         
         return context
+
+class SettingsView(LoginRequiredMixin, View):
+    """View to manage Barangay Information and System Settings"""
+    template_name = 'core/settings.html'
+
+    def get(self, request):
+        from apps.core.models import BarangayInfo
+        info = BarangayInfo.objects.first()
+        return render(request, self.template_name, {'info': info})
+
+    def post(self, request):
+        from apps.core.models import BarangayInfo
+        info = BarangayInfo.objects.first() or BarangayInfo()
+        
+        info.name = request.POST.get('barangay_name')
+        info.street = request.POST.get('barangay_street', '')
+        info.city_municipality = request.POST.get('barangay_city_municipality')
+        info.province = request.POST.get('barangay_province')
+        info.contact_number = request.POST.get('contact_number', '')
+        info.email = request.POST.get('barangay_email', '')
+        
+        if request.POST.get('latitude'):
+            info.latitude = float(request.POST.get('latitude'))
+        if request.POST.get('longitude'):
+            info.longitude = float(request.POST.get('longitude'))
+            
+        if request.FILES.get('barangay_logo'):
+            info.logo = request.FILES['barangay_logo']
+            
+        info.save()
+        messages.success(request, "System settings updated successfully.")
+        return redirect('core:settings')
 
 @method_decorator(tier_required(['ultra']), name='dispatch')
 class GisMapView(TemplateView):

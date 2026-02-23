@@ -81,7 +81,7 @@
                 0 4px 20px rgba(0,0,0,0.35);
             transition: box-shadow 0.2s, transform 0.2s;
         }
-        .card:hover {
+        .card:not(.static-card):hover {
             box-shadow:
                 inset 0 3px 0 oklch(58% 0.20 262),
                 0 10px 30px rgba(0,0,0,0.50);
@@ -146,10 +146,17 @@
             padding-left: 1.1rem;
         }
         .menu li > a.active {
-            background: oklch(58% 0.20 262);
-            color: oklch(98% 0.003 245);
-            font-weight: 600;
-            box-shadow: 0 2px 12px oklch(58% 0.20 262 / 0.40);
+            background: oklch(58% 0.20 262 / 0.12) !important;
+            color: oklch(58% 0.20 262) !important;
+            font-weight: 800;
+            border-left: 4px solid oklch(58% 0.20 262);
+            border-radius: 0 6px 6px 0;
+            box-shadow: none;
+            padding-left: 1rem;
+        }
+        .menu li > a.active svg {
+            transform: scale(1.15);
+            color: oklch(58% 0.20 262);
         }
         /* Section labels ("TIER 1: COMMUNITY") */
         .menu-title {

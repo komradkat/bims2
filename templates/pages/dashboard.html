@@ -18,20 +18,20 @@
     <div class="mb-8">
         <h2 class="text-xl font-bold mb-4">Quick Actions</h2>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <a href="{% url 'residents:add' %}" class="btn btn-outline h-auto py-4 flex flex-col items-center gap-2 hover:bg-primary hover:text-white group">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-primary group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg>
+            <a href="{% url 'residents:add' %}" class="btn btn-primary h-auto py-4 flex flex-col items-center gap-2 text-white border-none shadow-md hover:scale-105 transition-transform">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg>
                 New Resident
             </a>
-            <a href="{% url 'certificates:center' %}" class="btn btn-outline h-auto py-4 flex flex-col items-center gap-2 hover:bg-secondary hover:text-white group">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-secondary group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+            <a href="{% url 'certificates:center' %}" class="btn btn-secondary h-auto py-4 flex flex-col items-center gap-2 text-white border-none shadow-md hover:scale-105 transition-transform">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                 Issue Certificate
             </a>
-            <a href="{% url 'blotter:list' %}" class="btn btn-outline h-auto py-4 flex flex-col items-center gap-2 hover:bg-warning hover:text-white group">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-warning group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+            <a href="{% url 'blotter:list' %}" class="btn btn-warning h-auto py-4 flex flex-col items-center gap-2 text-warning-content border-none shadow-md hover:scale-105 transition-transform">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
                 New Blotter
             </a>
-            <a href="{% url 'business:list' %}" class="btn btn-outline h-auto py-4 flex flex-col items-center gap-2 hover:bg-accent hover:text-white group">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-accent group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <a href="{% url 'business:list' %}" class="btn btn-accent h-auto py-4 flex flex-col items-center gap-2 text-accent-content border-none shadow-md hover:scale-105 transition-transform">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                 Renew Permit
             </a>
         </div>
@@ -40,7 +40,7 @@
     {# Two Column Layout: Recent Certificates & Urgent Blotter Cases #}
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {# Recent Certificates #}
-        <div class="card bg-base-100 shadow-sm border border-base-200">
+        <div class="card bg-base-100 shadow-sm border border-base-200 static-card">
             <div class="card-body">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="card-title text-lg">Recent Certificates</h2>
@@ -59,7 +59,7 @@
                         </thead>
                         <tbody>
                             {% for cert in recent_certificates %}
-                            <tr class="hover">
+                            <tr>
                                 <td class="font-medium">{{ cert.recipient }}</td>
                                 <td class="text-sm text-base-content/70">{{ cert.type }}</td>
                                 <td class="text-sm text-base-content/70">{{ cert.date }}</td>
@@ -79,7 +79,7 @@
         </div>
 
         {# Urgent Blotter Cases #}
-        <div class="card bg-base-100 shadow-sm border border-base-200">
+        <div class="card bg-base-100 shadow-sm border border-base-200 static-card">
             <div class="card-body">
                 <h2 class="card-title text-lg text-error mb-4">Urgent Blotter Cases</h2>
                 
