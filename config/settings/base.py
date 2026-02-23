@@ -8,6 +8,14 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
+# System Versioning
+VERSION_FILE = BASE_DIR / 'VERSION'
+if VERSION_FILE.exists():
+    with open(VERSION_FILE, 'r') as f:
+        BIMS_VERSION = f.read().strip()
+else:
+    BIMS_VERSION = '1.0.0-dev'
+
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-q^n26_lr7(^ha^yk7n-m+dn5zdjs(&606at*gqrt4z*)*mjtj&')
@@ -73,6 +81,7 @@ TEMPLATES = [
                 'apps.core.context_processors.barangay_info',
                 'apps.core.context_processors.user_info',
                 'apps.core.context_processors.tier_info',
+                'apps.core.context_processors.system_version',
             ],
         },
     },

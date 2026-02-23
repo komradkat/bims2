@@ -126,3 +126,9 @@ def notifications(request):
         'recent_notifications': recent_notifications,
     }
 
+def system_version(request):
+    """Provide system version information to all templates"""
+    from django.conf import settings
+    return {
+        'system_version': getattr(settings, 'BIMS_VERSION', '1.0.0-dev')
+    }

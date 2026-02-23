@@ -1,136 +1,115 @@
+import os
+import traceback
 from django.core.management.base import BaseCommand
 from django.utils import timezone
+from django.conf import settings
+from django.template.loader import render_to_string
 from apps.certificates.models import CertificateType, Certificate
 from apps.residents.models import Resident
 from apps.certificates.utils import generate_pdf
-import os
-from django.conf import settings
 
 class Command(BaseCommand):
     help = 'Generate sample PDFs for all certificate types'
 
     def handle(self, *args, **kwargs):
-        self.stdout.write('Generating sample PDFs...')
+        self.stdout.write('Generating sample PDFs with context sync...')
         
         # Ensure output directory exists
         output_dir = os.path.join(settings.MEDIA_ROOT, 'sample_pdfs')
         os.makedirs(output_dir, exist_ok=True)
         
-        import traceback
+        # 1. Fetch Real Barangay Info or fall back
+        from apps.core.models import BarangayInfo
+        try:
+            info = BarangayInfo.objects.get()
+            barangay_data = {
+                'name':         info.name,
+                'city':         info.city_municipality,
+                'province':     info.province,
+                'region':       info.region,
+                'logo_url':     ('file:///' + info.logo.path.replace('\\', '/')) if info.logo else None,
+                'captain_name': (info.captain_name or '').upper() if hasattr(info, 'captain_name') else 'PUNONG BARANGAY',
+                'contact':      info.contact_number,
+                'email':        info.email,
+            }
+        except Exception:
+            self.stdout.write(self.style.WARNING("No BarangayInfo found, using mock data."))
+            barangay_data = {
+                'name': 'SAMPLE BARANGAY',
+                'city': 'SAMPLE CITY',
+                'province': 'SAMPLE PROVINCE',
+                'logo_url': None,
+                'captain_name': 'JUAN DELA CRUZ',
+            }
+
+        # 2. Get System Version (Global Context)
+        system_version = getattr(settings, 'BIMS_VERSION', '1.0.0-dev')
         
-        # Create dummy resident as a DICT to avoid lookup issues
+        # 3. Create dummy resident
         resident = {
             'first_name': 'Juan',
             'last_name': 'Dela Cruz',
             'middle_name': 'Santos',
             'age': 25,
             'sex': 'M',
-            'civil_status': 'single',
             'get_civil_status_display': 'Single',
             'citizenship': 'Filipino',
-            'address': 'Purok 1, Barangay San Jose',
-            'is_household_head': True,
+            'address': 'Purok 1, Barangay Sample',
             'full_name': 'Juan Santos Dela Cruz',
         }
         
-        # Get all certificate types
+        # 4. Process all active certificate types
         types = CertificateType.objects.filter(is_active=True)
         
+        bp_path = os.path.join(settings.MEDIA_ROOT, 'barangay', 'logo', 'bangongpilipinas.png')
+        bagong_pilipinas_url = ('file:///' + bp_path.replace('\\', '/')) if os.path.isfile(bp_path) else None
+
         for cert_type in types:
             try:
-                # Create dummy certificate context as DICT
-                cert = {
-                    'certificate_type': cert_type, # Model instance is fine here
-                    'resident': resident,
-                    'purpose': 'Employment Requirement',
-                    'transaction_number': f'SAMPLE-{cert_type.slug.upper()}',
-                    'or_number': 'OR-12345',
-                    'issued_at': timezone.now(),
-                    'issued_by': {
-                        'username': 'admin',
-                        'get_full_name': 'Admin User'
-                    }
-                }
+                # Mock certificate instance attributes
+                class MockCert:
+                    pass
                 
-                # Mock context
-                logo_path = '/media/barangay/logo/445493360_7676135385787063_8483044850165205000_n-removebg-preview.png'
+                cert = MockCert()
+                cert.certificate_type = cert_type
+                cert.resident = resident
+                cert.purpose = 'Sample Purpose for Testing'
+                cert.transaction_number = f'SAMPLE-{cert_type.slug.upper()}'
+                cert.or_number = 'OR-SAMPLE'
+                cert.issued_at = timezone.now()
+                cert.status = 'issued' # Ensure it gets hashed
+                cert.digital_hash = '(Sample Hash)' # Placeholder for preview
+                cert.id = 999
+                
                 context = {
                     'certificate': cert,
-                    'barangay': {
-                        'name': 'San Jose',
-                        'city': 'San Fernando',
-                        'province': 'Pampanga',
-                        'logo_url': logo_path
-                    },
-                    'barangay_info': {
-                        'name': 'San Jose',
-                        'city': 'San Fernando',
-                        'province': 'Pampanga',
-                        'logo_url': logo_path
-                    },
-                    'today': timezone.now(),
+                    'barangay':    barangay_data,
+                    'today':       timezone.now(),
+                    'system_version': system_version,
+                    'bagong_pilipinas_url': bagong_pilipinas_url,
                 }
                 
-                # Generate PDF logic from utils (modified to accept context directly if needed)
-                from django.template.loader import render_to_string
-                
+                # HTML Preview for debugging
                 html_content = render_to_string(cert_type.template_file, context)
-                
-                # Always save HTML for debugging/preview
                 html_filename = f"{cert_type.slug}_preview.html"
-                html_filepath = os.path.join(output_dir, html_filename)
-                with open(html_filepath, 'w', encoding='utf-8') as f:
+                with open(os.path.join(output_dir, html_filename), 'w', encoding='utf-8') as f:
                     f.write(html_content)
-                self.stdout.write(f'Generated properties: {html_filepath}')
 
+                # PDF Generation
                 try:
-                    pdf_content = generate_pdf(cert_type.template_file, context)
-                    filename = f"{cert_type.slug}_sample.pdf"
-                    filepath = os.path.join(output_dir, filename)
+                    pdf_content, pdf_hash = generate_pdf(cert_type.template_file, context)
+                    
+                    pdf_filename = f"{cert_type.slug}_sample.pdf"
+                    filepath = os.path.join(output_dir, pdf_filename)
                     with open(filepath, 'wb') as f:
                         f.write(pdf_content)
-                    self.stdout.write(self.style.SUCCESS(f'Generated PDF: {filepath}'))
-                except Exception as e:
-                    self.stdout.write(self.style.WARNING(f'PDF generation failed: {str(e)}'))
-                    self.stdout.write(self.style.SUCCESS(f'HTML Preview available: {html_filepath}'))
-                    # traceback.print_exc() # Optional: uncomment for details
-
-                # --- Docx Generation ---
-                try:
-                    from docxtpl import DocxTemplate
-                    docx_template_path = os.path.join(settings.MEDIA_ROOT, 'templates', 'certificate_template.docx')
                     
-                    if os.path.exists(docx_template_path):
-                        doc = DocxTemplate(docx_template_path)
-                        
-                        # Docx Context (flatter structure usually better for simple templates)
-                        docx_context = {
-                            'province': 'Pampanga',
-                            'city': 'San Fernando',
-                            'barangay_name': 'San Jose',
-                            'certificate_title': cert_type.name.upper(),
-                            'full_name': resident['full_name'],
-                            'citizenship': resident['citizenship'],
-                            'address': resident['address'],
-                            'purpose': context['certificate']['purpose'],
-                            'day': context['today'].strftime('%d'),
-                            'month_year': context['today'].strftime('%B, %Y'),
-                        }
-                        
-                        doc.render(docx_context)
-                        
-                        docx_filename = f"{cert_type.slug}_sample.docx"
-                        docx_filepath = os.path.join(output_dir, docx_filename)
-                        doc.save(docx_filepath)
-                        self.stdout.write(self.style.SUCCESS(f'Generated DOCX: {docx_filepath}'))
-                    else:
-                        self.stdout.write(self.style.WARNING(f'Skipping DOCX: Template not found at {docx_template_path}'))
-                        
+                    self.stdout.write(self.style.SUCCESS(f'Generated PDF: {pdf_filename} | Hash: {pdf_hash[:10]}...'))
                 except Exception as e:
-                    self.stdout.write(self.style.ERROR(f'Failed to generate DOCX for {cert_type.name}: {str(e)}'))
-                
-            except Exception as e:
-                self.stdout.write(self.style.ERROR(f'Failed to generate {cert_type.name}: {str(e)}'))
-                traceback.print_exc()
+                    self.stdout.write(self.style.ERROR(f'PDF Error for {cert_type.slug}: {str(e)}'))
+                    # self.stdout.write(traceback.format_exc())
 
-        self.stdout.write(self.style.SUCCESS(f'\nAll samples (HTML/PDF) saved to: {output_dir}'))
+            except Exception as e:
+                self.stdout.write(self.style.ERROR(f'Failed to process {cert_type.name}: {str(e)}'))
+
+        self.stdout.write(self.style.SUCCESS(f'\nSamples saved to: {output_dir}'))

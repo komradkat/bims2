@@ -36,6 +36,13 @@ This guide lists the placeholders you can use in your Word (`.docx`) certificate
 | `{{ day }}` | Day of the month | *19* |
 | `{{ month_year }}` | Month and Year | *February, 2026* |
 
+### Digital Authenticity
+| Placeholder | Description | Example |
+| :--- | :--- | :--- |
+| `{{ qr_code }}` | **Verification Image**: Generates a QR code for authenticity tracking. | *(Generates Image)* |
+| `{{ transaction_number }}` | The unique identifier for this document instance. | *CERT-20260224-1234* |
+| `{{ digital_hash }}` | The **SHA256 signature** of the document for fraud prevention. | *a7c3b2...12df* |
+
 ## Advanced Formatting
 You can format these placeholders directly in Word. For example:
 - To make the name bold, simply highlight `{{ full_name }}` in Word and click **Bold**.

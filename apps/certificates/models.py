@@ -50,6 +50,10 @@ class Certificate(models.Model):
     amount_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     
+    # Authenticity & Persistence
+    digital_hash = models.CharField(max_length=64, blank=True, help_text="SHA256 hash of the generated document")
+    document = models.FileField(upload_to='certificates/issued/%Y/%m/', null=True, blank=True)
+    
     # Metadata
     issued_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
     issued_at = models.DateTimeField(null=True, blank=True)

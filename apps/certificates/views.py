@@ -49,13 +49,35 @@ class CertificatePrintView(LoginRequiredMixin, NonBootstrapRequiredMixin, Detail
         template_name = certificate.certificate_type.template_file
 
         try:
-            pdf = generate_pdf(template_name, context)
-            response = HttpResponse(pdf, content_type='application/pdf')
+            # 1. Reuse existing document if available and valid
+            if certificate.document and certificate.digital_hash:
+                try:
+                    return HttpResponse(certificate.document.open('rb'), content_type='application/pdf')
+                except Exception:
+                    # If file is missing or error, regenerate
+                    pass
+
+            # 2. Generate PDF and calculate Hash
+            pdf_content, pdf_hash = generate_pdf(template_name, context)
+            
+            # 3. Save Hash and Document if not draft
+            if certificate.status != 'cancelled':
+                certificate.digital_hash = pdf_hash
+                
+                # Save PDF content to a FileField
+                from django.core.files.base import ContentFile
+                filename = f"{certificate.transaction_number}.pdf"
+                certificate.document.save(filename, ContentFile(pdf_content), save=True)
+
+            # 4. Return as Response
+            response = HttpResponse(pdf_content, content_type='application/pdf')
             response['Content-Disposition'] = (
                 f'inline; filename="{certificate.transaction_number}.pdf"'
             )
             return response
         except Exception as e:
+            import traceback
+            print(traceback.format_exc())
             messages.error(request, f"Error generating PDF: {e}")
             return redirect('certificates:center')
 
