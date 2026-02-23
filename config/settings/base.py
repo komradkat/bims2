@@ -156,6 +156,13 @@ STORAGES = {
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+# External Storage for Certificates (Safe from project deletion/temp cleanup)
+# FALLBACK: If DEBUG=True, save to project media for easier developer access.
+if DEBUG:
+    BIMS_CERTIFICATE_STORAGE_ROOT = MEDIA_ROOT / 'certificates' / 'issued'
+else:
+    BIMS_CERTIFICATE_STORAGE_ROOT = Path("C:/BIMS_Data/Issued_Certificates")
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 

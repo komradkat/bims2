@@ -29,6 +29,14 @@ class CertificateType(models.Model):
     def __str__(self):
         return self.name
 
+from django.core.files.storage import FileSystemStorage
+
+# Custom storage for certificates to keep them in a safe system location
+certificate_storage = FileSystemStorage(
+    location=str(getattr(settings, 'BIMS_CERTIFICATE_STORAGE_ROOT', settings.MEDIA_ROOT / 'certificates/issued')),
+    base_url='/external-certs/' # We will handle serving in the view
+)
+
 class Certificate(models.Model):
     """
     Record of an issued certificate.
@@ -52,7 +60,12 @@ class Certificate(models.Model):
     
     # Authenticity & Persistence
     digital_hash = models.CharField(max_length=64, blank=True, help_text="SHA256 hash of the generated document")
-    document = models.FileField(upload_to='certificates/issued/%Y/%m/', null=True, blank=True)
+    document = models.FileField(
+        storage=certificate_storage,
+        upload_to='%Y/%m/', 
+        null=True, 
+        blank=True
+    )
     
     # Metadata
     issued_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)

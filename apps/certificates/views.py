@@ -66,13 +66,22 @@ class CertificatePrintView(LoginRequiredMixin, NonBootstrapRequiredMixin, Detail
                 
                 # Save PDF content to a FileField
                 from django.core.files.base import ContentFile
-                filename = f"{certificate.transaction_number}.pdf"
+                from django.utils.text import slugify
+                
+                # Descriptive filename: LASTNAME-FIRSTNAME-TYPE-TRANSACTION.pdf
+                res = certificate.resident
+                name_slug = slugify(f"{res.last_name}-{res.first_name}")
+                type_slug = certificate.certificate_type.slug
+                txn = certificate.transaction_number
+                filename = f"{name_slug}-{type_slug}-{txn}.pdf"
+                
                 certificate.document.save(filename, ContentFile(pdf_content), save=True)
 
             # 4. Return as Response
             response = HttpResponse(pdf_content, content_type='application/pdf')
             response['Content-Disposition'] = (
-                f'inline; filename="{certificate.transaction_number}.pdf"'
+                f'inline; filename="{name_slug}-{type_slug}-{txn}.pdf"' if 'name_slug' in locals() 
+                else f'inline; filename="{certificate.transaction_number}.pdf"'
             )
             return response
         except Exception as e:
