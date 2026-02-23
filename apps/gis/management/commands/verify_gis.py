@@ -42,7 +42,7 @@ class Command(BaseCommand):
         # We can't reverse easily without full URL conf loaded in some contexts, but let's try
         try:
             url = reverse('gis:resident_geojson')
-        except:
+        except Exception:
             url = '/gis/api/residents/'
             
         request = factory.get(url)

@@ -5,7 +5,7 @@ from apps.residents.models import Resident
 from apps.blotter.models import BlotterCase, Complainant, Respondent, Hearing
 from apps.certificates.models import Certificate, CertificateType
 from apps.finance.models import Fee, OfficialReceipt
-from apps.business.models import BusinessPermit, BusinessClearance
+from apps.business.models import BusinessPermit
 from datetime import date, timedelta
 import random
 

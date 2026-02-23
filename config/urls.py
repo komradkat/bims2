@@ -14,9 +14,10 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
-from django.conf.urls import handler404, handler500
 
 # Custom error handlers
 handler404 = 'apps.core.views.error_404'
@@ -33,9 +34,6 @@ urlpatterns = [
     path('audit/', include('apps.audit.urls')),
     path('gis/', include('apps.gis.urls')),  # GIS Map
 ]
-
-from django.conf import settings
-from django.conf.urls.static import static
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

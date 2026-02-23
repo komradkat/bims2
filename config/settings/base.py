@@ -2,9 +2,10 @@
 Base settings for BIMS2 project.
 """
 
-import os
+import copy
 import environ
 from pathlib import Path
+from django.utils.log import DEFAULT_LOGGING
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -173,9 +174,6 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # Logging Configuration
 LOGS_DIR = BASE_DIR / 'logs'
 LOGS_DIR.mkdir(exist_ok=True)
-
-from django.utils.log import DEFAULT_LOGGING
-import copy
 
 LOGGING = copy.deepcopy(DEFAULT_LOGGING)
 

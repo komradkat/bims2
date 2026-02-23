@@ -2,7 +2,7 @@
 Development settings for BIMS2 project.
 """
 
-from .base import *
+from .base import *  # noqa: F403, F405
 
 # ALLOWED_HOSTS is now handled via .env in base.py
 

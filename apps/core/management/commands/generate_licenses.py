@@ -56,7 +56,7 @@ class Command(BaseCommand):
                 expiry_date = date.today() + timedelta(days=days)
             
             # Create license
-            license_obj = LicenseKey.objects.create(
+            LicenseKey.objects.create(
                 key=key,
                 tier=tier,
                 max_users=max_users_map[tier],

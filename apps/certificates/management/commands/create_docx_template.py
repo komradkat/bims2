@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from docx import Document
-from docx.shared import Pt, Cm, Inches
+from docx.shared import Pt, Cm
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 import os
 from django.conf import settings

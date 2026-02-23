@@ -6,7 +6,6 @@ Safe to re-run — uses update_or_create / get_or_create wherever possible.
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from datetime import date, timedelta
-import random
 
 
 class Command(BaseCommand):

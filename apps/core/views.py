@@ -1,5 +1,6 @@
 # Core views
 from django.shortcuts import render, redirect
+from django.http import HttpResponse
 from django.views.generic import TemplateView, View
 from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
@@ -11,6 +12,7 @@ from django.utils.safestring import mark_safe
 from datetime import timedelta
 
 # Import models for Dashboard
+from .models import Notification
 from apps.residents.models import Resident
 from apps.certificates.models import Certificate
 from apps.blotter.models import BlotterCase, Hearing
@@ -36,7 +38,6 @@ class CustomLoginView(LoginView):
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView, CreateView, UpdateView
-from apps.core.mixins import NonBootstrapRequiredMixin
 from .models import User
 from .decorators import role_required, tier_required
 from django.utils.decorators import method_decorator
@@ -434,7 +435,7 @@ class SetupView(View):
 
 # ── Officials ──────────────────────────────────────────────────────────────
 
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.views.generic import ListView, CreateView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from apps.core.models import BarangayOfficial
 

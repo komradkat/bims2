@@ -1,11 +1,9 @@
 import os
-import traceback
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from django.conf import settings
 from django.template.loader import render_to_string
-from apps.certificates.models import CertificateType, Certificate
-from apps.residents.models import Resident
+from apps.certificates.models import CertificateType
 from apps.certificates.utils import generate_pdf
 
 class Command(BaseCommand):

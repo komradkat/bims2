@@ -8,7 +8,10 @@ from django.http import HttpResponse
 from .models import Resident
 import openpyxl
 from openpyxl.styles import Font, Alignment, PatternFill
-from datetime import datetime
+from datetime import datetime, date
+from django.urls import reverse
+from django.contrib import messages
+from .forms import ResidentForm
 
 
 class ResidentsListView(LoginRequiredMixin, NonBootstrapRequiredMixin, ListView):
@@ -58,7 +61,6 @@ class ResidentsListView(LoginRequiredMixin, NonBootstrapRequiredMixin, ListView)
         age_max = self.request.GET.get('age_max', '').strip()
         
         if age_min or age_max:
-            from datetime import date
             today = date.today()
             
             if age_max:
@@ -185,7 +187,6 @@ class ResidentCreateView(LoginRequiredMixin, NonBootstrapRequiredMixin, CreateVi
     template_name = 'pages/residents/form.html'
     
     def get_form_class(self):
-        from .forms import ResidentForm
         return ResidentForm
     
     def get_context_data(self, **kwargs):
@@ -195,7 +196,6 @@ class ResidentCreateView(LoginRequiredMixin, NonBootstrapRequiredMixin, CreateVi
         return context
     
     def form_valid(self, form):
-        from django.contrib import messages
         
         response = super().form_valid(form)
         messages.success(
@@ -205,7 +205,6 @@ class ResidentCreateView(LoginRequiredMixin, NonBootstrapRequiredMixin, CreateVi
         return response
     
     def get_success_url(self):
-        from django.urls import reverse
         return reverse('residents:list')
 
 
@@ -218,7 +217,6 @@ class ResidentUpdateView(LoginRequiredMixin, NonBootstrapRequiredMixin, UpdateVi
     template_name = 'pages/residents/form.html'
     
     def get_form_class(self):
-        from .forms import ResidentForm
         return ResidentForm
     
     def get_context_data(self, **kwargs):
@@ -228,7 +226,6 @@ class ResidentUpdateView(LoginRequiredMixin, NonBootstrapRequiredMixin, UpdateVi
         return context
     
     def form_valid(self, form):
-        from django.contrib import messages
         
         response = super().form_valid(form)
         messages.success(
@@ -238,7 +235,6 @@ class ResidentUpdateView(LoginRequiredMixin, NonBootstrapRequiredMixin, UpdateVi
         return response
     
     def get_success_url(self):
-        from django.urls import reverse
         return reverse('residents:list')
 
 
