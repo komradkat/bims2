@@ -228,6 +228,16 @@
 
         /* ─── ALERTS ─── */
         .alert { border-radius: 0.6rem; }
+
+        /* ─── Layout Stability for Drawer ─── */
+        @media (min-width: 1024px) {
+            .drawer-side {
+                width: 20rem !important; /* Forces sidebar width matching w-80 (20rem) */
+            }
+            .drawer-content {
+                width: auto !important;
+            }
+        }
     </style>
 
 

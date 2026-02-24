@@ -37,6 +37,13 @@ class MapView(LoginRequiredMixin, NonBootstrapRequiredMixin, TemplateView):
             ctx['has_coords']    = False
 
         ctx['barangay_name'] = info.name if info else 'Barangay'
+        
+        # Add Blip Management context
+        license_tier = getattr(self.request, 'license', {}).get('tier', 'community')
+        if license_tier == 'ultra':
+            ctx['blips'] = EmergencyService.objects.all().order_by('service_type', 'name')
+            ctx['form'] = EmergencyServiceForm()
+            
         return ctx
 
 
@@ -76,20 +83,11 @@ class ResidentGeoJSONView(LoginRequiredMixin, NonBootstrapRequiredMixin, View):
 
 
 @method_decorator(tier_required(['ultra']), name='dispatch')
-class BlipListView(LoginRequiredMixin, NonBootstrapRequiredMixin, ListView):
-    model = EmergencyService
-    template_name = 'gis/blip_list.html'
-    context_object_name = 'blips'
-    
-    def get_queryset(self):
-        return EmergencyService.objects.all().order_by('service_type', 'name')
-
-@method_decorator(tier_required(['ultra']), name='dispatch')
 class BlipCreateView(LoginRequiredMixin, NonBootstrapRequiredMixin, CreateView):
     model = EmergencyService
     form_class = EmergencyServiceForm
     template_name = 'gis/blip_form.html'
-    success_url = reverse_lazy('gis:blip_list')
+    success_url = reverse_lazy('gis:map')
     
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -108,7 +106,7 @@ class BlipUpdateView(LoginRequiredMixin, NonBootstrapRequiredMixin, UpdateView):
     model = EmergencyService
     form_class = EmergencyServiceForm
     template_name = 'gis/blip_form.html'
-    success_url = reverse_lazy('gis:blip_list')
+    success_url = reverse_lazy('gis:map')
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -126,7 +124,7 @@ class BlipUpdateView(LoginRequiredMixin, NonBootstrapRequiredMixin, UpdateView):
 class BlipDeleteView(LoginRequiredMixin, NonBootstrapRequiredMixin, DeleteView):
     model = EmergencyService
     template_name = 'gis/blip_confirm_delete.html'
-    success_url = reverse_lazy('gis:blip_list')
+    success_url = reverse_lazy('gis:map')
 
     def delete(self, request, *args, **kwargs):
         obj = self.get_object()

@@ -36,6 +36,15 @@
     }
     .leaflet-control-attribution a { color: oklch(58% 0.20 262) !important; }
 
+    /* Management Sidebar */
+    #map-management {
+        background: oklch(20% 0.022 255);
+        border-left: 4px solid oklch(65% 0.15 250);
+    }
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: oklch(40% 0.02 255); border-radius: 10px; }
+
     /* Loading Overlay */
     #map-loading {
         background: oklch(16% 0.022 255);
@@ -62,12 +71,12 @@
             </h1>
             <p class="text-xs text-base-content/60">Community Geographic Information System (Live)</p>
         </div>
-        <div class="flex items-center gap-3">
-            {% if user.is_staff %}
-            <a href="{% url 'gis:blip_list' %}" class="btn btn-xs btn-outline btn-secondary gap-1">
+        <div class="flex items-center gap-2">
+            {% if tier_info.name == 'Ultra' %}
+            <button onclick="toggleManagement()" class="btn btn-xs btn-outline btn-secondary gap-1">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                 Manage Markers
-            </a>
+            </button>
             {% endif %}
             <div class="join">
                 <button id="layer-streets" onclick="updateLayer('streets')" class="btn btn-xs join-item btn-primary">Dark Maps</button>
@@ -174,6 +183,115 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
             </svg>
         </button>
+
+        {# ── Integrated Management Sidebar ── #}
+        {% if tier_info.name == 'Ultra' %}
+        <div id="map-management" class="absolute top-0 right-0 bottom-0 z-20 w-80 bg-black/80 backdrop-blur-md shadow-2xl transition-all duration-500 translate-x-full border-l border-white/5 flex flex-col">
+            <div class="p-4 border-b border-white/10 flex justify-between items-center bg-secondary/20">
+                <h3 class="text-xs uppercase tracking-widest font-black text-white">Manage Markers</h3>
+                <button onclick="toggleManagement()" class="p-1 hover:bg-white/10 rounded transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+
+            <div class="p-4 bg-white/5 border-b border-white/5">
+                <button onclick="showAddModal()" class="btn btn-sm btn-primary btn-block gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                    Add New Blip
+                </button>
+                <p class="text-[10px] text-white/40 mt-2 text-center italic">Manage points of interest and landmarks</p>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-1">
+                {% for blip in blips %}
+                <div class="group flex items-center gap-3 p-3 rounded-lg hover:bg-white/5 transition-all duration-200 border border-transparent hover:border-white/10 relative">
+                    <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-sm shadow-inner shrink-0">
+                        {{ blip.icon_emoji|default:"📍" }}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="text-[11px] font-bold text-white truncate">{{ blip.name }}</div>
+                        <div class="text-[9px] text-white/50 uppercase tracking-tighter">{{ blip.get_service_type_display }}</div>
+                    </div>
+                    <div class="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity translate-x-1 group-hover:translate-x-0">
+                        <a href="{% url 'gis:blip_edit' blip.id %}" class="btn btn-square btn-ghost btn-xs h-6 w-6">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                        </a>
+                        <button onclick="focusOnBlip(this.dataset.lat, this.dataset.lng)" 
+                                data-lat="{{ blip.latitude|default:0 }}" 
+                                data-lng="{{ blip.longitude|default:0 }}"
+                                class="btn btn-square btn-ghost btn-xs h-6 w-6">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                        </button>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="py-12 text-center opacity-30 italic text-[10px]">No markers found.</div>
+                {% endfor %}
+            </div>
+
+            <div class="p-4 border-t border-white/5 bg-black/40 text-[9px] text-center text-white/30 uppercase tracking-widest">
+                Marker Administration Console
+            </div>
+        </div>
+
+        {# Add Marker Modal #}
+        <input type="checkbox" id="add-blip-modal" class="modal-toggle" />
+        <div class="modal z-[100]">
+            <div class="modal-box bg-base-100 border border-base-300 p-0 overflow-hidden max-w-2xl text-left">
+                <div class="bg-primary/10 p-4 border-b border-base-300 flex justify-between items-center">
+                    <div>
+                        <h3 class="font-black uppercase tracking-widest text-xs">Register New Map Marker</h3>
+                        <p class="text-[10px] opacity-60">System Registry v2.1</p>
+                    </div>
+                    <label for="add-blip-modal" class="btn btn-ghost btn-xs btn-circle">✕</label>
+                </div>
+                <form action="{% url 'gis:blip_add' %}" method="post" class="p-6">
+                    {% csrf_token %}
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="form-control col-span-2">
+                            <label class="label text-[10px] uppercase font-black opacity-50 px-0">Marker Name</label>
+                            {{ form.name }}
+                        </div>
+                        <div class="form-control">
+                            <label class="label text-[10px] uppercase font-black opacity-50 px-0">Category</label>
+                            {{ form.service_type }}
+                        </div>
+                        <div class="form-control">
+                            <label class="label text-[10px] uppercase font-black opacity-50 px-0">Icon / Emoji</label>
+                            {{ form.icon_emoji }}
+                        </div>
+                        <div class="form-control">
+                            <label class="label text-[10px] uppercase font-black opacity-50 px-0">Latitude</label>
+                            {{ form.latitude }}
+                        </div>
+                        <div class="form-control">
+                            <label class="label text-[10px] uppercase font-black opacity-50 px-0">Longitude</label>
+                            {{ form.longitude }}
+                        </div>
+                        <div class="form-control col-span-2">
+                            <label class="label text-[10px] uppercase font-black opacity-50 px-0">Contact info</label>
+                            {{ form.contact_number }}
+                        </div>
+                        <div class="form-control col-span-2">
+                            <label class="label text-[10px] uppercase font-black opacity-50 px-0">Description / Details</label>
+                            {{ form.description }}
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info mt-6 bg-primary/5 border-primary/20 rounded-lg py-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <span class="text-[10px] font-semibold">TIP: Click on the map in the background to automatically set coordinates!</span>
+                    </div>
+
+                    <div class="modal-action mt-6 pt-6 border-t border-base-200">
+                        <label for="add-blip-modal" class="btn btn-ghost btn-sm">Discard</label>
+                        <button type="submit" class="btn btn-primary btn-sm px-6">Save to Database</button>
+                    </div>
+                </form>
+            </div>
+            <label class="modal-backdrop" for="add-blip-modal">Close</label>
+        </div>
+        {% endif %}
         
         {# Loading Overlay #}
         <div id="map-loading" class="absolute inset-0 z-10 transition-opacity duration-500">
@@ -190,9 +308,9 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script>
     // ── Context Variables ──
-    const LAT = {{ barangay_lat }};
-    const LNG = {{ barangay_lng }};
-    const ZOOM = {{ barangay_zoom }};
+    const LAT = parseFloat("{{ barangay_lat|default:12.8797 }}");
+    const LNG = parseFloat("{{ barangay_lng|default:121.7740 }}");
+    const ZOOM = parseInt("{{ barangay_zoom|default:7 }}");
 
     // ── Initialize Map ──
     const map = L.map('map', {
@@ -242,7 +360,10 @@
     }
 
     const legend = document.getElementById('map-legend');
+    const management = document.getElementById('map-management');
     let isLegendOpen = false;
+    let isManagementOpen = false;
+    let isCoordPickMode = false;
 
     function toggleLegend() {
         isLegendOpen = !isLegendOpen;
@@ -252,6 +373,60 @@
             legend.classList.replace('translate-x-0', '-translate-x-[calc(100%+24px)]');
         }
     }
+
+    function toggleManagement() {
+        isManagementOpen = !isManagementOpen;
+        if (isManagementOpen) {
+            management.classList.replace('translate-x-full', 'translate-x-0');
+        } else {
+            management.classList.replace('translate-x-0', 'translate-x-full');
+        }
+    }
+
+    function showAddModal() {
+        document.getElementById('add-blip-modal').checked = true;
+        isCoordPickMode = true;
+    }
+
+    function focusOnBlip(lat, lng) {
+        map.flyTo([lat, lng], 18, { duration: 1.2 });
+    }
+
+    // Coordinate Picking Logic
+    map.on('click', (e) => {
+        if (isCoordPickMode) {
+            const latInp = document.querySelector('#add-blip-modal #id_latitude');
+            const lngInp = document.querySelector('#add-blip-modal #id_longitude');
+            if (latInp && lngInp) {
+                latInp.value = e.latlng.lat.toFixed(6);
+                lngInp.value = e.latlng.lng.toFixed(6);
+                
+                // Visual feedback marker
+                if (window.tempMarker) map.removeLayer(window.tempMarker);
+                window.tempMarker = L.marker(e.latlng, {
+                    icon: L.divIcon({
+                        className: 'animate-bounce',
+                        html: '<div style="width:12px;height:12px;background:oklch(65% 0.15 250);border:2px solid #fff;border-radius:50%;box-shadow:0 0 15px oklch(65% 0.15 250);"></div>',
+                        iconSize: [12,12], iconAnchor: [6,6]
+                    })
+                }).addTo(map);
+
+                // Flash the inputs to show they were updated
+                [latInp, lngInp].forEach(el => {
+                    el.classList.add('ring-2', 'ring-primary');
+                    setTimeout(() => el.classList.remove('ring-2', 'ring-primary'), 1000);
+                });
+            }
+        }
+    });
+
+    // Reset pick mode when modal closes
+    document.getElementById('add-blip-modal').addEventListener('change', (e) => {
+        if (!e.target.checked) {
+            isCoordPickMode = false;
+            if (window.tempMarker) map.removeLayer(window.tempMarker);
+        }
+    });
 
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && isLegendOpen) toggleLegend();

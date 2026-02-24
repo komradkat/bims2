@@ -9,10 +9,14 @@ class EmergencyServiceForm(forms.ModelForm):
             'contact_number', 'icon_emoji', 'latitude', 'longitude', 'is_active'
         ]
         widgets = {
-            'description': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Optional details about this location'}),
-            'address': forms.Textarea(attrs={'rows': 2, 'placeholder': 'Full address...'}),
-            'latitude': forms.NumberInput(attrs={'step': 'any', 'id': 'id_latitude'}),
-            'longitude': forms.NumberInput(attrs={'step': 'any', 'id': 'id_longitude'}),
+            'name': forms.TextInput(attrs={'class': 'input input-bordered input-sm w-full'}),
+            'service_type': forms.Select(attrs={'class': 'select select-bordered select-sm w-full'}),
+            'description': forms.Textarea(attrs={'class': 'textarea textarea-bordered h-20 w-full', 'placeholder': 'Optional details about this location'}),
+            'address': forms.Textarea(attrs={'class': 'textarea textarea-bordered h-20 w-full', 'placeholder': 'Full address...'}),
+            'contact_number': forms.TextInput(attrs={'class': 'input input-bordered input-sm w-full', 'placeholder': 'Optional contact...'}),
+            'icon_emoji': forms.TextInput(attrs={'class': 'input input-bordered input-sm w-full', 'placeholder': 'e.g. 🏫'}),
+            'latitude': forms.NumberInput(attrs={'class': 'input input-bordered input-sm w-full', 'step': 'any', 'id': 'id_latitude'}),
+            'longitude': forms.NumberInput(attrs={'class': 'input input-bordered input-sm w-full', 'step': 'any', 'id': 'id_longitude'}),
         }
 
     def clean_latitude(self):
