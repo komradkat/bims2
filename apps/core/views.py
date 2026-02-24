@@ -440,13 +440,38 @@ class SetupView(View):
                     is_bootstrap=True # Set is_bootstrap to True
                 )
                 
-            messages.success(request, "System Setup Completed Successfully! Please login.")
-            return redirect('core:login')
+            messages.success(request, "System Setup Completed Successfully! Initializing your workspace...")
+            return redirect('core:initializing')
             
         except Exception as e:
             messages.error(request, f"An error occurred: {str(e)}")
             return render(request, self.template_name)
 
+class InitializingView(TemplateView):
+    """Premium loading screen for system initialization"""
+    template_name = 'core/initializing.html'
+
+class TriggerInitializeAPI(View):
+    """API endpoint to trigger background initialization tasks (like GIS import)"""
+    def post(self, request):
+        from django.core.management import call_command
+        from django.http import JsonResponse
+        import threading
+
+        def run_initialization():
+            try:
+                # Trigger the GIS Importer
+                # Note: Radius is set to 5km by default
+                call_command('import_nearby_services', radius=5000)
+            except Exception as e:
+                print(f"Initialization background task error: {e}")
+
+        # Run in background thread to avoid blocking the UI
+        thread = threading.Thread(target=run_initialization)
+        thread.daemon = True
+        thread.start()
+
+        return JsonResponse({'status': 'started', 'message': 'Initialization background tasks triggered.'})
 
 # ── Officials ──────────────────────────────────────────────────────────────
 

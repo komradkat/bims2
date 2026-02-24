@@ -1,0 +1,130 @@
+{% extends 'base_simple.html' %}
+{% load static %}
+
+{% block title %}Initializing System | BIMS{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-neutral flex items-center justify-center p-6">
+    <div class="max-w-2xl w-full bg-base-100 rounded-3xl shadow-2xl border border-white/5 overflow-hidden">
+        {# Header #}
+        <div class="p-8 border-b border-base-200 bg-base-200/50">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center">
+                    <span class="loading loading-spinner text-primary"></span>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-black tracking-tighter uppercase">Initializing BIMS</h1>
+                    <p class="text-xs font-bold opacity-40 uppercase tracking-widest">Barangay Information Management System v2.0</p>
+                </div>
+            </div>
+        </div>
+
+        {# Terminal / Progress Section #}
+        <div class="p-8 space-y-8">
+            {# Status Message #}
+            <div class="text-center py-4">
+                <div id="status-title" class="text-lg font-black text-primary uppercase mb-1 italic">Compiling Core Modules...</div>
+                <div id="status-desc" class="text-xs opacity-50 font-mono tracking-tighter">Preparing secure database environment...</div>
+            </div>
+
+            {# Big Progress Bar #}
+            <div class="relative pt-1">
+                <div class="overflow-hidden h-3 mb-4 text-xs flex rounded-full bg-primary/10">
+                    <div id="main-progress" style="width:0%" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-primary transition-all duration-1000 ease-out"></div>
+                </div>
+            </div>
+
+            {# Step by Step Terminal Logs #}
+            <div class="bg-black/90 rounded-2xl p-6 font-mono text-[10px] space-y-3 min-h-[160px] border border-white/5 shadow-inner">
+                <div id="log-container" class="space-y-2">
+                    <!-- Logs will appear here -->
+                </div>
+            </div>
+        </div>
+
+        {# Footer #}
+        <div class="p-6 bg-base-200/30 text-center border-t border-base-200">
+            <p class="text-[9px] uppercase tracking-widest font-black opacity-30">Deployment Signature: BIMS-CORE-STABLE-2026</p>
+        </div>
+    </div>
+</div>
+
+<script>
+const logs = [
+    { time: 500, title: "Initializing Core", desc: "Setting up secure database environment...", log: "> [OK] CORE_DB: Postgres/SQLite Handshake Successful" },
+    { time: 1500, title: "Encryption Layer", desc: "Mounting cryptographic keys...", log: "> [OK] SECURE_KEY: System Entropy Initialized" },
+    { time: 2500, title: "GIS Engine", desc: "Connecting to Satellite Data Providers...", log: "> [WAIT] GIS_CONNECT: Routing to OpenStreetMap Overpass API..." },
+    { time: 4000, title: "Data Ingestion", desc: "Fetching Community Infrastructure Data...", log: "> [AUTO] OSM_IMPORT: Synchronizing Police, Fire, and Hospitals..." },
+    { time: 7000, title: "SpatiaLite Link", desc: "Indexing geographic coordinates...", log: "> [OK] SYNC_COMPLETE: 25+ Facilities Mapped Successfully" },
+    { time: 8500, title: "Finalizing Environment", desc: "Preparing Dashboard for first launch...", log: "> [OK] DEPLOYMENT: Ready for Administrator Login" },
+];
+
+const logContainer = document.getElementById('log-container');
+const statusTitle = document.getElementById('status-title');
+const statusDesc = document.getElementById('status-desc');
+const mainProgress = document.getElementById('main-progress');
+
+function addLog(text, isError = false) {
+    const div = document.createElement('div');
+    div.className = isError ? 'text-error' : 'text-primary/70';
+    div.textContent = text;
+    logContainer.appendChild(div);
+    
+    // Auto scroll
+    logContainer.scrollTop = logContainer.scrollHeight;
+}
+
+// Start actual backend trigger
+fetch('{% url "core:api_initialize" %}', {
+    method: 'POST',
+    headers: {
+        'X-CSRFToken': '{{ csrf_token }}'
+    }
+}).then(r => r.json())
+  .then(data => console.log("Backend Initialized"))
+  .catch(err => console.error("Initialization trigger failed:", err));
+
+// Simulation for UI
+let currentStep = 0;
+const totalSteps = logs.length;
+
+function processNextStep() {
+    if (currentStep >= totalSteps) {
+        // Redirect to login after a small delay
+        setTimeout(() => {
+            window.location.href = "{% url 'core:login' %}";
+        }, 1500);
+        return;
+    }
+
+    const step = logs[currentStep];
+    statusTitle.textContent = step.title;
+    statusDesc.textContent = step.desc;
+    addLog(step.log);
+    
+    // Update progress
+    const percent = ((currentStep + 1) / totalSteps) * 100;
+    mainProgress.style.width = percent + '%';
+
+    currentStep++;
+    
+    // Schedule next
+    const nextWait = currentStep < totalSteps ? logs[currentStep].time - step.time : 2000;
+    setTimeout(processNextStep, Math.max(nextWait, 800));
+}
+
+// Initial delay before first step
+setTimeout(processNextStep, 500);
+
+</script>
+
+<style>
+@keyframes pulse-opacity {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+}
+.animate-pulse {
+    animation: pulse-opacity 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+</style>
+{% endblock %}
