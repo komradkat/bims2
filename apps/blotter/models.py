@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
+from django.core.exceptions import ValidationError
 from apps.residents.models import Resident
 from simple_history.models import HistoricalRecords
 
@@ -106,6 +107,13 @@ class Complainant(models.Model):
     address = models.CharField(max_length=255, blank=True, help_text="Address (if not a resident)")
     contact_number = models.CharField(max_length=20, blank=True)
 
+    def clean(self):
+        super().clean()
+        if not self.resident and not self.name:
+            raise ValidationError("Either a resident must be selected or a name must be provided for non-residents.")
+        if not self.resident and not self.address:
+             raise ValidationError("Address is required for non-resident complainants.")
+
     def __str__(self):
         if self.resident:
             return f"{self.resident.full_name} (Resident)"
@@ -119,6 +127,11 @@ class Respondent(models.Model):
     name = models.CharField(max_length=255, blank=True, help_text="Full name (if not a resident)")
     address = models.CharField(max_length=255, blank=True, help_text="Address (if not a resident)")
     contact_number = models.CharField(max_length=20, blank=True)
+
+    def clean(self):
+        super().clean()
+        if not self.resident and not self.name:
+            raise ValidationError("Either a resident must be selected or a name must be provided for non-residents.")
 
     def __str__(self):
         if self.resident:

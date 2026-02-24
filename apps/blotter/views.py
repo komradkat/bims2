@@ -7,6 +7,7 @@ from django.db.models import Q
 from django.utils import timezone
 from django.contrib import messages
 from .models import BlotterCase, Complainant, Respondent, Hearing
+from .forms import BlotterCaseForm, ComplainantForm, RespondentForm, HearingForm
 
 
 class BlotterListView(LoginRequiredMixin, NonBootstrapRequiredMixin, ListView):
@@ -60,76 +61,59 @@ class BlotterListView(LoginRequiredMixin, NonBootstrapRequiredMixin, ListView):
 
 class BlotterCreateView(LoginRequiredMixin, NonBootstrapRequiredMixin, CreateView):
     model = BlotterCase
+    form_class = BlotterCaseForm
     template_name = 'pages/blotter/form.html'
-    fields = ['incident_type', 'incident_date', 'incident_location', 'narrative', 'status']
     success_url = reverse_lazy('blotter:list')
 
-    def post(self, request, *args, **kwargs):
-        # Extract case data
-        incident_datetime = request.POST.get('incident_datetime')
-        incident_location = request.POST.get('location')
-        nature_of_complaint = request.POST.get('nature_of_complaint')
-        narrative = request.POST.get('narrative')
-        action_taken = request.POST.get('action_taken', 'mediation').lower()
-        
-        # Map action_taken to status if necessary
-        status_map = {
-            'mediation': 'mediation',
-            'conciliation': 'conciliation',
-            'arbitration': 'arbitration',
-            'referred to police': 'dismissed',
-            'for investigation': 'mediation',
-        }
-        status = status_map.get(action_taken, 'mediation')
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.POST:
+            context['complainant_form'] = ComplainantForm(self.request.POST, prefix='complainant')
+            context['respondent_form'] = RespondentForm(self.request.POST, prefix='respondent')
+            context['hearing_form'] = HearingForm(self.request.POST, prefix='hearing')
+        else:
+            context['complainant_form'] = ComplainantForm(prefix='complainant')
+            context['respondent_form'] = RespondentForm(prefix='respondent')
+            context['hearing_form'] = HearingForm(prefix='hearing')
+        return context
 
-        # Create the Case
-        case = BlotterCase.objects.create(
-            incident_type='others', # Placeholder for now, could map from nature_of_complaint
-            incident_date=incident_datetime,
-            incident_location=incident_location,
-            narrative=f"Nature: {nature_of_complaint}\n\n{narrative}",
-            status=status,
-            created_by=request.user
-        )
+    def form_valid(self, form):
+        context = self.get_context_data()
+        complainant_form = context['complainant_form']
+        respondent_form = context['respondent_form']
+        hearing_form = context['hearing_form']
 
-        # Extract Complainant
-        c_first = request.POST.get('complainant_first_name')
-        c_middle = request.POST.get('complainant_middle_name', '')
-        c_last = request.POST.get('complainant_last_name')
-        c_address = request.POST.get('complainant_address')
-        c_contact = request.POST.get('complainant_contact')
-        
-        Complainant.objects.create(
-            case=case,
-            name=f"{c_first} {c_middle} {c_last}".strip().replace("  ", " "),
-            address=c_address,
-            contact_number=c_contact
-        )
+        if complainant_form.is_valid() and respondent_form.is_valid():
+            # Process BlotterCase
+            nature = form.cleaned_data.get('nature_of_complaint')
+            incident_dt = form.cleaned_data.get('incident_datetime')
+            
+            self.object = form.save(commit=False)
+            self.object.incident_date = incident_dt
+            self.object.narrative = f"Nature: {nature}\n\n{self.object.narrative}"
+            self.object.created_by = self.request.user
+            self.object.save()
 
-        # Extract Respondent
-        r_first = request.POST.get('respondent_first_name')
-        r_middle = request.POST.get('respondent_middle_name', '')
-        r_last = request.POST.get('respondent_last_name')
-        r_address = request.POST.get('respondent_address')
-        r_contact = request.POST.get('respondent_contact')
-        
-        Respondent.objects.create(
-            case=case,
-            name=f"{r_first} {r_middle} {r_last}".strip().replace("  ", " "),
-            address=r_address,
-            contact_number=r_contact
-        )
+            # Process Complainant
+            complainant = complainant_form.save(commit=False)
+            complainant.case = self.object
+            complainant.save()
 
-        # Handle Optional Hearing
-        hearing_datetime = request.POST.get('hearing_datetime')
-        hearing_venue = request.POST.get('hearing_venue')
-        
-        if hearing_datetime:
-            Hearing.objects.create(
-                case=case,
-                scheduled_at=hearing_datetime,
-                remarks=f"Venue: {hearing_venue}" if hearing_venue else ""
-            )
+            # Process Respondent
+            respondent = respondent_form.save(commit=False)
+            respondent.case = self.object
+            respondent.save()
+
+            # Process Optional Hearing
+            if hearing_form.is_valid() and hearing_form.cleaned_data.get('scheduled_at'):
+                hearing = hearing_form.save(commit=False)
+                hearing.case = self.object
+                hearing.save()
+            
+            messages.success(self.request, f"New blotter case {self.object.case_number} has been recorded.")
+            return redirect(self.success_url)
+        else:
+            return self.render_to_response(self.get_context_data(form=form))
 
 
 

@@ -1,5 +1,8 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.conf import settings
+from django.core.validators import MinValueValidator
+from simple_history.models import HistoricalRecords
 from django.utils import timezone
 
 class User(AbstractUser):
@@ -129,10 +132,9 @@ class BarangayInfo(models.Model):
     
     def save(self, *args, **kwargs):
         if not self.pk and BarangayInfo.objects.exists():
-            # If trying to create a new instance when one exists, update the existing one instead
-            # or raise an error. For simplicity, we can just enforce singleton at view level,
-            # but let's be safe.
-            return super().save(*args, **kwargs)
+            # Strictly prevent secondary record creation
+            existing = BarangayInfo.objects.first()
+            self.pk = existing.pk # Force update existing instead
         return super().save(*args, **kwargs)
 
     def __str__(self):

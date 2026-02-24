@@ -7,6 +7,7 @@ from django.contrib import messages
 from django.utils import timezone
 from django.http import HttpResponse
 from .models import CertificateType, Certificate
+from .forms import CertificateIssueForm
 from .utils import generate_pdf
 from apps.residents.models import Resident
 
@@ -102,6 +103,11 @@ class CertificateCenterView(LoginRequiredMixin, NonBootstrapRequiredMixin, ListV
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Certificate Issuance Center'
+        
+        if self.request.POST:
+            context['issue_form'] = CertificateIssueForm(self.request.POST)
+        else:
+            context['issue_form'] = CertificateIssueForm()
 
         queryset = self.get_queryset()
         context['community_certs'] = queryset.filter(tier='community')
@@ -119,38 +125,30 @@ class CertificateCenterView(LoginRequiredMixin, NonBootstrapRequiredMixin, ListV
                     'price':   float(cert.default_price),
                     'is_free': cert.default_price == 0,
                 }
+                # Pre-fill form
+                if not self.request.POST:
+                    context['issue_form'].initial['certificate_type'] = cert.id
             except CertificateType.DoesNotExist:
                 pass
 
         return context
 
     def post(self, request, *args, **kwargs):
-        resident_id  = request.POST.get('resident')
-        cert_type_id = request.POST.get('certificate_type')
-        purpose      = request.POST.get('purpose')
-        or_number    = request.POST.get('or_number', '')
+        form = CertificateIssueForm(request.POST)
+        if form.is_valid():
+            certificate = form.save(commit=False)
+            certificate.amount_paid = certificate.certificate_type.default_price
+            certificate.status = 'issued'
+            certificate.issued_by = request.user
+            certificate.issued_at = timezone.now()
+            certificate.save()
 
-        if not all([resident_id, cert_type_id, purpose]):
-            messages.error(request, "Please fill in all required fields.")
-            return redirect('certificates:center')
-
-        resident  = get_object_or_404(Resident, id=resident_id)
-        cert_type = get_object_or_404(CertificateType, id=cert_type_id)
-
-        certificate = Certificate.objects.create(
-            resident=resident,
-            certificate_type=cert_type,
-            purpose=purpose,
-            or_number=or_number,
-            amount_paid=cert_type.default_price,
-            status='issued',
-            issued_by=request.user,
-            issued_at=timezone.now(),
-        )
-
-        messages.success(request, f"Successfully issued {cert_type.name} for {resident.full_name}.")
-        from django.urls import reverse
-        return redirect(reverse('certificates:print', kwargs={'pk': certificate.pk}))
+            messages.success(request, f"Successfully issued {certificate.certificate_type.name} for {certificate.resident.full_name}.")
+            from django.urls import reverse
+            return redirect(reverse('certificates:print', kwargs={'pk': certificate.pk}))
+        else:
+            messages.error(request, "Please fill in all required fields correctly.")
+            return self.render_to_response(self.get_context_data())
 
 
 class CertificateListView(LoginRequiredMixin, NonBootstrapRequiredMixin, ListView):

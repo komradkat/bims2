@@ -1,7 +1,7 @@
 # Residents models
 from django.db import models
 from django.core.exceptions import ValidationError
-from django.core.validators import RegexValidator
+from django.core.validators import RegexValidator, MinValueValidator
 from simple_history.models import HistoricalRecords
 
 # Security: File upload limits
@@ -177,6 +177,30 @@ class Resident(models.Model):
         super().clean()
         if self.photo and self.photo.size > MAX_UPLOAD_SIZE:
             raise ValidationError({'photo': f"Image file too large. Max size is {MAX_UPLOAD_SIZE/1024/1024}MB."})
+        
+        # Security & Business Logic: Senior Citizen validation
+        if self.date_of_birth and self.is_senior_citizen:
+            from datetime import date
+            today = date.today()
+            age = today.year - self.date_of_birth.year - (
+                (today.month, today.day) < (self.date_of_birth.month, self.date_of_birth.day)
+            )
+            if age < 60:
+                raise ValidationError({
+                    'is_senior_citizen': 'Person must be 60 years or older to be marked as Senior Citizen.'
+                })
+
+        # Security & Business Logic: PWD validation
+        if self.is_pwd and not self.disability_type:
+            raise ValidationError({
+                'disability_type': 'Please specify the disability type for PWD.'
+            })
+
+        # Security & Business Logic: Voter validation
+        if self.is_voter and not self.precinct_number:
+            raise ValidationError({
+                'precinct_number': 'Please provide the precinct number for registered voters.'
+            })
     
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)

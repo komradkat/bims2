@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.core.validators import MinValueValidator
 from simple_history.models import HistoricalRecords
 from django.utils import timezone
 
@@ -30,8 +31,8 @@ class BusinessPermit(models.Model):
     cedula_date = models.DateField(null=True, blank=True)
 
     # Financials
-    gross_sales = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
-    clearance_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    gross_sales = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, validators=[MinValueValidator(0)])
+    clearance_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, validators=[MinValueValidator(0)])
     or_number = models.CharField(max_length=50, blank=True)
 
     issued_date = models.DateField(default=timezone.now)
@@ -95,7 +96,7 @@ class BusinessClearance(models.Model):
     """
     permit = models.ForeignKey(BusinessPermit, on_delete=models.CASCADE, related_name='clearances')
     or_number = models.CharField(max_length=50)
-    amount_paid = models.DecimalField(max_digits=10, decimal_places=2)
+    amount_paid = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
     issued_date = models.DateTimeField(auto_now_add=True)
     issued_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
 

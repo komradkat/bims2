@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.core.validators import MinValueValidator
 from simple_history.models import HistoricalRecords
 from apps.residents.models import Resident
 
@@ -17,7 +18,7 @@ class CertificateType(models.Model):
     slug = models.SlugField(unique=True)
     tier = models.CharField(max_length=20, choices=TIER_CHOICES, default='community')
     description = models.TextField(blank=True)
-    default_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    default_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, validators=[MinValueValidator(0)])
     template_file = models.CharField(
         max_length=255, 
         help_text="Path to the HTML template for this certificate (e.g., 'certificates/print/clearance.html')"
@@ -55,7 +56,7 @@ class Certificate(models.Model):
     # Transaction Details
     purpose = models.TextField(help_text="Reason for requesting the certificate")
     or_number = models.CharField(max_length=50, blank=True, help_text="Official Receipt Number")
-    amount_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    amount_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, validators=[MinValueValidator(0)])
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     
     # Authenticity & Persistence

@@ -1,11 +1,12 @@
 from django.db import models
 from django.conf import settings
+from django.core.validators import MinValueValidator
 from simple_history.models import HistoricalRecords
 
 class Fee(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
-    default_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    default_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, validators=[MinValueValidator(0)])
 
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -23,7 +24,7 @@ class OfficialReceipt(models.Model):
     or_number = models.CharField(max_length=50, unique=True)
     payor = models.CharField(max_length=255)
     particulars = models.TextField(help_text="Description of payment")
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
     date = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='paid')
 
