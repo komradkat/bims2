@@ -68,7 +68,7 @@ This is the final blueprint for your **Barangay Information Management System (B
 
 
 * **Hardware Lock:**
-* The license is tied to the specific computer UUID to prevent unauthorized copying.
+* The software license is cryptographically bound to the server's unique hardware fingerprint (MAC address + CPU ID) to prevent unauthorized distribution and ensure compliant deployment.
 
 
 
@@ -85,8 +85,8 @@ This is the final blueprint for your **Barangay Information Management System (B
 
 
 * **Security & Verification:**
-* **QR-Code Authentication:** Every printed document gets a unique QR code. Anyone (like a bank or employer) can scan it to verify the document is real.
-* **Biometric/Photo Support:** Ability to capture and store resident photos directly via webcam.
+* **Public QR-Code Authentication:** Every printed document features a secure QR code. Banks, employers, or government agencies can scan it to access a public, login-free verification portal that confirms the document's authenticity against the live BIMS database.
+* **Audit Trails:** Comprehensive logging of all system modifications (Ultra only).
 
 
 * **Smart Connectivity:**
@@ -107,11 +107,11 @@ This is the final blueprint for your **Barangay Information Management System (B
 | Feature | Community (CE) | Pro (Business) | Ultra (Executive) |
 | --- | --- | --- | --- |
 | **Residents** | **Unlimited** | Unlimited + Photos | Unlimited + Biometrics |
-| **Certificates** | Social Only (3 Types) | **All Templates** | **QR-Verified** |
+| **Certificates** | Social Only (3 Types) | **All Templates** | **Public QR-Verification** |
 | **Business Module** | No | **Yes** | Yes + Expiry Alerts |
 | **Blotter/Justice** | Read-Only | Full Management | Full Legal Docs |
 | **Finance** | No | Daily Ledger | Full Revenue Reports |
-| **Security** | None | Hardware Lock | **Audit Logs** |
+| **Security** | None | **Hardware Lock** | **Audit Logs** |
 | **Updates** | Manual USB | GitHub/Docker Pull | **Auto-Update** |
 
 ### **Professional Implementation Tip**

@@ -1,30 +1,27 @@
-# This is the suggested folder structure for the BIMS project. It may change as the project progresses but the core
-# structure will remain the same or at least most of it will.
-
-/bims-project
+/bims2
 │
 ├── .github/                # GitHub Actions for Auto-Builds/Watchtower
-├── .envs/                  # Environment variables (.env.ce, .env.pro)
+├── config/                 # Django Project Settings (settings.py, urls.py)
 ├── apps/                   # Django Apps
-│   ├── core/               # Shared logic, base models (Residents, Households)
-│   ├── certificates/       # PDF Generation logic (CE vs Pro templates)
+│   ├── core/               # Shared logic, hardware licensing, setup wizard
+│   ├── residents/          # Residents & Household management (Purok model)
+│   ├── certificates/       # PDF Generation & Public Verification Portal
 │   ├── business/           # Pro Tier: Business Permits & Revenue
 │   ├── blotter/            # Pro Tier: Justice & Incident logs
-│   └── audit/              # Ultra Tier: Audit Logging & Security
+│   ├── finance/            # Pro Tier: Official Receipts & Collections
+│   ├── audit/              # Ultra Tier: Audit Logging & History
+│   └── gis/                # Ultra Tier: Leaflet.js Mapping
 │
-├── core/                   # Django Project Settings (settings.py, wsgi.py)
 ├── static/                 # Tailwind CSS, Images, Alpine.js scripts
 ├── media/                  # Uploaded files (e.g., Resident photos)
-├── templates/              # HTML Templates (organized by tier)
+├── templates/              # HTML Templates
 │   ├── base.html
-│   ├── partials/           # Reusable components (e.g., sidebars, headers, footers, etc.)
-│   ├── components/         # Reusable components (e.g., tables, buttons, modals, etc.)
-│   └── pages/              # Page templates (organized by tier)
+│   ├── partials/           # Sidebars, Headers, etc.
+│   ├── components/         # Stat cards, Modals, etc.
+│   └── pages/              # App-specific page templates
 │
-├── requirements/           # Split dependencies
-│   ├── base.txt            # Django, Postgres, WhiteNoise
-│   └── pro.txt             # WeasyPrint (PDF), Cryptography
-│
+├── .envs/                  # Environment variables
+├── requirements.txt        # Combined dependencies (uv managed)
 ├── docker-compose.yml
 ├── Dockerfile
 ├── manage.py

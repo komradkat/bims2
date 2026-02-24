@@ -58,8 +58,14 @@ Here is the detailed "BIMS-Pro" 2026 Web Stack.
 * *Why:* It turns responsive HTML/CSS into high-quality PDFs. It is used for all social certificates and business clearances.
 
 
-* **QR Code Generation: python-qrcode**
-* *Why:* For the **Ultra Tier**, embedding scannable verification codes into printed certificates.
+---
+
+### 5. Document Verification (The Trust Layer)
+
+* **Public Verification Portal:**
+* *How:* A public, login-free endpoint (`/v/<txn>/`) that allows banks and government agencies to verify the authenticity of printed certificates and permits issued by the system.
+* **Smart QR Codes:**
+* *Mechanism:* Using `python-qrcode` to embed absolute verification URLs into document footers for instant mobile authentication.
 
 
 ---
@@ -86,7 +92,8 @@ Here is the detailed "BIMS-Pro" 2026 Web Stack.
 | **UX Engine** | HTMX / Alpine.js | "Stutter-free" search and dynamic UI interactions. |
 | **Spatial Layer** | Leaflet.js | Interactive community mapping (Ultra Tier). |
 | **PDF Engine** | WeasyPrint | Turning HTML templates into printable certificates. |
-| **Security** | Python Cryptography | Encrypting Tier settings and Hardware IDs. |
+| **Verification** | Public Portal | Unauthenticated document authenticity check. |
+| **Security** | Hardware-ID Bind | Cryptographic locking of Pro/Ultra tiers to server UUID. |
 
 ### Why this is perfect for you:
 
