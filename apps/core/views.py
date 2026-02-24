@@ -417,9 +417,17 @@ class SetupView(View):
             
             info.is_setup_complete = True
             info.save()
+
+            # Save Puroks
+            from apps.residents.models import Purok
+            purok_names = request.POST.getlist('puroks[]')
+            # Clear existing if any (since this is setup, usually empty)
+            for p_name in purok_names:
+                if p_name.strip():
+                    Purok.objects.get_or_create(name=p_name.strip())
             
             # Create/Update Admin User
-            # Check if admin exists
+            # ... existing admin logic ...
             if User.objects.filter(username=username).exists():
                 user = User.objects.get(username=username)
                 user.set_password(password)

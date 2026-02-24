@@ -80,10 +80,9 @@ class ResidentsListView(LoginRequiredMixin, NonBootstrapRequiredMixin, ListView)
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
-        # Get unique puroks for filter dropdown
-        context['puroks'] = Resident.objects.filter(
-            is_active=True
-        ).values_list('purok', flat=True).distinct().order_by('purok')
+        # Get formal puroks from the Purok model
+        from .models import Purok
+        context['puroks'] = Purok.objects.values_list('name', flat=True).order_by('name')
         
         # Preserve filter values
         context['search_query'] = self.request.GET.get('search', '')

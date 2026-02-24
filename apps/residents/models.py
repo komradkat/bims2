@@ -4,6 +4,32 @@ from django.core.validators import RegexValidator
 from simple_history.models import HistoricalRecords
 
 
+from django.utils.text import slugify
+
+
+class Purok(models.Model):
+    """
+    Standardizes the Puroks/Sitios in the Barangay.
+    Used for dropdown choices in forms.
+    """
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField(blank=True)
+    slug = models.SlugField(max_length=100, unique=True, blank=True)
+    
+    class Meta:
+        ordering = ['name']
+        verbose_name = "Purok"
+        verbose_name_plural = "Puroks"
+        
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+            
+    def __str__(self):
+        return self.name
+
+
 class Resident(models.Model):
     """
     Main resident model storing all personal, contact, and sectoral information.
@@ -148,6 +174,11 @@ class Resident(models.Model):
     
     class Meta:
         ordering = ['last_name', 'first_name']
+
+    @classmethod
+    def get_purok_choices(cls):
+        """Returns a list of tuples for form choices from the Purok model."""
+        return [(p.name, p.name) for p in Purok.objects.all()]
         indexes = [
             models.Index(fields=['last_name', 'first_name']),
             models.Index(fields=['purok']),

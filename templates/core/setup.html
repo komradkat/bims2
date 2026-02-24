@@ -3,192 +3,304 @@
 
 {% block title %}System Setup | BIMS{% endblock %}
 
-{% block body_class %}bg-base-200 min-h-screen flex items-center justify-center{% endblock %}
+{% block body_class %}bg-base-200 min-h-screen flex items-center justify-center py-12{% endblock %}
 
-{% block content %}
-<div class="max-w-4xl w-full mx-auto p-4">
-    <div class="card bg-base-100 shadow-xl">
-        <div class="card-body">
-            <h2 class="card-title text-2xl font-bold text-primary mb-4 text-center block">
-                Welcome to BIMS Setup
-            </h2>
-            <p class="text-center text-gray-500 mb-8">
-                Please configure your Barangay Information and Administrator Account to get started.
-            </p>
-
-            <form method="post" enctype="multipart/form-data" class="space-y-6">
-                {% csrf_token %}
-                
-                {% if messages %}
-                    {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }} shadow-lg">
-                        <div>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current flex-shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            <span>{{ message }}</span>
-                        </div>
-                    </div>
-                    {% endfor %}
-                {% endif %}
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <!-- Section 1: Barangay Information -->
-                    <div>
-                        <h3 class="font-bold text-lg border-b pb-2 mb-4">🏠 Barangay Information</h3>
-                        
-                        <div class="form-control w-full mb-3">
-                            <label class="label"><span class="label-text">Barangay Name *</span></label>
-                            <input type="text" name="barangay_name" placeholder="e.g. Barangay 123" class="input input-bordered w-full" required />
-                        </div>
-
-                        <div class="form-control w-full mb-3">
-                            <label class="label"><span class="label-text">Region *</span></label>
-                            <select id="sel-region" name="barangay_region" class="select select-bordered w-full" required>
-                                <option value="" disabled selected>— Select Region —</option>
-                            </select>
-                        </div>
-
-                        <div class="form-control w-full mb-3">
-                            <label class="label"><span class="label-text">Province *</span></label>
-                            <select id="sel-province" name="barangay_province" class="select select-bordered w-full" required disabled>
-                                <option value="" disabled selected>— Select Province —</option>
-                            </select>
-                        </div>
-
-                        <div class="form-control w-full mb-3">
-                            <label class="label"><span class="label-text">City / Municipality *</span></label>
-                            <select id="sel-city" name="barangay_city_municipality" class="select select-bordered w-full" required disabled>
-                                <option value="" disabled selected>— Select City / Municipality —</option>
-                            </select>
-                        </div>
-
-                        <div class="form-control w-full mb-3">
-                            <label class="label"><span class="label-text">Street / Purok / Sitio</span></label>
-                            <input type="text" name="barangay_street" placeholder="e.g. Purok 3, Sitio Mabini" class="input input-bordered w-full" />
-                        </div>
-
-                        <div class="form-control w-full mb-3">
-                            <label class="label"><span class="label-text">ZIP Code</span></label>
-                            <input type="text" name="barangay_zip_code" placeholder="e.g. 1100" class="input input-bordered w-full" maxlength="10" />
-                        </div>
-
-                        <div class="form-control w-full mb-3">
-                            <label class="label"><span class="label-text">Logo</span></label>
-                            <input type="file" name="barangay_logo" class="file-input file-input-bordered w-full" accept="image/*" />
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-2 mb-3">
-                            <div class="form-control w-full">
-                                <label class="label"><span class="label-text">Contact No.</span></label>
-                                <input type="text" name="contact_number" placeholder="Hotline/Tel" class="input input-bordered w-full" />
-                            </div>
-                            <div class="form-control w-full">
-                                <label class="label"><span class="label-text">Email Address</span></label>
-                                <input type="email" name="barangay_email" placeholder="official@brgy.gov.ph" class="input input-bordered w-full" />
-                            </div>
-                        </div>
-                        
-                        <div class="grid grid-cols-2 gap-2">
-                             <div class="form-control w-full">
-                                <label class="label"><span class="label-text">Latitude</span></label>
-                                <input type="number" step="any" name="latitude" placeholder="e.g. 14.5995" class="input input-bordered w-full" />
-                            </div>
-                             <div class="form-control w-full">
-                                <label class="label"><span class="label-text">Longitude</span></label>
-                                <input type="number" step="any" name="longitude" placeholder="e.g. 120.9842" class="input input-bordered w-full" />
-                            </div>
-                        </div>
-                        <p class="text-xs text-gray-500 mt-1">Coordinates for the barangay center (GIS Map).</p>
-                    </div>
-
-                    <!-- Section 2: Admin Account -->
-                    <div>
-                        <h3 class="font-bold text-lg border-b pb-2 mb-4">👤 Administrator Account</h3>
-                        <p class="text-sm text-gray-500 mb-4">Create the master superuser account.</p>
-
-                        <div class="form-control w-full mb-3">
-                            <label class="label"><span class="label-text">Username *</span></label>
-                            <input type="text" name="admin_username" placeholder="admin" class="input input-bordered w-full" required />
-                        </div>
-
-                        <div class="form-control w-full mb-3">
-                            <label class="label"><span class="label-text">Password *</span></label>
-                            <input type="password" name="admin_password" placeholder="********" class="input input-bordered w-full" required />
-                        </div>
-                        
-                        <div class="alert alert-info shadow-sm mt-8">
-                            <div>
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current flex-shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                <span class="text-xs">
-                                    By clicking "Complete Setup", you confirm that the information provided is accurate. The system will now be locked to this configuration.
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card-actions justify-end mt-8">
-                    <button type="submit" class="btn btn-primary btn-lg w-full md:w-auto">
-                        Complete Setup 🚀
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-    
-    <div class="text-center mt-6 text-gray-500 text-sm">
-        Barangay Information Management System (BIMS) v2.0
-    </div>
-</div>
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<style>
+    #setup-map { height: 300px; border-radius: 0.75rem; border: 2px solid hsl(var(--bc) / 0.1); }
+    [x-cloak] { display: none !important; }
+</style>
 {% endblock %}
 
-{% block extra_js %}
+{% block content %}
+<div class="max-w-4xl w-full mx-auto p-4" x-data="setupWizard()" x-cloak>
+    {# Progress Bar #}
+    <div class="mb-8 overflow-hidden rounded-full bg-base-100 h-2 flex">
+        <div class="bg-primary transition-all duration-500" :style="`width: ${(step / 4) * 100}%`"></div>
+    </div>
+
+    <div class="card bg-base-100 shadow-xl overflow-hidden">
+        {# Step Counters #}
+        <div class="bg-base-200/50 px-8 py-4 flex justify-between items-center border-b border-base-200">
+            <div class="flex gap-4">
+                <template x-for="i in 4">
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors"
+                         :class="step >= i ? 'bg-primary text-primary-content' : 'bg-base-300 text-base-content/50'"
+                         x-text="i"></div>
+                </template>
+            </div>
+            <div class="text-sm font-bold opacity-60 uppercase tracking-widest" x-text="stepTitle()"></div>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" class="card-body p-8">
+            {% csrf_token %}
+            
+            {# Step 1: Barangay Details #}
+            <div x-show="step === 1" x-transition>
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="bg-primary/10 p-3 rounded-2xl text-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold">Barangay Details</h2>
+                        <p class="text-sm opacity-60">Let's start with basic identification.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-bold">Barangay Name *</span></label>
+                        <input type="text" name="barangay_name" placeholder="e.g. Barangay San Jose" class="input input-bordered w-full" required />
+                    </div>
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-bold">Region *</span></label>
+                        <select id="sel-region" name="barangay_region" class="select select-bordered w-full" required @change="onRegionChange($event)">
+                            <option value="" disabled selected>— Select Region —</option>
+                        </select>
+                    </div>
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-bold">Province *</span></label>
+                        <select id="sel-province" name="barangay_province" class="select select-bordered w-full" required disabled @change="onProvinceChange($event)">
+                            <option value="" disabled selected>— Select Province —</option>
+                        </select>
+                    </div>
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-bold">City / Municipality *</span></label>
+                        <select id="sel-city" name="barangay_city_municipality" class="select select-bordered w-full" required disabled>
+                            <option value="" disabled selected>— Select City / Municipality —</option>
+                        </select>
+                    </div>
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-bold">Official Email</span></label>
+                        <input type="email" name="barangay_email" placeholder="brgy@example.gov.ph" class="input input-bordered w-full" />
+                    </div>
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-bold">Official Logo</span></label>
+                        <input type="file" name="barangay_logo" class="file-input file-input-bordered w-full" accept="image/*" />
+                    </div>
+                </div>
+            </div>
+
+            {# Step 2: GIS Location #}
+            <div x-show="step === 2" x-transition>
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="bg-secondary/10 p-3 rounded-2xl text-secondary">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold">Barangay Hall Location</h2>
+                        <p class="text-sm opacity-60">Click on the map to pin your Barangay Hall.</p>
+                    </div>
+                </div>
+
+                <div id="setup-map" class="mb-6 shadow-inner"></div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-bold">Latitude</span></label>
+                        <input type="number" step="any" name="latitude" x-model="lat" class="input input-bordered w-full" readonly />
+                    </div>
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-bold">Longitude</span></label>
+                        <input type="number" step="any" name="longitude" x-model="lng" class="input input-bordered w-full" readonly />
+                    </div>
+                </div>
+                <p class="text-xs mt-3 opacity-50 italic">Coordinates are used for GIS mapping and proximity services.</p>
+            </div>
+
+            {# Step 3: Purok Management #}
+            <div x-show="step === 3" x-transition>
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="bg-accent/10 p-3 rounded-2xl text-accent">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold">Puroks & Sitios</h2>
+                        <p class="text-sm opacity-60">Register the sub-territories of your Barangay.</p>
+                    </div>
+                </div>
+
+                <div class="space-y-3 mb-6">
+                    <template x-for="(purok, index) in puroks" :key="index">
+                        <div class="flex gap-2 items-center">
+                            <input type="text" name="puroks[]" x-model="puroks[index]" placeholder="e.g. Purok 1" class="input input-bordered flex-grow" required />
+                            <button type="button" @click="removePurok(index)" class="btn btn-square btn-error btn-outline" x-show="puroks.length > 1">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                            </button>
+                        </div>
+                    </template>
+                </div>
+
+                <button type="button" @click="addPurok()" class="btn btn-accent btn-sm btn-outline">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                    Add Purok
+                </button>
+            </div>
+
+            {# Step 4: Admin Account #}
+            <div x-show="step === 4" x-transition>
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="bg-neutral/10 p-3 rounded-2xl text-neutral">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold">Master Account</h2>
+                        <p class="text-sm opacity-60">This will be the administrator account.</p>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-bold">Username *</span></label>
+                        <input type="text" name="admin_username" placeholder="admin" class="input input-bordered w-full" required />
+                    </div>
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-bold">Password *</span></label>
+                        <input type="password" name="admin_password" placeholder="********" class="input input-bordered w-full" required />
+                    </div>
+                    
+                    <div class="alert alert-info shadow-sm mt-8">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current flex-shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span class="text-xs">
+                          Completing setup will initialize the database and secure the system.
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            {# Navigation Buttons #}
+            <div class="card-actions justify-between mt-12 border-t pt-6">
+                <button type="button" class="btn btn-ghost" x-show="step > 1" @click="prevStep()">
+                    Back
+                </button>
+                <div x-show="step === 1"></div> {# Spacer #}
+                
+                <button type="button" class="btn btn-primary px-8" x-show="step < 4" @click="nextStep()">
+                    Next
+                </button>
+                
+                <button type="submit" class="btn btn-success px-8 text-white" x-show="step === 4">
+                    Complete Setup 🚀
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{# Leaflet and PSGC Scripts #}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script src="{% static 'js/psgc.js' %}"></script>
+
 <script>
-(function () {
-    const selRegion   = document.getElementById('sel-region');
-    const selProvince = document.getElementById('sel-province');
-    const selCity     = document.getElementById('sel-city');
+function setupWizard() {
+    return {
+        step: 1,
+        lat: 14.5995,
+        lng: 120.9842,
+        map: null,
+        marker: null,
+        puroks: ['Purok 1', 'Purok 2', 'Purok 3'],
+        
+        init() {
+            // PSGC Initialization
+            this.initPSGC();
+        },
+        
+        stepTitle() {
+            const titles = ['General Info', 'GIS Setup', 'Jurisdiction', 'Security'];
+            return titles[this.step - 1];
+        },
+        
+        nextStep() {
+            if (this.step === 1) {
+                // Delay map init until step 2 is visible
+                setTimeout(() => this.initMap(), 100);
+            }
+            this.step++;
+        },
+        
+        prevStep() {
+            this.step--;
+        },
+        
+        addPurok() {
+            this.puroks.push('');
+        },
+        
+        removePurok(index) {
+            this.puroks.splice(index, 1);
+        },
+        
+        initMap() {
+            if (this.map) return;
+            
+            this.map = L.map('setup-map').setView([this.lat, this.lng], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap'
+            }).addTo(this.map);
+            
+            this.marker = L.marker([this.lat, this.lng], { draggable: true }).addTo(this.map);
+            
+            this.map.on('click', (e) => {
+                this.lat = e.latlng.lat.toFixed(6);
+                this.lng = e.latlng.lng.toFixed(6);
+                this.marker.setLatLng(e.latlng);
+            });
+            
+            this.marker.on('dragend', (e) => {
+                const pos = e.target.getLatLng();
+                this.lat = pos.lat.toFixed(6);
+                this.lng = pos.lng.toFixed(6);
+            });
+        },
+        
+        initPSGC() {
+            const selRegion = document.getElementById('sel-region');
+            PSGC.regions.forEach(r => {
+                const opt = new Option(r.name, r.name);
+                opt.dataset.code = r.code;
+                selRegion.appendChild(opt);
+            });
+        },
+        
+        onRegionChange(e) {
+            const selProvince = document.getElementById('sel-province');
+            const selCity = document.getElementById('sel-city');
+            this.resetSelect(selProvince, '— Select Province —');
+            this.resetSelect(selCity, '— Select City / Municipality —');
 
-    // Populate regions
-    PSGC.regions.forEach(r => {
-        const opt = new Option(r.name, r.name);
-        opt.dataset.code = r.code;
-        selRegion.appendChild(opt);
-    });
+            const code = e.target.selectedOptions[0]?.dataset.code;
+            const provinces = PSGC.provinces[code] || [];
+            if (provinces.length) {
+                provinces.forEach(p => {
+                    const opt = new Option(p.name, p.name);
+                    opt.dataset.code = p.code;
+                    selProvince.appendChild(opt);
+                });
+                selProvince.disabled = false;
+            }
+        },
+        
+        onProvinceChange(e) {
+            const selCity = document.getElementById('sel-city');
+            this.resetSelect(selCity, '— Select City / Municipality —');
 
-    function resetSelect(sel, placeholder) {
-        sel.innerHTML = `<option value="" disabled selected>${placeholder}</option>`;
-        sel.disabled = true;
+            const code = e.target.selectedOptions[0]?.dataset.code;
+            const cities = PSGC.cities[code] || [];
+            if (cities.length) {
+                cities.forEach(c => {
+                    selCity.appendChild(new Option(c, c));
+                });
+                selCity.disabled = false;
+            }
+        },
+        
+        resetSelect(sel, placeholder) {
+            sel.innerHTML = `<option value="" disabled selected>${placeholder}</option>`;
+            sel.disabled = true;
+        }
     }
-
-    selRegion.addEventListener('change', function () {
-        resetSelect(selProvince, '— Select Province —');
-        resetSelect(selCity, '— Select City / Municipality —');
-
-        const code = selRegion.selectedOptions[0]?.dataset.code;
-        const provinces = PSGC.provinces[code] || [];
-        if (provinces.length) {
-            provinces.forEach(p => {
-                const opt = new Option(p.name, p.name);
-                opt.dataset.code = p.code;
-                selProvince.appendChild(opt);
-            });
-            selProvince.disabled = false;
-        }
-    });
-
-    selProvince.addEventListener('change', function () {
-        resetSelect(selCity, '— Select City / Municipality —');
-
-        const code = selProvince.selectedOptions[0]?.dataset.code;
-        const cities = PSGC.cities[code] || [];
-        if (cities.length) {
-            cities.forEach(c => {
-                selCity.appendChild(new Option(c, c));
-            });
-            selCity.disabled = false;
-        }
-    });
-})();
+}
 </script>
 {% endblock %}

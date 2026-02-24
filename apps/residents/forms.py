@@ -178,17 +178,11 @@ class ResidentForm(forms.ModelForm):
         self.fields['purok'].required = True
         self.fields['address'].required = True
         
-        # Populate purok choices dynamically
-        puroks = Resident.objects.values_list('purok', flat=True).distinct().order_by('purok')
-        purok_choices = [('', 'Select Purok')] + [(p, p) for p in puroks if p]
-        # Add common puroks if not in database
-        common_puroks = ['Purok 1', 'Purok 2', 'Purok 3', 'Sitio Kawayan']
-        for purok in common_puroks:
-            if purok not in [p for _, p in purok_choices]:
-                purok_choices.append((purok, purok))
+        # Populate purok choices from the Purok table
+        self.fields['purok'].choices = Resident.get_purok_choices()
         self.fields['purok'].widget = forms.Select(
             attrs={'class': 'select select-bordered w-full'},
-            choices=sorted(purok_choices, key=lambda x: x[1] if x[1] else '')
+            choices=[('', 'Select Purok')] + list(self.fields['purok'].choices)
         )
         
         # Populate household head choices (only household heads)
