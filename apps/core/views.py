@@ -49,6 +49,7 @@ class UserListView(LoginRequiredMixin, ListView):
     template_name = 'auth/user_list.html'
     context_object_name = 'users'
     paginate_by = 20
+    ordering = ['id']
 
 @method_decorator(role_required(['admin']), name='dispatch')
 class UserCreateView(LoginRequiredMixin, CreateView):

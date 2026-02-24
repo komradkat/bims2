@@ -38,9 +38,13 @@ class Command(BaseCommand):
 
         url = "https://overpass-api.de/api/interpreter"
         try:
-            response = requests.post(url, data={'data': query})
+            # Set a 30s timeout to prevent hanging on slow external API response
+            response = requests.post(url, data={'data': query}, timeout=30)
             response.raise_for_status()
             data = response.json()
+        except requests.exceptions.Timeout:
+            self.stdout.write(self.style.ERROR("API Error: Request timed out after 30 seconds. Overpass API might be busy."))
+            return
         except Exception as e:
             self.stdout.write(self.style.ERROR(f"API Error: {str(e)}"))
             return
