@@ -5,12 +5,19 @@ class EmergencyService(models.Model):
         ('police', 'Police Station'),
         ('fire', 'Fire Station'),
         ('hospital', 'Hospital / Clinic'),
+        ('hall', 'Barangay Hall'),
+        ('evacuation', 'Evacuation Center'),
+        ('landmark', 'Landmark / Park'),
+        ('education', 'School / Education'),
+        ('other', 'Custom Point'),
     ]
 
     name = models.CharField(max_length=200)
     service_type = models.CharField(max_length=20, choices=SERVICE_TYPES)
+    description = models.TextField(blank=True, help_text="Optional details about this location")
     address = models.TextField(blank=True)
     contact_number = models.CharField(max_length=50, blank=True)
+    icon_emoji = models.CharField(max_length=10, blank=True, help_text="Custom emoji for 'other' types")
     
     latitude = models.FloatField()
     longitude = models.FloatField()

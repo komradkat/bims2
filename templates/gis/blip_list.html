@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Map Blips Management | GIS{% endblock %}
+
+{% block content %}
+<div class="container mx-auto">
+
+  {# Page Header #}
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+    <div>
+      <h1 class="text-2xl font-bold">GIS Map Blips</h1>
+      <p class="text-base-content/60 text-sm mt-0.5">Manage community points of interest and infrastructure.</p>
+    </div>
+    <div class="flex gap-2">
+      <a href="{% url 'gis:map' %}" class="btn btn-ghost gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" /></svg>
+        View Map
+      </a>
+      <a href="{% url 'gis:blip_add' %}" class="btn btn-primary gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+        Add Blip
+      </a>
+    </div>
+  </div>
+
+  {# Flash messages #}
+  {% if messages %}
+    {% for msg in messages %}
+      <div class="alert alert-{{ msg.tags|default:'info' }} mb-4">
+        <span>{{ msg }}</span>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  {% if blips %}
+    <div class="overflow-x-auto bg-base-100 rounded-xl shadow border border-base-200">
+      <table class="table table-zebra">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Coordinates</th>
+            <th>Contact</th>
+            <th class="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for blip in blips %}
+          <tr>
+            <td>
+              <div class="font-bold">{{ blip.name }}</div>
+              <div class="text-xs opacity-50">{{ blip.description|truncatechars:50 }}</div>
+            </td>
+            <td>
+              {% if blip.service_type == 'police' %}<span class="badge badge-primary gap-1">👮 Police</span>
+              {% elif blip.service_type == 'fire' %}<span class="badge badge-error gap-1">🚒 Fire</span>
+              {% elif blip.service_type == 'hospital' %}<span class="badge badge-success gap-1">🏥 Medical</span>
+              {% elif blip.service_type == 'hall' %}<span class="badge badge-warning gap-1">🏛️ Hall</span>
+              {% elif blip.service_type == 'evacuation' %}<span class="badge badge-accent gap-1">🛡️ Evacuation</span>
+              {% elif blip.service_type == 'landmark' %}<span class="badge badge-secondary gap-1">🌳 Landmark</span>
+              {% elif blip.service_type == 'education' %}<span class="badge badge-info gap-1">🎓 School</span>
+              {% else %}<span class="badge badge-ghost gap-1">{{ blip.icon_emoji|default:'📍' }} Custom</span>
+              {% endif %}
+            </td>
+            <td class="font-mono text-[10px] opacity-70">
+              {{ blip.latitude|floatformat:4 }}, {{ blip.longitude|floatformat:4 }}
+            </td>
+            <td class="text-sm">{{ blip.contact_number|default:'—' }}</td>
+            <td class="text-right">
+              <div class="flex justify-end gap-1">
+                <a href="{% url 'gis:blip_edit' blip.pk %}" class="btn btn-ghost btn-xs">Edit</a>
+                <button type="button" class="btn btn-ghost btn-xs text-error" onclick="document.getElementById('del-modal-{{ blip.pk }}').showModal()">Delete</button>
+              </div>
+            </td>
+          </tr>
+
+          {# Delete modal #}
+          <dialog id="del-modal-{{ blip.pk }}" class="modal">
+            <div class="modal-box">
+              <h3 class="font-bold text-lg text-error">Delete Blip?</h3>
+              <p class="py-4 font-bold">"{{ blip.name }}"</p>
+              <p class="text-sm opacity-60">This will remove the marker from the GIS map permanently.</p>
+              <div class="modal-action">
+                <form method="post" action="{% url 'gis:blip_delete' blip.pk %}">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-error">Yes, Delete</button>
+                </form>
+                <form method="dialog"><button class="btn">Cancel</button></form>
+              </div>
+            </div>
+          </dialog>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="flex flex-col items-center justify-center py-24 text-center">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-base-content/20 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+      </svg>
+      <h2 class="text-xl font-semibold mb-1">No blips managed yet</h2>
+      <p class="text-base-content/50 mb-6 max-w-xs">You haven't added or modified any community markers. Start by adding your first point of interest.</p>
+      <a href="{% url 'gis:blip_add' %}" class="btn btn-primary">Add First Blip</a>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

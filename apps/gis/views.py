@@ -69,10 +69,55 @@ class ResidentGeoJSONView(LoginRequiredMixin, NonBootstrapRequiredMixin, View):
         return JsonResponse(geojson)
 
 
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.urls import reverse_lazy
+from django.contrib import messages
+
+# Existing imports ...
+
+class BlipListView(LoginRequiredMixin, NonBootstrapRequiredMixin, ListView):
+    model = EmergencyService
+    template_name = 'gis/blip_list.html'
+    context_object_name = 'blips'
+    
+    def get_queryset(self):
+        return EmergencyService.objects.filter(is_active=True).order_by('service_type', 'name')
+
+class BlipCreateView(LoginRequiredMixin, NonBootstrapRequiredMixin, CreateView):
+    model = EmergencyService
+    template_name = 'gis/blip_form.html'
+    fields = ['name', 'service_type', 'description', 'address', 'contact_number', 'icon_emoji', 'latitude', 'longitude']
+    success_url = reverse_lazy('gis:blip_list')
+    
+    def form_valid(self, form):
+        messages.success(self.request, f"Blip '{form.instance.name}' created successfully.")
+        return super().form_valid(form)
+
+class BlipUpdateView(LoginRequiredMixin, NonBootstrapRequiredMixin, UpdateView):
+    model = EmergencyService
+    template_name = 'gis/blip_form.html'
+    fields = ['name', 'service_type', 'description', 'address', 'contact_number', 'icon_emoji', 'latitude', 'longitude', 'is_active']
+    success_url = reverse_lazy('gis:blip_list')
+
+    def form_valid(self, form):
+        messages.success(self.request, f"Blip '{form.instance.name}' updated successfully.")
+        return super().form_valid(form)
+
+class BlipDeleteView(LoginRequiredMixin, NonBootstrapRequiredMixin, DeleteView):
+    model = EmergencyService
+    template_name = 'gis/blip_confirm_delete.html'
+    success_url = reverse_lazy('gis:blip_list')
+
+    def delete(self, request, *args, **kwargs):
+        obj = self.get_object()
+        messages.success(request, f"Blip '{obj.name}' deleted.")
+        return super().delete(request, *args, **kwargs)
+
+
 class EmergencyServiceGeoJSONView(LoginRequiredMixin, NonBootstrapRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         services = EmergencyService.objects.filter(is_active=True).values(
-            'id', 'name', 'service_type', 'latitude', 'longitude', 'contact_number', 'address'
+            'id', 'name', 'service_type', 'latitude', 'longitude', 'contact_number', 'address', 'description', 'icon_emoji'
         )
 
         features = []
@@ -89,6 +134,8 @@ class EmergencyServiceGeoJSONView(LoginRequiredMixin, NonBootstrapRequiredMixin,
                     'type': s['service_type'],
                     'contact': s['contact_number'],
                     'address': s['address'],
+                    'description': s['description'],
+                    'icon': s['icon_emoji'],
                 }
             })
 
