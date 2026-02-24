@@ -10,7 +10,11 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {% include 'components/stat_card.html' with title="Total Residents" value=stats.total_residents icon="users" color="primary" description="↗︎ 14 new this month" %}
         {% include 'components/stat_card.html' with title="Documents Issued" value=stats.documents_issued icon="document" color="secondary" description="This week" %}
-        {% include 'components/stat_card.html' with title="Revenue (YTD)" value=stats.total_revenue|default:0 icon="money" color="accent" description="Est. from permits" %}
+        
+        {% if tier_info.features.finance or tier_info.features.business %}
+        {% include 'components/stat_card.html' with title="Revenue (YTD)" value=stats.total_revenue|default:0 icon="money" color="accent" description="Est. from transactions" %}
+        {% endif %}
+
         {% include 'components/stat_card.html' with title="Pending Incidents" value=stats.active_cases icon="case" color="warning" description="Requires attention" %}
     </div>
 
@@ -30,10 +34,12 @@
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
                 New Blotter
             </a>
+            {% if tier_info.features.business %}
             <a href="{% url 'business:list' %}" class="btn btn-accent h-auto py-4 flex flex-col items-center gap-2 text-accent-content border-none shadow-md hover:scale-105 transition-transform">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                 Renew Permit
             </a>
+            {% endif %}
         </div>
     </div>
 

@@ -8,4 +8,5 @@ urlpatterns = [
     path('list/', views.CertificateListView.as_view(), name='list'),
     path('<int:pk>/print/', views.CertificatePrintView.as_view(), name='print'),
     path('<int:pk>/void/', views.void_certificate, name='void'),
+    path('v/<str:tn>/', views.VerifyDocumentView.as_view(), name='verify'),
 ]

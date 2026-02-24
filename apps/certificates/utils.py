@@ -67,9 +67,13 @@ def generate_pdf(template_name, context):
     # 1. Generate QR Code if transaction_number exists in context
     cert_obj = context.get('certificate')
     if cert_obj and hasattr(cert_obj, 'transaction_number'):
-        # Pass the transaction number or a verification URL to the QR code
-        qr_data = cert_obj.transaction_number
-        context['qr_code_base64'] = generate_qr_code(qr_data)
+        # Generate the absolute verification URL
+        from django.urls import reverse
+        host = context.get('request').get_host() if context.get('request') else 'localhost:8000'
+        scheme = 'https' if not settings.DEBUG else 'http'
+        verify_url = f"{scheme}://{host}{reverse('certificates:verify', kwargs={'tn': cert_obj.transaction_number})}"
+        
+        context['qr_code_base64'] = generate_qr_code(verify_url)
 
     # 2. Render Template
     html_string = render_to_string(template_name, context)

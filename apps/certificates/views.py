@@ -7,6 +7,7 @@ from django.contrib import messages
 from django.utils import timezone
 from django.http import HttpResponse
 from .models import CertificateType, Certificate
+from apps.business.models import BusinessPermit # Added for dual verification
 from .forms import CertificateIssueForm
 from .utils import generate_pdf
 from apps.residents.models import Resident
@@ -184,3 +185,45 @@ def void_certificate(request, pk):
         certificate.save()
         messages.warning(request, f"Certificate {certificate.transaction_number} has been voided.")
     return redirect('certificates:list')
+
+
+class VerifyDocumentView(TemplateView):
+    """
+    Public view for verifying certificate or permit authenticity via QR code.
+    Exempt from typical auth mixes.
+    """
+    template_name = 'certificates/verify.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        tn = self.kwargs.get('tn')
+        context['tn'] = tn
+        context['valid'] = False
+
+        # 1. Try Certificate Lookup
+        try:
+            cert = Certificate.objects.get(transaction_number=tn, status='issued')
+            context.update({
+                'valid': True,
+                'type': cert.certificate_type.name,
+                'recipient': cert.resident.full_name,
+                'date_issued': cert.issued_at,
+            })
+            return context
+        except Certificate.DoesNotExist:
+            pass
+
+        # 2. Try Business Permit Lookup
+        try:
+            permit = BusinessPermit.objects.get(permit_number=tn)
+            context.update({
+                'valid': True,
+                'type': 'Business Permit',
+                'recipient': f"{permit.business_name} (Owner: {permit.owner_name})",
+                'date_issued': permit.issued_date,
+            })
+            return context
+        except BusinessPermit.DoesNotExist:
+            pass
+
+        return context

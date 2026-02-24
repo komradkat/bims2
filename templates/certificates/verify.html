@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="min-h-screen bg-base-200 flex flex-col items-center justify-center p-4">
+    <div class="card w-full max-w-md bg-base-100 shadow-xl border border-primary/20">
+        <div class="card-body items-center text-center">
+            
+            {% if valid %}
+                <div class="w-20 h-20 bg-success/10 rounded-full flex items-center justify-center mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <h2 class="card-title text-2xl font-bold text-success mb-2">Authentic Document</h2>
+                <div class="badge badge-success mb-6">Verified by Barangay BIMS</div>
+
+                <div class="w-full space-y-4 text-left bg-base-200 p-4 rounded-lg">
+                    <div class="flex justify-between border-b border-base-300 pb-2">
+                        <span class="text-sm opacity-60">Type</span>
+                        <span class="font-medium">{{ type }}</span>
+                    </div>
+                    <div class="flex justify-between border-b border-base-300 pb-2">
+                        <span class="text-sm opacity-60">Issued To</span>
+                        <span class="font-medium font-serif capitalize">{{ recipient }}</span>
+                    </div>
+                    <div class="flex justify-between border-b border-base-300 pb-2">
+                        <span class="text-sm opacity-60">Date Issued</span>
+                        <span class="font-medium">{{ date_issued|date:"M d, Y" }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-sm opacity-60">Reference No.</span>
+                        <span class="font-mono text-sm">{{ tn }}</span>
+                    </div>
+                </div>
+
+                <div class="mt-6 text-xs opacity-50 text-center italic">
+                    This document was officially issued by the Office of the Barangay Captain. 
+                    If the details above do not match the physical document, please report it immediately.
+                </div>
+            {% else %}
+                <div class="w-20 h-20 bg-error/10 rounded-full flex items-center justify-center mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-error" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <h2 class="card-title text-2xl font-bold text-error mb-2">Verification Failed</h2>
+                <p class="text-base-content/70">The transaction number <strong>{{ tn }}</strong> could not be found in our official records.</p>
+                
+                <div class="card-actions mt-6">
+                    <a href="/" class="btn btn-outline btn-sm">Try Again</a>
+                </div>
+            {% endif %}
+            
+        </div>
+    </div>
+    
+    <div class="mt-8 text-center text-xs opacity-30">
+        &copy; 2026 Barangay Information Management System<br>
+        Digital Authenticity Verification Module
+    </div>
+</div>
+{% endblock %}

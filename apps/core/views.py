@@ -124,26 +124,20 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         
         # Revenue: Sum of OfficialReceipts + BusinessClearances (if not in OR) + Certificates (if not in OR)
         # For simplicity, assuming all revenue is tracked in OfficialReceipt if we enforced it,
-        # but since we just implemented it, we might need to sum up.
         # Let's sum OfficialReceipts for now as it's the intended source of truth for Finance.
         # If BusinessClearance creates an OR, it should be there.
         # In my BusinessCreateView, I created BusinessClearance but not OfficialReceipt explicitly in Finance app.
         # But BusinessClearance has 'amount_paid'.
         
-        revenue_or = OfficialReceipt.objects.filter(status='paid').aggregate(Sum('amount'))['amount__sum'] or 0
-        revenue_biz = BusinessClearance.objects.aggregate(Sum('amount_paid'))['amount_paid__sum'] or 0
-        revenue_cert = Certificate.objects.filter(status='paid').aggregate(Sum('amount_paid'))['amount_paid__sum'] or 0
+        # Revenue Calculation (Pro/Ultra feature optimization)
+        total_revenue = 0
+        license_tier = getattr(self.request, 'license', {}).get('tier', 'community')
         
-        # To avoid double counting, ideally we should have a unified transaction model.
-        # For this MVP, I'll display the sum but acknowledge it might need refinement.
-        # Let's just use OfficialReceipt if available, otherwise fallback.
-        # Actually, let's just sum OfficialReceipt and assume that's the finance module's job.
-        # But since I didn't link Business/Cert to OR creation automatically in all places,
-        # I'll just use a simple aggregation of what we have.
-        # Since I implemented BusinessClearance and it stores amount, and Certificate stores amount.
-        # I'll sum them.
-        
-        total_revenue = revenue_or + revenue_biz + revenue_cert
+        if license_tier in ['pro', 'ultra']:
+            revenue_or = OfficialReceipt.objects.filter(status='paid').aggregate(Sum('amount'))['amount__sum'] or 0
+            revenue_biz = BusinessClearance.objects.aggregate(Sum('amount_paid'))['amount_paid__sum'] or 0
+            revenue_cert = Certificate.objects.filter(status='paid').aggregate(Sum('amount_paid'))['amount_paid__sum'] or 0
+            total_revenue = revenue_or + revenue_biz + revenue_cert
         
         active_cases = BlotterCase.objects.exclude(status__in=['settled', 'dismissed', 'cfa']).count()
         
