@@ -37,10 +37,10 @@ class ResidentsListView(LoginRequiredMixin, NonBootstrapRequiredMixin, ListView)
                 Q(mobile_number__icontains=search_query)
             )
         
-        # Filter by purok
+        # Filter by purok (using the ForeignKey link)
         purok_filter = self.request.GET.get('purok', '').strip()
         if purok_filter and purok_filter != 'all':
-            queryset = queryset.filter(purok=purok_filter)
+            queryset = queryset.filter(purok_link__name=purok_filter)
         
         # Filter by sector
         sector_filter = self.request.GET.get('sector', '').strip()
@@ -330,6 +330,8 @@ class HouseholdRegistrationView(LoginRequiredMixin, NonBootstrapRequiredMixin, C
         for instance in instances:
             instance.household_head = self.object
             # Inherit address and purok from head if blank
+            if not instance.purok_link:
+                instance.purok_link = self.object.purok_link
             if not instance.purok:
                 instance.purok = self.object.purok
             if not instance.address:

@@ -121,7 +121,7 @@
                             <div class="flex items-start gap-2">
                                 <i class="fas fa-map-marker-alt text-error mt-1 opacity-70"></i>
                                 <div>
-                                    <div class="font-medium text-sm">{{ resident.purok }}</div>
+                                    <div class="font-medium text-sm">{{ resident.purok_link.name|default:resident.purok }}</div>
                                     <div class="text-xs opacity-60 max-w-[150px] truncate" title="{{ resident.address }}">{{ resident.address }}</div>
                                 </div>
                             </div>

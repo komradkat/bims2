@@ -1,7 +1,14 @@
 # Residents admin
 from django.contrib import admin
 from simple_history.admin import SimpleHistoryAdmin
-from .models import Resident, HouseholdMember
+from .models import Resident, HouseholdMember, Purok
+
+
+@admin.register(Purok)
+class PurokAdmin(admin.ModelAdmin):
+    list_display = ['name', 'slug', 'description']
+    search_fields = ['name']
+    prepopulated_fields = {'slug': ('name',)}
 
 
 @admin.register(Resident)
@@ -12,7 +19,7 @@ class ResidentAdmin(SimpleHistoryAdmin):
         'get_full_name',
         'age',
         'sex',
-        'purok',
+        'purok_link',
         'get_sectors_display',
         'is_household_head',
         'is_active',
@@ -22,7 +29,7 @@ class ResidentAdmin(SimpleHistoryAdmin):
     list_filter = [
         'sex',
         'civil_status',
-        'purok',
+        'purok_link',
         'is_household_head',
         'is_senior_citizen',
         'is_pwd',
@@ -67,7 +74,7 @@ class ResidentAdmin(SimpleHistoryAdmin):
         }),
         ('Residence Information', {
             'fields': (
-                ('purok', 'address'),
+                ('purok_link', 'address'),
                 'years_of_residency',
                 ('is_household_head', 'household_head'),
                 'relationship_to_head',

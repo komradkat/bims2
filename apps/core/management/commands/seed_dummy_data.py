@@ -74,7 +74,8 @@ class Command(BaseCommand):
     # ── Residents ─────────────────────────────────────────────────────────
 
     def _seed_residents(self):
-        from apps.residents.models import Resident
+        from apps.residents.models import Resident, Purok
+        from django.utils.text import slugify
 
         residents_data = [
             # (first, middle, last, suffix, dob, sex, civil_status, purok, address, employment, occupation, mobile, sectors)
@@ -92,16 +93,29 @@ class Command(BaseCommand):
             ('Josefina',  'Castro',   'Navarro',    '',    '1960-10-11', 'F', 'widowed',   'Purok 4', '28 Quezon Ave.',     'unemployed',    '',                '09411234591', {'is_senior_citizen': True, 'is_indigent': True}),
         ]
 
+        # Ensure Puroks exist
+        purok_names = set(row[7] for row in residents_data)
+        purok_map = {}
+        for p_name in purok_names:
+            p_obj, _ = Purok.objects.get_or_create(
+                name=p_name,
+                defaults={'slug': slugify(p_name)}
+            )
+            purok_map[p_name] = p_obj
+
         created_residents = []
         for row in residents_data:
-            first, middle, last, suffix, dob, sex, civil, purok, address, emp, occ, mobile, sectors = row
+            first, middle, last, suffix, dob, sex, civil, purok_name, address, emp, occ, mobile, sectors = row
+            purok_obj = purok_map.get(purok_name)
+            
             defaults = {
                 'middle_name': middle,
                 'suffix': suffix,
                 'date_of_birth': date.fromisoformat(dob),
                 'sex': sex,
                 'civil_status': civil,
-                'purok': purok,
+                'purok': purok_name,
+                'purok_link': purok_obj,
                 'address': address,
                 'employment_status': emp,
                 'occupation': occ,

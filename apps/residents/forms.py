@@ -24,7 +24,7 @@ class ResidentForm(forms.ModelForm):
             'philhealth_no', 'sss_gsis_no', 'tin_no',
             'emergency_contact_name', 'emergency_contact_number',
             # Residence Information
-            'purok', 'address', 'years_of_residency',
+            'purok_link', 'address', 'years_of_residency',
             'is_household_head', 'household_head', 'relationship_to_head',
             # Sectoral Information
             'is_senior_citizen', 'is_pwd', 'disability_type',
@@ -111,7 +111,7 @@ class ResidentForm(forms.ModelForm):
             }),
             
             # Residence Information
-            'purok': forms.Select(attrs={'class': 'select select-bordered w-full'}),
+            'purok_link': forms.Select(attrs={'class': 'select select-bordered w-full'}),
             'address': forms.TextInput(attrs={
                 'class': 'input input-bordered w-full',
                 'placeholder': 'e.g. 123 Kalye Serye'
@@ -175,15 +175,14 @@ class ResidentForm(forms.ModelForm):
         self.fields['date_of_birth'].required = True
         self.fields['sex'].required = True
         self.fields['civil_status'].required = True
-        self.fields['purok'].required = True
+        self.fields['purok_link'].required = True
+        self.fields['purok_link'].label = "Purok"
         self.fields['address'].required = True
         
-        # Populate purok choices from the Purok table
-        self.fields['purok'].choices = Resident.get_purok_choices()
-        self.fields['purok'].widget = forms.Select(
-            attrs={'class': 'select select-bordered w-full'},
-            choices=[('', 'Select Purok')] + list(self.fields['purok'].choices)
-        )
+        # No longer need dynamic choice population here as purok_link 
+        # is a ForeignKey and Django handles choices automatically.
+        # But we ensure it's a select with an empty option.
+        self.fields['purok_link'].empty_label = 'Select Purok'
         
         # Populate household head choices (only household heads)
         household_heads = Resident.objects.filter(
@@ -250,6 +249,11 @@ class ResidentForm(forms.ModelForm):
                 'precinct_number': 'Please provide the precinct number for registered voters.'
             })
         
+        # Sync old purok field for backward compatibility
+        purok_link = cleaned_data.get('purok_link')
+        if purok_link:
+            cleaned_data['purok'] = purok_link.name
+        
         return cleaned_data
 
 class HouseholdHeadForm(ResidentForm):
@@ -272,7 +276,7 @@ class HouseholdMemberForm(ResidentForm):
         
         # In bulk registration, address and purok are usually shared
         # but we keep them for flexibility, maybe with smaller widgets
-        self.fields['purok'].widget.attrs.update({'class': 'select select-sm select-bordered w-full'})
+        self.fields['purok_link'].widget.attrs.update({'class': 'select select-sm select-bordered w-full'})
         self.fields['address'].widget.attrs.update({'class': 'input input-sm input-bordered w-full'})
 
 from django.forms import inlineformset_factory

@@ -128,6 +128,14 @@ class Resident(models.Model):
     
     # Residence Information
     purok = models.CharField(max_length=100, help_text="Purok/Sitio")
+    purok_link = models.ForeignKey(
+        'Purok', 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='residents',
+        help_text="Formal link to Purok table"
+    )
     address = models.CharField(max_length=500, help_text="House Number/Street")
     years_of_residency = models.PositiveIntegerField(default=0, blank=True)
     
