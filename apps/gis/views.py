@@ -1,11 +1,17 @@
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, ListView, CreateView, UpdateView, DeleteView
 from django.http import JsonResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from apps.core.mixins import NonBootstrapRequiredMixin
 from django.views import View
+from django.urls import reverse_lazy
+from django.contrib import messages
+from django.utils.decorators import method_decorator
+
 from apps.residents.models import Resident
 from apps.core.models import BarangayInfo
+from apps.core.decorators import tier_required
 from .models import EmergencyService
+from .forms import EmergencyServiceForm
 
 class MapView(LoginRequiredMixin, NonBootstrapRequiredMixin, TemplateView):
     template_name = 'gis/map.html'
@@ -69,40 +75,54 @@ class ResidentGeoJSONView(LoginRequiredMixin, NonBootstrapRequiredMixin, View):
         return JsonResponse(geojson)
 
 
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView
-from django.urls import reverse_lazy
-from django.contrib import messages
-
-# Existing imports ...
-
+@method_decorator(tier_required(['ultra']), name='dispatch')
 class BlipListView(LoginRequiredMixin, NonBootstrapRequiredMixin, ListView):
     model = EmergencyService
     template_name = 'gis/blip_list.html'
     context_object_name = 'blips'
     
     def get_queryset(self):
-        return EmergencyService.objects.filter(is_active=True).order_by('service_type', 'name')
+        return EmergencyService.objects.all().order_by('service_type', 'name')
 
+@method_decorator(tier_required(['ultra']), name='dispatch')
 class BlipCreateView(LoginRequiredMixin, NonBootstrapRequiredMixin, CreateView):
     model = EmergencyService
+    form_class = EmergencyServiceForm
     template_name = 'gis/blip_form.html'
-    fields = ['name', 'service_type', 'description', 'address', 'contact_number', 'icon_emoji', 'latitude', 'longitude']
     success_url = reverse_lazy('gis:blip_list')
     
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        info = BarangayInfo.objects.first()
+        if info:
+            ctx['barangay_lat'] = info.latitude
+            ctx['barangay_lng'] = info.longitude
+        return ctx
+
     def form_valid(self, form):
         messages.success(self.request, f"Blip '{form.instance.name}' created successfully.")
         return super().form_valid(form)
 
+@method_decorator(tier_required(['ultra']), name='dispatch')
 class BlipUpdateView(LoginRequiredMixin, NonBootstrapRequiredMixin, UpdateView):
     model = EmergencyService
+    form_class = EmergencyServiceForm
     template_name = 'gis/blip_form.html'
-    fields = ['name', 'service_type', 'description', 'address', 'contact_number', 'icon_emoji', 'latitude', 'longitude', 'is_active']
     success_url = reverse_lazy('gis:blip_list')
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        info = BarangayInfo.objects.first()
+        if info:
+            ctx['barangay_lat'] = info.latitude
+            ctx['barangay_lng'] = info.longitude
+        return ctx
 
     def form_valid(self, form):
         messages.success(self.request, f"Blip '{form.instance.name}' updated successfully.")
         return super().form_valid(form)
 
+@method_decorator(tier_required(['ultra']), name='dispatch')
 class BlipDeleteView(LoginRequiredMixin, NonBootstrapRequiredMixin, DeleteView):
     model = EmergencyService
     template_name = 'gis/blip_confirm_delete.html'

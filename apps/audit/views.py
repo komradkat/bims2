@@ -13,6 +13,8 @@ class AuditLogsView(LoginRequiredMixin, NonBootstrapRequiredMixin, ListView):
     paginate_by = 50
 
     def get_queryset(self):
+        from .models import SystemLog
+        
         models_to_track = [
             ('residents', 'Resident', 'Residents'),
             ('certificates', 'Certificate', 'Certificates'),
@@ -23,18 +25,15 @@ class AuditLogsView(LoginRequiredMixin, NonBootstrapRequiredMixin, ListView):
 
         all_logs = []
 
+        # 1. Fetch Model History (Granular changes)
         for app_label, model_name, module_name in models_to_track:
             try:
                 model = apps.get_model(app_label, model_name)
-                # Check if model has history manager
                 if hasattr(model, 'history'):
-                    # Fetch history records
-                    records = model.history.all().order_by('-history_date')[:50] # Limit to recent 50 per model for performance
-
+                    records = model.history.all().order_by('-history_date')[:50]
                     for record in records:
                         action_map = {'+': 'Create', '~': 'Update', '-': 'Delete'}
                         action = action_map.get(record.history_type, 'Unknown')
-
                         color_map = {'Create': 'success', 'Update': 'info', 'Delete': 'error'}
                         action_color = color_map.get(action, 'ghost')
 
@@ -42,23 +41,33 @@ class AuditLogsView(LoginRequiredMixin, NonBootstrapRequiredMixin, ListView):
                         if record.history_change_reason:
                             details += f" ({record.history_change_reason})"
 
-                        user_display = 'System'
-                        if record.history_user:
-                             user_display = record.history_user.username
+                        user_display = record.history_user.username if record.history_user else 'System'
 
-                        log = {
+                        all_logs.append({
                             'timestamp': record.history_date,
                             'user': user_display,
                             'action': action,
                             'action_color': action_color,
                             'module': module_name,
                             'details': details,
-                        }
-                        all_logs.append(log)
+                            'is_system': False
+                        })
             except LookupError:
                 continue
 
+        # 2. Fetch System Logs (High-level events)
+        system_events = SystemLog.objects.all().order_by('-timestamp')[:100]
+        for event in system_events:
+            all_logs.append({
+                'timestamp': event.timestamp,
+                'user': event.user.username if event.user else 'System',
+                'action': event.get_action_display(),
+                'action_color': 'primary' if event.action in ['LOGIN', 'LICENSE_ACTIVATE'] else 'secondary',
+                'module': 'System',
+                'details': f"{event.get_action_display()}: {event.details.get('message', '')}" if event.details else event.get_action_display(),
+                'is_system': True
+            })
+
         # Sort combined logs by timestamp descending
         all_logs.sort(key=lambda x: x['timestamp'], reverse=True)
-
         return all_logs
