@@ -178,8 +178,6 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         ]
         
         # Activity Logs (from Audit/History)
-        # We can't easily fetch mixed history efficiently without the Audit view logic.
-        # I'll reuse a simplified version of Audit logic here.
         from django.apps import apps
         
         models_to_track = [
@@ -194,7 +192,8 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             try:
                 model = apps.get_model(app_label, model_name)
                 if hasattr(model, 'history'):
-                    records = model.history.all().order_by('-history_date')[:3]
+                    # Fix N+1 by selecting history_user
+                    records = model.history.select_related('history_user').all().order_by('-history_date')[:5]
                     for record in records:
                         action_map = {'+': 'Created', '~': 'Updated', '-': 'Deleted'}
                         action = action_map.get(record.history_type, 'Unknown')
@@ -646,4 +645,7 @@ def error_404(request, exception):
     return render(request, '404.html', status=404)
 
 def error_500(request):
+    import logging
+    logger = logging.getLogger('apps')
+    logger.exception("An unhandled 500 error occurred.")
     return render(request, '500.html', status=500)

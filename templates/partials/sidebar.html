@@ -95,9 +95,9 @@
     </li>
     {% if user.is_staff or user.role == 'admin' %}
     <li>
-      <a href="{% url 'core:user_list' %}" class="{% if 'users' in request.path %}active{% endif %}">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-        User Management
+      <a href="{% url 'core:license_info' %}" class="{% if 'license' in request.path %}active{% endif %}">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+        License Info
       </a>
     </li>
     {% endif %}
@@ -110,7 +110,7 @@
   <div class="p-6 border-t border-base-300 bg-base-100 shrink-0">
     <div class="flex flex-wrap justify-center gap-x-4 gap-y-2 mb-4">
       <a href="{% url 'core:about' %}" class="text-[10px] font-bold uppercase tracking-widest opacity-40 hover:opacity-100 hover:text-primary transition-all">About</a>
-      <a href="{% url 'core:license-info' %}" class="text-[10px] font-bold uppercase tracking-widest opacity-40 hover:opacity-100 hover:text-primary transition-all">License</a>
+      <a href="{% url 'core:license_info' %}" class="text-[10px] font-bold uppercase tracking-widest opacity-40 hover:opacity-100 hover:text-primary transition-all">License</a>
       <a href="{% url 'core:privacy' %}" class="text-[10px] font-bold uppercase tracking-widest opacity-40 hover:opacity-100 hover:text-primary transition-all">Privacy</a>
       <a href="{% url 'core:terms' %}" class="text-[10px] font-bold uppercase tracking-widest opacity-40 hover:opacity-100 hover:text-primary transition-all">Terms</a>
     </div>
@@ -122,7 +122,7 @@
       
       <div class="flex items-center justify-center gap-2">
         <span class="badge badge-outline badge-xs opacity-50 text-[9px] px-2 py-1">v{{ system_version }}</span>
-        <a href="{% url 'core:license-info' %}" class="badge badge-{{ tier_info.badge_color }} badge-xs font-black text-[9px] uppercase px-2 py-1 hover:scale-110 transition-transform">{{ tier_info.name }}</a>
+        <a href="{% url 'core:license_info' %}" class="badge badge-{{ tier_info.badge_color }} badge-xs font-black text-[9px] uppercase px-2 py-1 hover:scale-110 transition-transform">{{ tier_info.name }}</a>
       </div>
     </div>
   </div>

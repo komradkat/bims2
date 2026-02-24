@@ -10,7 +10,9 @@ wheels/
 .venv
 
 # Django
-*.log
+logs/*.log
+logs/
+!logs/.gitkeep
 db.sqlite3
 db.sqlite3-journal
 /media

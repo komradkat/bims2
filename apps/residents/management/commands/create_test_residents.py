@@ -8,8 +8,12 @@ import random
 class Command(BaseCommand):
     help = 'Create test data for residents module'
 
+    def add_arguments(self, parser):
+        parser.add_argument('--count', type=int, default=5, help='Number of household heads to create')
+
     def handle(self, *args, **kwargs):
-        self.stdout.write(self.style.SUCCESS('Creating test residents...'))
+        count = kwargs['count']
+        self.stdout.write(self.style.SUCCESS(f'Creating {count} household heads and their members...'))
         
         # Sample data
         first_names = ['Juan', 'Maria', 'Jose', 'Ana', 'Pedro', 'Rosa', 'Carlos', 'Elena', 'Miguel', 'Sofia']
@@ -19,7 +23,7 @@ class Command(BaseCommand):
         
         # Create household heads
         household_heads = []
-        for i in range(5):
+        for i in range(count):
             age = random.randint(35, 65)
             dob = date.today() - timedelta(days=age*365)
             

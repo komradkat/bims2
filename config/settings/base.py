@@ -187,35 +187,80 @@ MEDIA_ROOT = BASE_DIR / 'media'
 LOGS_DIR = BASE_DIR / 'logs'
 LOGS_DIR.mkdir(exist_ok=True)
 
-LOGGING = copy.deepcopy(DEFAULT_LOGGING)
-
-# Add our custom rotating file handler for production errors
-LOGGING['handlers']['file'] = {
-    'level': 'ERROR',
-    'class': 'logging.handlers.RotatingFileHandler',
-    'filename': LOGS_DIR / 'bims2.log',
-    'maxBytes': 1024 * 1024 * 5,  # 5 MB
-    'backupCount': 5,
-    'formatter': 'verbose',
-}
-
-# Add verbose formatter
-LOGGING['formatters']['verbose'] = {
-    'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
-    'style': '{',
-}
-
-# Attach to the main django logger without removing existing (console) handlers
-if 'django' not in LOGGING['loggers']:
-    LOGGING['loggers']['django'] = {'handlers': [], 'level': 'INFO', 'propagate': True}
-
-LOGGING['loggers']['django']['handlers'].append('file')
-
-# Support app-level logging
-LOGGING['loggers']['apps'] = {
-    'handlers': ['console', 'file'] if DEBUG else ['file'],
-    'level': 'DEBUG' if DEBUG else 'INFO',
-    'propagate': True,
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse',
+        },
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+        'app_file': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': LOGS_DIR / 'info.log',
+            'maxBytes': 1024 * 1024 * 10,  # 10 MB
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
+        'error_file': {
+            'level': 'ERROR',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': LOGS_DIR / 'errors.log',
+            'maxBytes': 1024 * 1024 * 10,  # 10 MB
+            'backupCount': 10,
+            'formatter': 'verbose',
+        },
+        'security_file': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': LOGS_DIR / 'security.log',
+            'maxBytes': 1024 * 1024 * 5,  # 5 MB
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
+        'mail_admins': {
+            'level': 'ERROR',
+            'filters': ['require_debug_false'],
+            'class': 'django.utils.log.AdminEmailHandler'
+        }
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'app_file', 'error_file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'django.security': {
+            'handlers': ['security_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'apps': {
+            'handlers': ['console', 'app_file', 'error_file'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'propagate': True,
+        },
+    }
 }
 
 # External Storage for Certificates (Safe from project deletion/temp cleanup)

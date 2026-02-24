@@ -216,11 +216,6 @@ class Resident(models.Model):
     
     class Meta:
         ordering = ['last_name', 'first_name']
-
-    @classmethod
-    def get_purok_choices(cls):
-        """Returns a list of tuples for form choices from the Purok model."""
-        return [(p.name, p.name) for p in Purok.objects.all()]
         indexes = [
             models.Index(fields=['last_name', 'first_name']),
             models.Index(fields=['purok']),
@@ -229,6 +224,11 @@ class Resident(models.Model):
         verbose_name = 'Resident'
         verbose_name_plural = 'Residents'
     
+    @classmethod
+    def get_purok_choices(cls):
+        """Returns a list of tuples for form choices from the Purok model."""
+        return [(p.name, p.name) for p in Purok.objects.all()]
+
     def __str__(self):
         middle_initial = f"{self.middle_name[0]}." if self.middle_name else ""
         suffix = f" {self.suffix}" if self.suffix else ""

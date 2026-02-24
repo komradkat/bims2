@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404, redirect
-from django.views.generic import ListView, DetailView
+from django.views.generic import ListView, DetailView, TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from apps.core.mixins import NonBootstrapRequiredMixin
 from apps.core.decorators import non_bootstrap_required

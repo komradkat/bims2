@@ -1,8 +1,8 @@
-# Residents views
-from django.views.generic import ListView, DetailView, CreateView, UpdateView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.utils.decorators import method_decorator
 from apps.core.mixins import NonBootstrapRequiredMixin
-from apps.core.decorators import non_bootstrap_required
+from apps.core.decorators import non_bootstrap_required, role_required
 from django.db.models import Q
 from django.http import HttpResponse
 from .models import Resident
