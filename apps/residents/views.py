@@ -97,6 +97,7 @@ class ResidentsListView(LoginRequiredMixin, NonBootstrapRequiredMixin, ListView)
         return context
 
 
+@role_required(['admin', 'clerk', 'treasurer'])
 @non_bootstrap_required
 def export_residents_excel(request):
     """
@@ -207,6 +208,7 @@ class ResidentCreateView(LoginRequiredMixin, NonBootstrapRequiredMixin, CreateVi
         return reverse('residents:list')
 
 
+@method_decorator(role_required(['admin', 'clerk', 'treasurer']), name='dispatch')
 class ResidentUpdateView(LoginRequiredMixin, NonBootstrapRequiredMixin, UpdateView):
     """
     View for editing existing resident profiles.
@@ -237,6 +239,7 @@ class ResidentUpdateView(LoginRequiredMixin, NonBootstrapRequiredMixin, UpdateVi
         return reverse('residents:list')
 
 
+@method_decorator(role_required(['admin', 'clerk', 'treasurer']), name='dispatch')
 class ResidentDetailView(LoginRequiredMixin, NonBootstrapRequiredMixin, DetailView):
     """
     Detailed view of a resident's profile.

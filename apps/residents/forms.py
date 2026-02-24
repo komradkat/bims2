@@ -5,6 +5,11 @@ from .models import Resident
 from datetime import date
 
 
+# Security: File upload limits
+MAX_UPLOAD_SIZE = 2 * 1024 * 1024  # 2MB
+ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png']
+
+
 class ResidentForm(forms.ModelForm):
     """
     Form for creating and editing resident profiles.

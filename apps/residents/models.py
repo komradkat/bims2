@@ -1,7 +1,12 @@
 # Residents models
 from django.db import models
+from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from simple_history.models import HistoricalRecords
+
+# Security: File upload limits
+MAX_UPLOAD_SIZE = 2 * 1024 * 1024  # 2MB
+ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png']
 
 
 from django.utils.text import slugify
@@ -167,6 +172,11 @@ class Resident(models.Model):
     
     # Photo
     photo = models.ImageField(upload_to='residents/photos/', blank=True, null=True)
+    
+    def clean(self):
+        super().clean()
+        if self.photo and self.photo.size > MAX_UPLOAD_SIZE:
+            raise ValidationError({'photo': f"Image file too large. Max size is {MAX_UPLOAD_SIZE/1024/1024}MB."})
     
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)

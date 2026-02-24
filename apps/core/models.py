@@ -185,6 +185,12 @@ class BarangayOfficial(models.Model):
 
     photo = models.ImageField(upload_to='officials/photos/', blank=True, null=True)
 
+    def clean(self):
+        super().clean()
+        if self.photo and self.photo.size > 2 * 1024 * 1024:
+            from django.core.exceptions import ValidationError
+            raise ValidationError("Image file too large. Max size is 2MB.")
+
     # Term info
     term_start = models.DateField(null=True, blank=True)
     term_end = models.DateField(null=True, blank=True)

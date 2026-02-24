@@ -3,7 +3,7 @@
 
 {# Modal Trigger Button (optional - can be triggered programmatically) #}
 {% if show_trigger %}
-<button class="btn btn-{{ trigger_variant|default:'primary' }}" onclick="{{ modal_id }}.showModal()">
+<button class="btn btn-{{ trigger_variant|default:'primary' }}" onclick="document.getElementById('{{ modal_id }}').showModal()">
     {{ trigger_text|default:'Open Modal' }}
 </button>
 {% endif %}
@@ -17,7 +17,8 @@
         {# Modal Content #}
         <div class="py-4">
             {% if content %}
-                {{ content|safe }}
+                {# Consider if content is trusted. If it's user input, it should be escaped. #}
+                {{ content }}
             {% else %}
                 {% block modal_content %}
                 <p>Modal content goes here</p>

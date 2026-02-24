@@ -224,13 +224,15 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                     a['time'],
                     a['activity'],
                     a['user'],
-                    mark_safe(f'<span class="badge badge-success">{a["status"]}</span>')
-                ]
+                    a['status']
+                ],
+                'status_class': 'badge-success' if a['status'] == 'Completed' else 'badge-ghost'
             } for a in activities
         ]
         
         return context
 
+@method_decorator(role_required(['admin']), name='dispatch')
 class SettingsView(LoginRequiredMixin, View):
     """View to manage Barangay Information and System Settings"""
     template_name = 'core/settings.html'
@@ -264,7 +266,7 @@ class SettingsView(LoginRequiredMixin, View):
         return redirect('core:settings')
 
 @method_decorator(tier_required(['ultra']), name='dispatch')
-class GisMapView(TemplateView):
+class GisMapView(LoginRequiredMixin, TemplateView):
     """GIS Map view (Ultra only)"""
     template_name = 'pages/gis/map.html'
 
@@ -460,7 +462,8 @@ class InitializingView(TemplateView):
     """Premium loading screen for system initialization"""
     template_name = 'core/initializing.html'
 
-class TriggerInitializeAPI(View):
+@method_decorator(role_required(['admin']), name='dispatch')
+class TriggerInitializeAPI(LoginRequiredMixin, View):
     """API endpoint to trigger background initialization tasks (like GIS import)"""
     def post(self, request):
         from django.core.management import call_command
@@ -498,6 +501,7 @@ class OfficialsListView(LoginRequiredMixin, ListView):
         return BarangayOfficial.objects.all()
 
 
+@method_decorator(role_required(['admin']), name='dispatch')
 class OfficialCreateView(LoginRequiredMixin, View):
     template_name = 'pages/officials/form.html'
 
@@ -549,6 +553,7 @@ class OfficialCreateView(LoginRequiredMixin, View):
             })
 
 
+@method_decorator(role_required(['admin']), name='dispatch')
 class OfficialUpdateView(LoginRequiredMixin, View):
     template_name = 'pages/officials/form.html'
 
@@ -604,6 +609,7 @@ class OfficialUpdateView(LoginRequiredMixin, View):
             })
 
 
+@method_decorator(role_required(['admin']), name='dispatch')
 class OfficialDeleteView(LoginRequiredMixin, View):
     def post(self, request, pk):
         from django.shortcuts import get_object_or_404
