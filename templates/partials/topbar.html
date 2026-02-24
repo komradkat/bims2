@@ -1,7 +1,7 @@
 {% load static %}
 
 {# Top Navigation Bar - Extracted from prototype/static/js/layout.js #}
-<div class="navbar bg-primary text-primary-content shadow-md z-30 h-20 shrink-0 px-4 justify-between">
+<div class="navbar bg-black/40 backdrop-blur-xl border-b border-white/5 text-primary-content shadow-2xl z-30 h-20 shrink-0 px-6 justify-between transition-all duration-300">
     {# Left: Branding #}
     <div class="flex items-center gap-3">
         {# Mobile Toggle (visible only on small screens) #}
@@ -9,52 +9,53 @@
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-6 h-6 stroke-current"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
         </label>
 
-        {# Logo Placeholder #}
-        <div class="avatar placeholder">
-            <div class="w-14 h-14 rounded-full bg-base-200 flex items-center justify-center overflow-hidden border border-base-300">
+        {# Logo / Seal #}
+        <div class="avatar">
+            <div class="w-14 h-14 rounded-full bg-white/5 flex items-center justify-center overflow-hidden border-2 border-white/10 shadow-inner group hover:border-primary/50 transition-all duration-500">
                 {% if barangay_info.logo_url %}
-                    <img src="{{ barangay_info.logo_url }}" alt="Logo" class="w-full h-full object-cover">
+                    <img src="{{ barangay_info.logo_url }}" alt="Logo" class="w-full h-full object-cover scale-105 group-hover:scale-110 transition-transform duration-500">
                 {% else %}
-                    <span class="text-xl">🏛️</span>
+                    <span class="text-2xl filter drop-shadow-md">🏛️</span>
                 {% endif %}
             </div>
         </div>
         
         {# Barangay Name and Title #}
-        <div class="leading-tight">
+        <div class="leading-tight ml-1">
             <div class="flex items-center gap-2">
-                <div class="font-bold text-lg leading-tight">{{ barangay_info.name }}</div>
+                <div class="font-black text-xl leading-none tracking-tight text-white">{{ barangay_info.name }}</div>
                 {% if request.user.is_bootstrap %}
-                <div class="badge badge-error badge-outline badge-xs font-black px-1.5 py-2 animate-pulse">BOOTSTRAP</div>
+                <div class="badge badge-error font-black text-[9px] px-1.5 py-2 ring-1 ring-error/30 animate-pulse">BOOTSTRAP</div>
                 {% endif %}
             </div>
-            <div class="text-[10px] opacity-60 font-medium tracking-tight uppercase hidden sm:block">BARANGAY INFORMATION MANAGEMENT SYSTEM - BIMS</div>
+            <div class="text-[9px] opacity-40 font-bold tracking-[0.2em] uppercase hidden sm:block mt-1">Barangay Information Management System - BIMS</div>
         </div>
     </div>
 
     {# Middle: Global Search #}
-    <div class="hidden md:flex flex-1 max-w-md mx-8 relative">
+    <div class="hidden md:flex flex-1 max-w-lg mx-12 relative group/search">
         <div class="relative w-full">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-white/40">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/30 group-focus-within/search:text-primary transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
             </div>
             <input type="text" 
                    name="q" 
-                   placeholder="Search residents (Press '/' to focus)" 
-                   class="input input-sm w-full bg-white/10 border-white/20 text-white placeholder:text-white/40 pl-10 focus:bg-white/20 focus:border-white/40 transition-all rounded-full"
+                   placeholder="Search residents, permits, or logs..." 
+                   class="input w-full bg-white/[0.03] border-white/5 text-white placeholder:text-white/20 pl-11 pr-12 focus:bg-white/[0.07] focus:border-primary/30 transition-all rounded-xl h-11 text-sm shadow-inner"
                    hx-get="{% url 'residents:search' %}?source=global"
                    hx-trigger="keyup changed delay:300ms, search"
                    hx-target="#global-search-results"
                    hx-indicator=".search-spinner"
                    id="global-search-input">
-            <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
-                <span class="loading loading-spinner loading-xs text-white/40 search-spinner htmx-indicator"></span>
+            <div class="absolute inset-y-0 right-0 pr-4 flex items-center gap-2">
+                <span class="loading loading-spinner loading-xs text-primary/40 search-spinner htmx-indicator"></span>
+                <kbd class="kbd kbd-xs bg-white/10 border-white/10 text-white/30 font-bold">/</kbd>
             </div>
         </div>
         {# Search Results Container #}
-        <div id="global-search-results" class="absolute top-full left-0 w-full mt-2 z-50"></div>
+        <div id="global-search-results" class="absolute top-[calc(100%+12px)] left-0 w-full z-50"></div>
     </div>
 
     {# Right: Notifications & User Profile #}
@@ -127,16 +128,19 @@
 
         {# User Profile Dropdown #}
         <div class="dropdown dropdown-end">
-            <div tabindex="0" role="button" class="btn btn-ghost btn-sm gap-2 text-white">
-                <div class="avatar placeholder">
-                    <div class="bg-white/20 text-white rounded-full w-8">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
-                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+            <div tabindex="0" role="button" class="btn btn-ghost hover:bg-white/5 h-12 gap-3 text-white transition-all rounded-xl px-4">
+                <div class="avatar online">
+                    <div class="bg-primary/20 text-primary rounded-full w-9 border border-primary/30">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-full h-full p-1.5">
+                            <path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clip-rule="evenodd" />
                         </svg>
                     </div>
                 </div>
-                <span class="hidden sm:inline">{{ request.user.username|default:"Guest" }}</span>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 opacity-70">
+                <div class="hidden sm:flex flex-col items-start leading-none">
+                    <span class="text-xs font-black tracking-tight">{{ request.user.username|default:"Guest" }}</span>
+                    <span class="text-[9px] opacity-40 font-bold uppercase tracking-widest mt-1">Administrator</span>
+                </div>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 opacity-30 group-hover:opacity-100 transition-opacity">
                     <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                 </svg>
             </div>

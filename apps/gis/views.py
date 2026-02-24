@@ -42,7 +42,7 @@ class MapView(LoginRequiredMixin, NonBootstrapRequiredMixin, TemplateView):
         license_tier = getattr(self.request, 'license', {}).get('tier', 'community')
         if license_tier == 'ultra':
             ctx['blips'] = EmergencyService.objects.all().order_by('service_type', 'name')
-            ctx['form'] = EmergencyServiceForm()
+            ctx['form'] = EmergencyServiceForm(initial={'is_active': True})
             
         return ctx
 

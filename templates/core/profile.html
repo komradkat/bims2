@@ -26,9 +26,13 @@
         <div class="space-y-6">
             <div class="card bg-base-100 shadow-xl border border-base-300">
                 <div class="card-body items-center text-center py-10">
-                    <div class="avatar placeholder mb-4">
-                        <div class="bg-primary text-primary-content rounded-full w-24 ring ring-primary ring-offset-base-100 ring-offset-2">
-                            <span class="text-3xl font-bold uppercase">{{ request.user.username.0 }}</span>
+                    <div class="avatar {% if request.user.official and request.user.official.is_active %}online{% endif %} mb-4">
+                        <div class="bg-primary text-primary-content rounded-full w-24 ring ring-primary ring-offset-base-100 ring-offset-2 overflow-hidden">
+                            {% if request.user.official and request.user.official.photo %}
+                                <img src="{{ request.user.official.photo.url }}" alt="{{ request.user.username }}" class="object-cover w-full h-full" />
+                            {% else %}
+                                <span class="text-3xl font-bold uppercase">{{ request.user.username.0 }}</span>
+                            {% endif %}
                         </div>
                     </div>
                     <h2 class="card-title text-2xl">{{ request.user.username }}</h2>

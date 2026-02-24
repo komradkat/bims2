@@ -4,7 +4,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.views.generic import TemplateView, View, ListView, CreateView, UpdateView
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, update_session_auth_hash
 from django.urls import reverse_lazy, reverse
 from django.contrib import messages
 from django.core.cache import cache
@@ -81,10 +81,19 @@ class UserCreateView(LoginRequiredMixin, CreateView):
             self.request.user.barangay_position = user.barangay_position
             self.request.user.is_bootstrap = False
             
+            # Sync names from official if linked
+            if user.official:
+                self.request.user.first_name = user.official.first_name
+                self.request.user.last_name = user.official.last_name
+            
             if password:
                 self.request.user.set_password(password)
             
             self.request.user.save()
+            
+            # Update session hash to prevent logout
+            update_session_auth_hash(self.request, self.request.user)
+            
             messages.success(self.request, f"Account '{self.request.user.username}' successfully linked to Official: {self.request.user.official.full_name}. You are no longer in bootstrap mode.")
             return redirect('core:profile')
 
