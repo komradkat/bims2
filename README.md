@@ -1,8 +1,31 @@
 # BIMS2 - Barangay Information Management System
 
+BIMS2 is a comprehensive information management system designed for local government units (Barangays). It streamlines administrative tasks, enhances data management, and provides advanced features like GIS mapping for resident and infrastructure tracking.
+
+## Core Modules
+
+- **Core**: System settings, dashboard, and authentication.
+- **Residents**: Management of resident profiles, demographic data, and tracking.
+- **Certificates**: Issuance and management of barangay clearances, residency permits, and other documents.
+- **Blotter**: Recording and monitoring of incident reports and disputes.
+- **Business**: Management of business permits and local economic data.
+- **Finance**: Budget tracking, expenses, and revenue management.
+- **GIS (Ultra Tier)**: Interactive map with GTA-style "blips" for residents and emergency services.
+- **Audit**: Comprehensive logging of system actions for accountability.
+
+## Tech Stack
+
+- **Backend**: Django (Python)
+- **Frontend**: HTMX, Alpine.js, Vanilla CSS
+- **Database**: SQLite (Development) / PostgreSQL (Production)
+- **Mapping**: Leaflet.js
+- **Package Management**: [uv](https://github.com/astral-sh/uv)
+
+---
+
 ## Environment Setup
 
-This project uses environment variables for configuration. Follow these steps to set up your development environment:
+This project uses environment variables for configuration.
 
 ### 1. Install Dependencies
 
@@ -16,32 +39,6 @@ Copy the example environment file:
 
 ```bash
 cp .env.example .env
-```
-
-Edit `.env` with your settings:
-
-```env
-# Django Settings
-DEBUG=True
-SECRET_KEY=your-secret-key-here
-
-# Database (SQLite by default)
-DATABASE_ENGINE=django.db.backends.sqlite3
-DATABASE_NAME=db.sqlite3
-
-# For PostgreSQL (optional):
-# DATABASE_ENGINE=django.db.backends.postgresql
-# DATABASE_NAME=bims2_db
-# DATABASE_USER=postgres
-# DATABASE_PASSWORD=your_password
-# DATABASE_HOST=localhost
-# DATABASE_PORT=5432
-
-# Allowed Hosts
-ALLOWED_HOSTS=localhost,127.0.0.1
-
-# License Settings
-LICENSE_DEBUG_BYPASS=True
 ```
 
 ### 3. Run Migrations
@@ -62,62 +59,70 @@ uv run python manage.py createsuperuser
 uv run python manage.py runserver
 ```
 
-## Environment Variables Reference
+### 6. Run with Docker (Alternative)
 
-| Variable | Description | Default | Required |
-|----------|-------------|---------|----------|
-| `DEBUG` | Enable debug mode | `True` | No |
-| `SECRET_KEY` | Django secret key | Auto-generated | No |
-| `ALLOWED_HOSTS` | Comma-separated list of allowed hosts | `localhost,127.0.0.1` | No |
-| `DATABASE_ENGINE` | Database backend | `django.db.backends.sqlite3` | No |
-| `DATABASE_NAME` | Database name/path | `db.sqlite3` | No |
-| `DATABASE_USER` | Database username | `` | No |
-| `DATABASE_PASSWORD` | Database password | `` | No |
-| `DATABASE_HOST` | Database host | `` | No |
-| `DATABASE_PORT` | Database port | `` | No |
-| `LICENSE_DEBUG_BYPASS` | Bypass license checks (grants Ultra tier) | `False` | No |
+If you prefer using Docker, you can start the system with:
+
+```bash
+docker compose up --build
+```
+
+The system will be available at `http://localhost:8000`.
+
+---
 
 ## License System
 
-### Development Mode
-
-When `DEBUG=True` or `LICENSE_DEBUG_BYPASS=True`, the system automatically grants **Ultra tier** access to all features without requiring license activation.
-
-### Production Mode
-
-Set `DEBUG=False` and `LICENSE_DEBUG_BYPASS=False` to enable full license verification:
-
-1. Generate license keys:
-```bash
-uv run python manage.py generate_licenses --tier ultra --count 1 --days 365
-```
-
-2. Activate license at `/license/activate/`
+BIMS2 features a tiered license system to unlock specific modules.
 
 ### License Tiers
 
 - **Community** (Free): Residents, Certificates, Blotter
 - **Pro**: Community + Business Permits, Finance, Audit Logs
-- **Ultra**: Pro + GIS Mapping
+- **Ultra**: Pro + GIS Mapping (GTA-style Blips)
+
+### Development Bypass
+
+When `DEBUG=True` or `LICENSE_DEBUG_BYPASS=True` in `.env`, the system automatically grants **Ultra tier** access.
+
+---
+
+## GIS Features
+
+The GIS module provides a visual interface for managing barangay assets:
+
+- **Resident Locations**: View where residents live on an interactive map.
+- **GTA-style Blips**: Dynamic icons for Emergency Services (Police, Fire, Hospitals).
+- **Custom Points**: Add and manage "Blips" for landmarks, evacuation centers, and more.
+- **Resident GeoJSON**: Real-time spatial data rendering.
+
+---
 
 ## Project Structure
 
-```
+```text
 bims2/
-├── apps/
-│   └── core/           # Core application
-├── config/             # Django settings
-├── templates/          # HTML templates
-├── static/             # Static files
-├── .env                # Environment variables (not in git)
-├── .env.example        # Environment template
-└── manage.py           # Django management
+├── apps/               # Application modules
+│   ├── core/           # Dashboard & Auth
+│   ├── residents/      # Resident Records
+│   ├── certificates/   # Document Issuance
+│   ├── gis/            # GIS Mapping Engine
+│   └── ...             # Other modules
+├── config/             # Django Settings & URLs
+├── templates/          # HTML Templates (Jinja2-style)
+├── static/             # Static Assets (JS/CSS)
+├── manage.py           # Django Management Tool
+└── pyproject.toml      # Project Metadata & Deps
 ```
 
-## Security Notes
+## Security Best Practices
 
-- **Never commit `.env` to version control** (already in `.gitignore`)
-- Change `SECRET_KEY` in production
-- Set `DEBUG=False` in production
-- Use strong database passwords
-- Configure `ALLOWED_HOSTS` properly in production
+- Change `SECRET_KEY` in production.
+- Set `DEBUG=False` in production.
+- Use strong database passwords and configure `ALLOWED_HOSTS` properly.
+- **Never commit `.env` to version control.**
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
