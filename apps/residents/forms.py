@@ -257,3 +257,38 @@ class ResidentForm(forms.ModelForm):
             })
         
         return cleaned_data
+
+class HouseholdHeadForm(ResidentForm):
+    """Form specifically for the household head."""
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['is_household_head'].initial = True
+        self.fields['is_household_head'].widget = forms.HiddenInput()
+        self.fields['household_head'].widget = forms.HiddenInput()
+        self.fields['relationship_to_head'].widget = forms.HiddenInput()
+
+class HouseholdMemberForm(ResidentForm):
+    """Form specifically for household members."""
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['is_household_head'].initial = False
+        self.fields['is_household_head'].widget = forms.HiddenInput()
+        self.fields['household_head'].widget = forms.HiddenInput()
+        self.fields['relationship_to_head'].required = True
+        
+        # In bulk registration, address and purok are usually shared
+        # but we keep them for flexibility, maybe with smaller widgets
+        self.fields['purok'].widget.attrs.update({'class': 'select select-sm select-bordered w-full'})
+        self.fields['address'].widget.attrs.update({'class': 'input input-sm input-bordered w-full'})
+
+from django.forms import inlineformset_factory
+
+# Since members are linked to the head via the 'household_head' foreign key
+HouseholdMemberFormSet = inlineformset_factory(
+    Resident, 
+    Resident,
+    form=HouseholdMemberForm,
+    fk_name='household_head',
+    extra=1,
+    can_delete=True
+)

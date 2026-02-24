@@ -1,0 +1,195 @@
+{# Resident Form Fields Partial #}
+{# Usage: {% include 'pages/residents/partials/resident_form_fields.html' with form=form %} #}
+
+<div class="space-y-8">
+    {# Card: Personal Information #}
+    <div>
+        <h3 class="text-sm font-bold text-base-content/70 uppercase tracking-wider mb-4 pb-2 border-b border-base-200">
+            Personal Information
+        </h3>
+        
+        {# Photo Upload - Only for Head or if specifically needed #}
+        {% if not is_member %}
+        <div class="form-control w-full mb-6" x-data="{ photoPreview: '{% if form.instance.photo %}{{ form.instance.photo.url }}{% endif %}' }">
+            <label class="label"><span class="label-text text-xs">Profile Photo</span></label>
+            <div class="flex items-center gap-4">
+                <div class="avatar placeholder">
+                    <div class="bg-neutral text-neutral-content rounded-full w-14 h-14 mask mask-squircle">
+                        <template x-if="photoPreview">
+                            <img :src="photoPreview" class="w-full h-full object-cover" />
+                        </template>
+                        <template x-if="!photoPreview">
+                            <span class="text-[10px]">Photo</span>
+                        </template>
+                    </div>
+                </div>
+                <div class="w-full">
+                    {{ form.photo }}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div class="form-control">
+                <label class="label"><span class="label-text text-xs">First Name *</span></label>
+                {{ form.first_name }}
+            </div>
+            <div class="form-control">
+                <label class="label"><span class="label-text text-xs">Middle Name</span></label>
+                {{ form.middle_name }}
+            </div>
+            <div class="form-control">
+                <label class="label"><span class="label-text text-xs">Last Name *</span></label>
+                {{ form.last_name }}
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+            <div class="form-control">
+                <label class="label"><span class="label-text text-xs">Suffix</span></label>
+                {{ form.suffix }}
+            </div>
+            <div class="form-control">
+                <label class="label"><span class="label-text text-xs">Date of Birth *</span></label>
+                {{ form.date_of_birth }}
+            </div>
+            <div class="form-control">
+                <label class="label"><span class="label-text text-xs">Sex *</span></label>
+                {{ form.sex }}
+            </div>
+            <div class="form-control">
+                <label class="label"><span class="label-text text-xs">Civil Status *</span></label>
+                {{ form.civil_status }}
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="form-control text-xs">
+                <label class="label"><span class="label-text text-xs">Citizenship</span></label>
+                {{ form.citizenship }}
+            </div>
+            <div class="form-control">
+                <label class="label"><span class="label-text text-xs">Religion</span></label>
+                {{ form.religion }}
+            </div>
+            <div class="form-control">
+                <label class="label"><span class="label-text text-xs">Blood Type</span></label>
+                {{ form.blood_type }}
+            </div>
+        </div>
+    </div>
+
+    {# Card: Education & Employment #}
+    <div>
+        <h3 class="text-sm font-bold text-base-content/70 uppercase tracking-wider mb-4 pb-2 border-b border-base-200">
+            Education & Employment
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="form-control">
+                <label class="label"><span class="label-text text-xs">Educational Attainment</span></label>
+                {{ form.educational_attainment }}
+            </div>
+            <div class="form-control">
+                <label class="label"><span class="label-text text-xs">Employment Status</span></label>
+                {{ form.employment_status }}
+            </div>
+            <div class="form-control">
+                <label class="label"><span class="label-text text-xs">Occupation</span></label>
+                {{ form.occupation }}
+            </div>
+        </div>
+    </div>
+
+    {# Card: Contact & IDs #}
+    <div>
+        <h3 class="text-sm font-bold text-base-content/70 uppercase tracking-wider mb-4 pb-2 border-b border-base-200">
+            Contact & Government IDs
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div class="form-control">
+                <label class="label"><span class="label-text text-xs">Mobile Number</span></label>
+                {{ form.mobile_number }}
+            </div>
+            <div class="form-control">
+                <label class="label"><span class="label-text text-xs">Email Address</span></label>
+                {{ form.email }}
+            </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="form-control">
+                <label class="label"><span class="label-text text-xs">PhilHealth No.</span></label>
+                {{ form.philhealth_no }}
+            </div>
+            <div class="form-control">
+                <label class="label"><span class="label-text text-xs">SSS / GSIS No.</span></label>
+                {{ form.sss_gsis_no }}
+            </div>
+            <div class="form-control">
+                <label class="label"><span class="label-text text-xs">TIN No.</span></label>
+                {{ form.tin_no }}
+            </div>
+        </div>
+    </div>
+
+    {# Residence - Usually synced for members but editable #}
+    {% if not is_member %}
+    <div>
+        <h3 class="text-sm font-bold text-base-content/70 uppercase tracking-wider mb-4 pb-2 border-b border-base-200">
+            Residence Info
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="form-control">
+                <label class="label"><span class="label-text text-xs">Purok *</span></label>
+                {{ form.purok }}
+            </div>
+            <div class="form-control md:col-span-2">
+                <label class="label"><span class="label-text text-xs">Address *</span></label>
+                {{ form.address }}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {# Sectoral Information #}
+    <div>
+        <h3 class="text-sm font-bold text-base-content/70 uppercase tracking-wider mb-4 pb-2 border-b border-base-200">
+            Sectoral Details
+        </h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-base-200/30 rounded-lg">
+            <label class="label cursor-pointer justify-start gap-2">
+                {{ form.is_senior_citizen }}
+                <span class="label-text text-xs">Senior</span>
+            </label>
+            <label class="label cursor-pointer justify-start gap-2">
+                {{ form.is_solo_parent }}
+                <span class="label-text text-xs">Solo Parent</span>
+            </label>
+            <label class="label cursor-pointer justify-start gap-2">
+                {{ form.is_4ps }}
+                <span class="label-text text-xs">4Ps</span>
+            </label>
+            <label class="label cursor-pointer justify-start gap-2">
+                {{ form.is_indigent }}
+                <span class="label-text text-xs">Indigent</span>
+            </label>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <div class="border border-base-200 rounded-lg p-3">
+                <label class="label cursor-pointer justify-start gap-2 mb-1">
+                    {{ form.is_pwd }}
+                    <span class="label-text text-xs font-bold">PWD</span>
+                </label>
+                {{ form.disability_type }}
+            </div>
+            <div class="border border-base-200 rounded-lg p-3">
+                <label class="label cursor-pointer justify-start gap-2 mb-1">
+                    {{ form.is_voter }}
+                    <span class="label-text text-xs font-bold">Voter</span>
+                </label>
+                {{ form.precinct_number }}
+            </div>
+        </div>
+    </div>
+</div>

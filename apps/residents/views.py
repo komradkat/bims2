@@ -294,3 +294,66 @@ class ResidentSearchView(LoginRequiredMixin, NonBootstrapRequiredMixin, ListView
             filters |= combined_filter
 
         return Resident.objects.filter(filters, is_active=True).order_by('last_name', 'first_name')[:10]
+from django.shortcuts import render, redirect
+from .forms import HouseholdHeadForm, HouseholdMemberFormSet
+
+class HouseholdRegistrationView(LoginRequiredMixin, NonBootstrapRequiredMixin, CreateView):
+    """
+    View for bulk registration of a household (head + members).
+    """
+    model = Resident
+    template_name = 'pages/residents/household_form.html'
+    
+    def get(self, request, *args, **kwargs):
+        self.object = None
+        form = HouseholdHeadForm()
+        formset = HouseholdMemberFormSet()
+        return self.render_to_response(
+            self.get_context_data(form=form, formset=formset)
+        )
+    
+    def post(self, request, *args, **kwargs):
+        self.object = None
+        form = HouseholdHeadForm(request.POST, request.FILES)
+        formset = HouseholdMemberFormSet(request.POST, request.FILES)
+        
+        if form.is_valid() and formset.is_valid():
+            return self.form_valid(form, formset)
+        else:
+            return self.form_invalid(form, formset)
+    
+    def form_valid(self, form, formset):
+        # Save the household head first
+        self.object = form.save()
+        
+        # Assign the head to the members and save them
+        instances = formset.save(commit=False)
+        for instance in instances:
+            instance.household_head = self.object
+            # Inherit address and purok from head if blank
+            if not instance.purok:
+                instance.purok = self.object.purok
+            if not instance.address:
+                instance.address = self.object.address
+            instance.save()
+        
+        formset.save_m2m() # In case there are many-to-many fields
+        
+        messages.success(
+            self.request,
+            f'Household for "{self.object.full_name}" has been successfully registered!'
+        )
+        return redirect(self.get_success_url())
+    
+    def form_invalid(self, form, formset):
+        return self.render_to_response(
+            self.get_context_data(form=form, formset=formset)
+        )
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Bulk Household Registration'
+        return context
+    
+    def get_success_url(self):
+        return reverse('residents:list')
