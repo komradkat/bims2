@@ -229,13 +229,27 @@
         /* ─── ALERTS ─── */
         .alert { border-radius: 0.6rem; }
 
-        /* ─── Layout Stability for Drawer ─── */
+        /* ─── Layout Stability for Drawer (Prevents JIT Flash) ─── */
         @media (min-width: 1024px) {
+            .drawer {
+                display: grid !important;
+                grid-template-columns: 20rem 1fr !important;
+            }
             .drawer-side {
-                width: 20rem !important; /* Forces sidebar width matching w-80 (20rem) */
+                grid-column-start: 1 !important;
+                width: 20rem !important;
+                display: block !important;
+                position: relative !important;
+                height: 100vh !important;
             }
             .drawer-content {
+                grid-column-start: 2 !important;
                 width: auto !important;
+                display: flex !important;
+                flex-direction: column !important;
+            }
+            .drawer-toggle ~ .drawer-content {
+                margin-left: 0 !important;
             }
         }
     </style>

@@ -19,21 +19,38 @@ class CertificatePrintView(LoginRequiredMixin, NonBootstrapRequiredMixin, Detail
     def get(self, request, *args, **kwargs):
         certificate = self.get_object()
 
-        from apps.core.models import BarangayInfo
+        from apps.core.models import BarangayInfo, BarangayOfficial
         try:
             info = BarangayInfo.objects.get()
         except BarangayInfo.DoesNotExist:
             info = None
 
+        # Try to find an active official as Punong Barangay / Captain
+        captain_official = BarangayOfficial.objects.filter(
+            position='punong_barangay', 
+            is_active=True
+        ).first()
+
+        captain_name = 'PUNONG BARANGAY'
+        captain_title = 'Punong Barangay'
+
+        if captain_official:
+            captain_name = captain_official.display_name.upper()
+            captain_title = captain_official.get_position_display().split(' / ')[-1] # Prefer Barangay Captain if available
+        elif info:
+            captain_name = (info.captain_name or 'PUNONG BARANGAY').upper()
+            captain_title = info.captain_title or 'Punong Barangay'
+
         barangay = {
-            'name':         info.name if info else 'Barangay',
-            'city':         info.city_municipality if info else '',
-            'province':     info.province if info else '',
-            'region':       info.region if info else '',
-            'logo_url':     ('file:///' + info.logo.path.replace('\\', '/')) if (info and info.logo) else None,
-            'captain_name': (info.captain_name or '').upper() if info else 'PUNONG BARANGAY',
-            'contact':      info.contact_number if info else '',
-            'email':        info.email if info else '',
+            'name':          info.name if info else 'Barangay',
+            'city':          info.city_municipality if info else '',
+            'province':      info.province if info else '',
+            'region':        info.region if info else '',
+            'logo_url':      ('file:///' + info.logo.path.replace('\\', '/')) if (info and info.logo) else None,
+            'captain_name':  captain_name,
+            'captain_title': captain_title,
+            'contact':       info.contact_number if info else '',
+            'email':         info.email if info else '',
         }
 
         import os

@@ -108,7 +108,12 @@ class BarangayInfo(models.Model):
     captain_name = models.CharField(
         max_length=200,
         blank=True,
-        help_text="Full name of the Punong Barangay (used on printed certificates)"
+        help_text="Full name of the Punong Barangay / Barangay Captain"
+    )
+    captain_title = models.CharField(
+        max_length=100,
+        default="Punong Barangay",
+        help_text="Official title (e.g. Punong Barangay, Barangay Captain)"
     )
 
     # GIS Location (Center of Barangay)
@@ -152,7 +157,7 @@ class BarangayOfficial(models.Model):
     """
 
     POSITION_CHOICES = [
-        ('punong_barangay', 'Punong Barangay'),
+        ('punong_barangay', 'Punong Barangay / Barangay Captain'),
         ('kagawad', 'Barangay Kagawad'),
         ('sk_chairman', 'SK Chairman'),
         ('secretary', 'Barangay Secretary'),
