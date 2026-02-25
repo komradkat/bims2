@@ -6,12 +6,35 @@
 <div class="container mx-auto space-y-6">
 
     {# ── Page header ───────────────────────────── #}
-    <div class="flex items-center justify-between">
+    <div class="flex items-center justify-between" x-data="{ 
+        updateAvailable: false, 
+        checking: false,
+        checkUpdates() {
+            this.checking = true;
+            fetch('{% url 'core:api_check_updates' %}')
+                .then(r => r.json())
+                .then(data => {
+                    this.updateAvailable = data.update_available;
+                    this.checking = false;
+                });
+        }
+    }" x-init="checkUpdates()">
         <div>
-            <h1 class="text-2xl font-bold">Dashboard</h1>
+            <div class="flex items-center gap-2">
+                <h1 class="text-2xl font-bold">Dashboard</h1>
+                <template x-if="updateAvailable">
+                    <div class="badge badge-error badge-sm animate-pulse">Update Available</div>
+                </template>
+            </div>
             <p class="text-sm text-base-content/50 mt-0.5">Overview of barangay operations</p>
         </div>
-        <div class="badge badge-outline text-xs">{{ today|date:"l, F j, Y" }}</div>
+        <div class="flex flex-col items-end gap-1">
+            <div class="badge badge-outline text-xs">{{ today|date:"l, F j, Y" }}</div>
+            <button @click="checkUpdates()" class="btn btn-ghost btn-xs opacity-50 hover:opacity-100 gap-1.5" :class="checking ? 'loading' : ''">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                <span x-text="checking ? 'Checking...' : 'Check Updates'"></span>
+            </button>
+        </div>
     </div>
 
     {# ── Top KPI row ───────────────────────────── #}

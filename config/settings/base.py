@@ -2,6 +2,7 @@
 Base settings for BIMS2 project.
 """
 
+import os
 import environ
 from pathlib import Path
 
@@ -14,10 +15,24 @@ env = environ.Env(
     ALLOWED_HOSTS=(list, []),
 )
 
-# Read .env file if it exists
+# Read .env file if it exists (for Development)
 ENV_FILE = BASE_DIR / '.env'
 if ENV_FILE.exists():
     environ.Env.read_env(str(ENV_FILE))
+
+# --- Embedded Secrets (Production Hardening) ---
+# For compiled distributions, we embed secrets directly in the binary.
+# The build script generates config/env_secure.py which is then obfuscated.
+try:
+    from config import env_secure
+    # Iterate over all uppercase variables in the secure module
+    for key, value in env_secure.__dict__.items():
+        if key.isupper():
+            # Inject into the environment so environ.Env picks them up as overrides
+            os.environ[key] = str(value)
+except ImportError:
+    # Not in a hardened environment, standard .env loading continues
+    pass
 
 # System Versioning
 VERSION_FILE = BASE_DIR / 'VERSION'
@@ -25,7 +40,7 @@ if VERSION_FILE.exists():
     with open(VERSION_FILE, 'r') as f:
         BIMS_VERSION = f.read().strip()
 else:
-    BIMS_VERSION = '1.0.0-dev'
+    BIMS_VERSION = '1.0.0-alpha'
 
 
 # SECURITY WARNING: keep the secret key used in production secret!
@@ -116,12 +131,28 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+# Production-Grade System-Integrated Persistence
+# All data is stored in a fixed system location for stability and easy backup
+BIMS_DATA_ROOT = Path(env('BIMS_DATA_ROOT', default='C:/BIMS_Data'))
+
 DATABASES = {
-    'default': env.db(
-        'DATABASE_URL',
-        default=f'sqlite:///{BASE_DIR / "db.sqlite3"}'
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': str(BIMS_DATA_ROOT / 'db.sqlite3'),
+        'OPTIONS': {
+            'timeout': 20,
+            'init_command': 'PRAGMA journal_mode=WAL; PRAGMA synchronous=NORMAL;',
+        },
+    }
 }
+# Ensure the data directory exists
+try:
+    BIMS_DATA_ROOT.mkdir(parents=True, exist_ok=True)
+except Exception:
+    # Fallback for development/non-Windows systems
+    BIMS_DATA_ROOT = BASE_DIR / 'data'
+    BIMS_DATA_ROOT.mkdir(parents=True, exist_ok=True)
+    DATABASES['default']['NAME'] = str(BIMS_DATA_ROOT / 'db.sqlite3')
 
 
 # Password validation
@@ -179,11 +210,11 @@ STORAGES = {
 
 # Media files
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = BIMS_DATA_ROOT / 'media'
 
 # Logging Configuration
-LOGS_DIR = BASE_DIR / 'logs'
-LOGS_DIR.mkdir(exist_ok=True)
+LOGS_DIR = BIMS_DATA_ROOT / 'logs'
+LOGS_DIR.mkdir(parents=True, exist_ok=True)
 
 LOGGING = {
     'version': 1,
@@ -262,15 +293,8 @@ LOGGING = {
 }
 
 # External Storage for Certificates (Safe from project deletion/temp cleanup)
-# FALLBACK: If DEBUG=True and no storage root is set, save to project media.
-_default_storage = MEDIA_ROOT / 'certificates' / 'issued'
-BIMS_CERTIFICATE_STORAGE_ROOT = env('BIMS_CERTIFICATE_STORAGE_ROOT', default=str(_default_storage))
-
-# If it's a relative path or empty in DEBUG mode, ensure it's absolute within MEDIA_ROOT
-if DEBUG and (not BIMS_CERTIFICATE_STORAGE_ROOT or BIMS_CERTIFICATE_STORAGE_ROOT == str(_default_storage)):
-    BIMS_CERTIFICATE_STORAGE_ROOT = _default_storage
-else:
-    BIMS_CERTIFICATE_STORAGE_ROOT = Path(BIMS_CERTIFICATE_STORAGE_ROOT)
+BIMS_CERTIFICATE_STORAGE_ROOT = BIMS_DATA_ROOT / 'certificates'
+BIMS_CERTIFICATE_STORAGE_ROOT.mkdir(parents=True, exist_ok=True)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

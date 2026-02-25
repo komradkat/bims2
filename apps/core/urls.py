@@ -42,4 +42,5 @@ urlpatterns = [
     path('profile/', views.ProfileView.as_view(), name='profile'),
     path('password-change/', views.CustomPasswordChangeView.as_view(), name='change_password'),
     path('notifications/<int:pk>/read/', views.MarkNotificationReadView.as_view(), name='notification_read'),
+    path('api/check-updates/', views.CheckForUpdatesAPI.as_view(), name='api_check_updates'),
 ]

@@ -37,3 +37,6 @@ Thumbs.db
 
 # Temporary files
 init_apps.py
+
+# Build output
+/dist_hardened

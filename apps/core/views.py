@@ -796,6 +796,23 @@ class OfficialProfileForm(forms.ModelForm):
             'contact_number': forms.TextInput(attrs={'class': 'input input-bordered w-full'}),
         }
 
+class CheckForUpdatesAPI(LoginRequiredMixin, View):
+    """API endpoint to check for system updates."""
+    def get(self, request):
+        from .utils.update import check_for_updates # To be created
+        from django.http import JsonResponse
+        from django.conf import settings
+        
+        current_version = getattr(settings, 'BIMS_VERSION', '1.0.0-alpha')
+        update_info = check_for_updates(current_version)
+        
+        return JsonResponse({
+            'current_version': current_version,
+            'latest_version': update_info.get('latest_version'),
+            'update_available': update_info.get('update_available'),
+            'changelog': update_info.get('changelog', '')
+        })
+
 class ProfileView(LoginRequiredMixin, View):
     template_name = 'core/profile.html'
     
