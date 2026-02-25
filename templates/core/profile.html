@@ -7,6 +7,16 @@
         <p class="text-base-content/60">Manage your personal information and account settings.</p>
     </div>
 
+    {% if messages %}
+    <div class="mb-8 space-y-2">
+        {% for message in messages %}
+        <div class="alert alert-{% if message.tags == 'error' %}error{% else %}success{% endif %} shadow-lg">
+            <span>{{ message }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
     {% if request.user.is_bootstrap %}
     <div class="alert alert-error shadow-lg mb-8 border-2 border-error/20 flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4 p-6">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-8 h-8 opacity-80 mt-1"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
@@ -51,7 +61,7 @@
                             <span class="font-semibold text-base-content/70">Position:</span>
                             <span>
                                 {% if request.user.official %}
-                                    {{ request.user.official.position }}
+                                    {{ request.user.official.get_position_display }}
                                 {% else %}
                                     {{ request.user.barangay_position|default:"Not set" }}
                                 {% endif %}
@@ -61,7 +71,7 @@
                         <div class="flex items-center gap-3 text-sm">
                             <i class="fas fa-users-cog w-5 text-primary opacity-70"></i>
                             <span class="font-semibold text-base-content/70">Committee:</span>
-                            <span>{{ request.user.official.committee }}</span>
+                            <span>{{ request.user.official.get_committee_display }}</span>
                         </div>
                         {% endif %}
                         <div class="flex items-center gap-3 text-sm">
@@ -76,7 +86,7 @@
             <div class="card bg-primary text-primary-content shadow-xl">
                 <div class="card-body p-6">
                     <h3 class="font-black uppercase text-xs tracking-widest opacity-80 decoration-white/20 underline underline-offset-4 mb-4">Account Security</h3>
-                    <button class="btn btn-sm btn-white w-full" {% if request.user.is_bootstrap %}disabled{% endif %}>Change Password</button>
+                    <a href="{% url 'core:change_password' %}" class="btn btn-sm btn-white w-full {% if request.user.is_bootstrap %}btn-disabled opacity-50{% endif %}">Change Password</a>
                     <p class="text-[10px] mt-2 opacity-60 text-center italic">Last login: {{ request.user.last_login|timesince }} ago</p>
                 </div>
             </div>
@@ -93,31 +103,87 @@
                     
                     <form method="POST" action="{% url 'core:profile' %}" class="space-y-4">
                         {% csrf_token %}
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div class="form-control w-full">
-                                <label class="label"><span class="label-text font-bold">First Name</span></label>
-                                <input type="text" name="first_name" value="{{ request.user.first_name }}" class="input input-bordered w-full" {% if request.user.is_bootstrap %}disabled{% endif %} />
-                            </div>
-                            <div class="form-control w-full">
-                                <label class="label"><span class="label-text font-bold">Last Name</span></label>
-                                <input type="text" name="last_name" value="{{ request.user.last_name }}" class="input input-bordered w-full" {% if request.user.is_bootstrap %}disabled{% endif %} />
-                            </div>
-                        </div>
                         
-                        <div class="form-control w-full">
-                            <label class="label"><span class="label-text font-bold">Email Address</span></label>
-                            <input type="email" name="email" value="{{ request.user.email }}" class="input input-bordered w-full" {% if request.user.is_bootstrap %}disabled{% endif %} />
-                        </div>
+                        {% if official_form %}
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div class="form-control w-full">
+                                    <label class="label"><span class="label-text font-bold">Honorific</span></label>
+                                    {{ official_form.honorific }}
+                                    {% if official_form.honorific.errors %}<p class="text-error text-xs p-1">{{ official_form.honorific.errors.0 }}</p>{% endif %}
+                                </div>
+                                <div class="form-control w-full sm:col-span-2">
+                                    <label class="label"><span class="label-text font-bold">First Name</span></label>
+                                    {{ form.first_name }}
+                                    {% if form.first_name.errors %}<p class="text-error text-xs p-1">{{ form.first_name.errors.0 }}</p>{% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="form-control w-full">
+                                    <label class="label"><span class="label-text font-bold">Middle Name</span></label>
+                                    {{ official_form.middle_name }}
+                                    {% if official_form.middle_name.errors %}<p class="text-error text-xs p-1">{{ official_form.middle_name.errors.0 }}</p>{% endif %}
+                                </div>
+                                <div class="form-control w-full">
+                                    <label class="label"><span class="label-text font-bold">Last Name</span></label>
+                                    {{ form.last_name }}
+                                    {% if form.last_name.errors %}<p class="text-error text-xs p-1">{{ form.last_name.errors.0 }}</p>{% endif %}
+                                </div>
+                            </div>
 
-                        {% if request.user.official and request.user.official.phone %}
-                        <div class="form-control w-full">
-                            <label class="label"><span class="label-text font-bold">Phone Number</span></label>
-                            <input type="text" value="{{ request.user.official.phone }}" class="input input-bordered w-full" disabled />
-                            <label class="label">
-                                <span class="label-text-alt opacity-50 italic">Phone number is managed via your Official Profile.</span>
-                            </label>
-                        </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                                <div class="form-control w-full">
+                                    <label class="label"><span class="label-text font-bold">Suffix</span></label>
+                                    {{ official_form.suffix }}
+                                    {% if official_form.suffix.errors %}<p class="text-error text-xs p-1">{{ official_form.suffix.errors.0 }}</p>{% endif %}
+                                </div>
+                                <div class="form-control w-full sm:col-span-3">
+                                    <label class="label"><span class="label-text font-bold">Email Address</span></label>
+                                    {{ form.email }}
+                                    {% if form.email.errors %}<p class="text-error text-xs p-1">{{ form.email.errors.0 }}</p>{% endif %}
+                                </div>
+                            </div>
+
+                            <div class="form-control w-full">
+                                <label class="label"><span class="label-text font-bold">Contact Number</span></label>
+                                {{ official_form.contact_number }}
+                                {% if official_form.contact_number.errors %}<p class="text-error text-xs p-1">{{ official_form.contact_number.errors.0 }}</p>{% endif %}
+                            </div>
+                        {% else %}
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="form-control w-full">
+                                    <label class="label"><span class="label-text font-bold">First Name</span></label>
+                                    {{ form.first_name }}
+                                    {% if form.first_name.errors %}<p class="text-error text-xs p-1">{{ form.first_name.errors.0 }}</p>{% endif %}
+                                </div>
+                                <div class="form-control w-full">
+                                    <label class="label"><span class="label-text font-bold">Last Name</span></label>
+                                    {{ form.last_name }}
+                                    {% if form.last_name.errors %}<p class="text-error text-xs p-1">{{ form.last_name.errors.0 }}</p>{% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="form-control w-full">
+                                <label class="label"><span class="label-text font-bold">Email Address</span></label>
+                                {{ form.email }}
+                                {% if form.email.errors %}<p class="text-error text-xs p-1">{{ form.email.errors.0 }}</p>{% endif %}
+                            </div>
                         {% endif %}
+
+                        <div class="form-control w-full">
+                            <label class="label"><span class="label-text font-bold">Barangay Position</span></label>
+                            {{ form.barangay_position }}
+                            <label class="label">
+                                <span class="label-text-alt opacity-50 italic">
+                                    {% if request.user.official %}
+                                        Position is synced from your <span class="font-bold">Official Profile</span>.
+                                    {% else %}
+                                        Your official designation in the Barangay.
+                                    {% endif %}
+                                </span>
+                            </label>
+                            {% if form.barangay_position.errors %}<p class="text-error text-xs p-1">{{ form.barangay_position.errors.0 }}</p>{% endif %}
+                        </div>
 
                         {% if not request.user.is_bootstrap %}
                         <div class="pt-4 flex justify-end">

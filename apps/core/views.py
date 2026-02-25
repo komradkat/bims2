@@ -2,7 +2,9 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseRedirect
 from django.views.generic import TemplateView, View, ListView, CreateView, UpdateView
-from django.contrib.auth.views import LoginView
+from django.contrib.auth.views import LoginView, PasswordChangeView
+from django.contrib.auth.forms import PasswordChangeForm
+from django import forms
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import get_user_model, update_session_auth_hash
 from django.urls import reverse_lazy, reverse
@@ -772,28 +774,75 @@ class PrivacyView(TemplateView):
 class TermsView(TemplateView):
     template_name = 'pages/info/terms.html'
 
+class ProfileForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'email', 'barangay_position']
+        widgets = {
+            'first_name': forms.TextInput(attrs={'class': 'input input-bordered w-full'}),
+            'last_name': forms.TextInput(attrs={'class': 'input input-bordered w-full'}),
+            'email': forms.EmailInput(attrs={'class': 'input input-bordered w-full'}),
+            'barangay_position': forms.TextInput(attrs={'class': 'input input-bordered w-full'}),
+        }
+
+class OfficialProfileForm(forms.ModelForm):
+    class Meta:
+        model = BarangayOfficial
+        fields = ['honorific', 'middle_name', 'suffix', 'contact_number']
+        widgets = {
+            'honorific': forms.TextInput(attrs={'class': 'input input-bordered w-full'}),
+            'middle_name': forms.TextInput(attrs={'class': 'input input-bordered w-full'}),
+            'suffix': forms.TextInput(attrs={'class': 'input input-bordered w-full'}),
+            'contact_number': forms.TextInput(attrs={'class': 'input input-bordered w-full'}),
+        }
+
 class ProfileView(LoginRequiredMixin, View):
     template_name = 'core/profile.html'
     
     def get(self, request):
-        return render(request, self.template_name)
+        user_form = ProfileForm(instance=request.user)
+        official_form = None
+        if request.user.official:
+            official_form = OfficialProfileForm(instance=request.user.official)
+            
+        return render(request, self.template_name, {
+            'form': user_form,
+            'official_form': official_form
+        })
         
     def post(self, request):
-        user = request.user
-        first_name = request.POST.get('first_name')
-        last_name = request.POST.get('last_name')
-        email = request.POST.get('email')
-        
-        try:
-            user.first_name = first_name
-            user.last_name = last_name
-            user.email = email
-            user.save()
-            messages.success(request, "Profile updated successfully.")
-        except Exception as e:
-            messages.error(request, f"Error updating profile: {str(e)}")
+        if request.user.is_bootstrap:
+            messages.error(request, "Bootstrap account settings cannot be modified.")
+            return redirect('core:profile')
             
-        return redirect('core:profile')
+        user_form = ProfileForm(request.POST, instance=request.user)
+        official_form = None
+        official_valid = True
+        
+        if request.user.official:
+            official_form = OfficialProfileForm(request.POST, instance=request.user.official)
+            official_valid = official_form.is_valid()
+            
+        if user_form.is_valid() and official_valid:
+            user_form.save()
+            if official_form:
+                official_form.save()
+            messages.success(request, "Profile updated successfully.")
+            return redirect('core:profile')
+        
+        return render(request, self.template_name, {
+            'form': user_form,
+            'official_form': official_form
+        })
+
+class CustomPasswordChangeView(LoginRequiredMixin, PasswordChangeView):
+    form_class = PasswordChangeForm
+    success_url = reverse_lazy('core:profile')
+    template_name = 'auth/password_change.html'
+    
+    def form_valid(self, form):
+        messages.success(self.request, "Your password has been changed successfully.")
+        return super().form_valid(form)
 
 class MarkNotificationReadView(LoginRequiredMixin, View):
     def post(self, request, pk):
