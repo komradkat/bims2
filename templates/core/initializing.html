@@ -1,75 +1,68 @@
 {% extends 'base_simple.html' %}
 {% load static %}
 
-{% block title %}Initializing System | BIMS{% endblock %}
+{% block title %}System Initialization | BIMS{% endblock %}
 
 {% block content %}
 <div class="min-h-screen bg-base-200 flex items-center justify-center p-6 lg:p-12 relative overflow-hidden">
-    {# Animated background elements #}
-    <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none opacity-20">
-        <div class="absolute w-[800px] h-[800px] bg-primary/20 rounded-full blur-[120px] -top-96 -left-96 animate-pulse"></div>
-        <div class="absolute w-[600px] h-[600px] bg-secondary/10 rounded-full blur-[100px] -bottom-48 -right-48 animate-pulse" style="animation-delay: 2s"></div>
-    </div>
+    {# Simple professional background #}
+    <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-base-200 to-base-300 pointer-events-none opacity-50"></div>
 
-    <div class="max-w-2xl w-full glass-panel rounded-[2rem] shadow-2xl relative z-10 overflow-hidden">
+    <div class="max-w-2xl w-full bg-base-100 rounded-3xl shadow-2xl relative z-10 overflow-hidden border border-base-300">
         {# Header #}
-        <div class="p-10 border-b border-white/5 bg-white/5">
+        <div class="p-10 border-b border-base-200 bg-base-200/30">
             <div class="flex items-center gap-6">
-                <div class="w-16 h-16 bg-primary/20 rounded-[1.25rem] flex items-center justify-center shadow-lg shadow-primary/10 relative">
+                <div class="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center shadow-sm relative">
                     <span class="loading loading-spinner loading-lg text-primary"></span>
-                    <div class="absolute inset-0 rounded-[1.25rem] border border-primary/30 animate-ping opacity-20"></div>
                 </div>
                 <div>
-                    <h1 class="text-3xl font-black tracking-tighter uppercase text-white mb-0.5">Initializing BIMS</h1>
+                    <h1 class="text-3xl font-bold tracking-tight text-base-content mb-0.5">Finalizing System Setup</h1>
                     <div class="flex items-center gap-2">
-                        <span class="badge badge-primary badge-outline badge-xs font-black px-2 py-2">STABLE BUILD</span>
-                        <p class="text-[10px] font-black opacity-30 uppercase tracking-[0.25em]">Barangay Information Management System v2.0</p>
+                        <span class="badge badge-ghost badge-xs font-bold px-2 py-2">OFFICIAL BUILD</span>
+                        <p class="text-[10px] font-bold opacity-40 uppercase tracking-widest">Barangay Information Management System</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        {# Terminal / Progress Section #}
+        {# Information Section #}
         <div class="p-10 space-y-10">
             {# Status Message #}
             <div class="text-center">
-                <div id="status-title" class="text-xl font-black text-primary uppercase mb-2 italic tracking-tight shadow-primary/20 drop-shadow-sm">Compiling Core Modules...</div>
-                <div id="status-desc" class="text-xs opacity-50 font-mono tracking-tighter uppercase font-bold">Preparing secure database environment...</div>
+                <div id="status-title" class="text-xl font-bold text-base-content tracking-tight mb-2">Preparing Environment...</div>
+                <div id="status-desc" class="text-xs opacity-60 font-medium uppercase tracking-wider">Please wait while the system completes initialization.</div>
             </div>
 
-            {# Big Progress Bar #}
+            {# Progress Bar #}
             <div class="relative pt-1 px-2">
-                <div class="overflow-hidden h-2 mb-4 text-xs flex rounded-full bg-white/5 shadow-inner">
-                    <div id="main-progress" style="width:0%" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-primary transition-all duration-1000 ease-out shadow-[0_0_20px_oklch(var(--p)/0.5)]"></div>
+                <div class="overflow-hidden h-2.5 mb-4 text-xs flex rounded-full bg-base-300">
+                    <div id="main-progress" style="width:0%" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-primary transition-all duration-1000 ease-out"></div>
                 </div>
             </div>
 
-            {# Step by Step Terminal Logs #}
-            <div class="bg-black/80 rounded-2xl p-8 font-mono text-[10.5px] space-y-3 min-h-[200px] border border-white/5 shadow-inner relative overflow-hidden">
-                <div class="absolute top-0 right-0 p-3 opacity-10">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
-                </div>
-                <div id="log-container" class="space-y-2 relative z-10">
-                    <!-- Logs will appear here -->
+            {# Administrative Status Updates #}
+            <div class="bg-base-200/50 rounded-2xl p-8 space-y-4 min-h-[160px] border border-base-300/50 transition-all">
+                <div class="flex flex-col gap-3" id="log-container">
+                    {# Professional status lines will appear here #}
                 </div>
             </div>
         </div>
 
         {# Footer #}
-        <div class="px-10 py-6 bg-black/20 text-center border-t border-white/5">
-            <p class="text-[9px] uppercase tracking-[0.3em] font-black opacity-30">Deployment Signature: {{ system_version|default:"BIMS-CORE-STABLE-2026" }}</p>
+        <div class="px-10 py-6 bg-base-200/30 text-center border-t border-base-200">
+            <p class="text-[9px] uppercase tracking-[0.2em] font-bold opacity-40">System Version: {{ BIMS_VERSION|default:"2.0.0-Stable" }}</p>
         </div>
     </div>
 </div>
 
 <script>
-const logs = [
-    { time: 500, title: "Initializing Core", desc: "Setting up secure database environment...", log: "> [OK] CORE_DB: Postgres/SQLite Handshake Successful" },
-    { time: 1500, title: "Encryption Layer", desc: "Mounting cryptographic keys...", log: "> [OK] SECURE_KEY: System Entropy Initialized" },
-    { time: 2500, title: "GIS Engine", desc: "Connecting to Satellite Data Providers...", log: "> [WAIT] GIS_CONNECT: Routing to OpenStreetMap Overpass API..." },
-    { time: 4000, title: "Data Ingestion", desc: "Fetching Community Infrastructure Data...", log: "> [AUTO] OSM_IMPORT: Synchronizing Police, Fire, and Hospitals..." },
-    { time: 7000, title: "SpatiaLite Link", desc: "Indexing geographic coordinates...", log: "> [OK] SYNC_COMPLETE: 25+ Facilities Mapped Successfully" },
-    { time: 8500, title: "Finalizing Environment", desc: "Preparing Dashboard for first launch...", log: "> [OK] DEPLOYMENT: Ready for Administrator Login" },
+const steps = [
+    { time: 500, title: "Configuring Database", desc: "Setting up administrative tables and schemas...", log: "Validated structural integrity of the database." },
+    { time: 1500, title: "Securing System", desc: "Applying system configuration and security policies...", log: "Security protocols and internal access controls verified." },
+    { time: 2500, title: "Initializing GIS Services", desc: "Connecting to mapping and geographic resources...", log: "Geographic information services linked successfully." },
+    { time: 4500, title: "Indexing Records", desc: "Preparing resident and administrative data indices...", log: "Resource indexing completed for optimal performance." },
+    { time: 7000, title: "Finalizing Components", desc: "Preparing the administrative dashboard...", log: "System environment stable and verified." },
+    { time: 8500, title: "Ready for Access", desc: "System initialization complete.", log: "Redirecting to official login page..." },
 ];
 
 const logContainer = document.getElementById('log-container');
@@ -77,14 +70,19 @@ const statusTitle = document.getElementById('status-title');
 const statusDesc = document.getElementById('status-desc');
 const mainProgress = document.getElementById('main-progress');
 
-function addLog(text, isError = false) {
+function addStatusUpdate(text) {
     const div = document.createElement('div');
-    div.className = isError ? 'text-error' : 'text-primary/70';
-    div.textContent = text;
+    div.className = 'flex items-center gap-3 animate-in fade-in duration-500';
+    div.innerHTML = `
+        <div class="w-1.5 h-1.5 rounded-full bg-primary/40"></div>
+        <span class="text-xs font-semibold text-base-content/70">${text}</span>
+    `;
     logContainer.appendChild(div);
     
-    // Auto scroll
-    logContainer.scrollTop = logContainer.scrollHeight;
+    // Maintain a clean view, only show last 4
+    if (logContainer.children.length > 4) {
+        logContainer.removeChild(logContainer.children[0]);
+    }
 }
 
 // Start actual backend trigger
@@ -94,50 +92,44 @@ fetch('{% url "core:api_initialize" %}', {
         'X-CSRFToken': '{{ csrf_token }}'
     }
 }).then(r => r.json())
-  .then(data => console.log("Backend Initialized"))
-  .catch(err => console.error("Initialization trigger failed:", err));
+  .then(data => console.log("System Initialized"))
+  .catch(err => console.error("Initialization failed:", err));
 
-// Simulation for UI
 let currentStep = 0;
-const totalSteps = logs.length;
+const totalSteps = steps.length;
 
 function processNextStep() {
     if (currentStep >= totalSteps) {
-        // Redirect to login after a small delay
         setTimeout(() => {
             window.location.href = "{% url 'core:login' %}";
-        }, 1500);
+        }, 1200);
         return;
     }
 
-    const step = logs[currentStep];
+    const step = steps[currentStep];
     statusTitle.textContent = step.title;
     statusDesc.textContent = step.desc;
-    addLog(step.log);
+    addStatusUpdate(step.log);
     
-    // Update progress
     const percent = ((currentStep + 1) / totalSteps) * 100;
     mainProgress.style.width = percent + '%';
 
     currentStep++;
     
-    // Schedule next
-    const nextWait = currentStep < totalSteps ? logs[currentStep].time - step.time : 2000;
-    setTimeout(processNextStep, Math.max(nextWait, 800));
+    const nextWait = currentStep < totalSteps ? steps[currentStep].time - step.time : 2000;
+    setTimeout(processNextStep, Math.max(nextWait, 1000));
 }
 
-// Initial delay before first step
 setTimeout(processNextStep, 500);
-
 </script>
 
 <style>
-@keyframes pulse-opacity {
-    0%, 100% { opacity: 0.4; }
-    50% { opacity: 1; }
+@keyframes fade-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
 }
-.animate-pulse {
-    animation: pulse-opacity 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+.animate-in {
+    animation: fade-in 0.5s ease-out forwards;
 }
 </style>
 {% endblock %}

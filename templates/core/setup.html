@@ -8,19 +8,18 @@
 {% block extra_css %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 <style>
-    /* Premium Background */
+    /* Professional Background */
     body::before {
         content: '';
         position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle at center, oklch(25% 0.15 262 / 0.15) 0%, transparent 70%);
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle at 10% 20%, oklch(25% 0.15 262 / 0.1) 0%, transparent 50%),
+                    radial-gradient(circle at 90% 80%, oklch(25% 0.15 262 / 0.1) 0%, transparent 50%);
         z-index: -1;
-        animation: rotate 60s linear infinite;
     }
-    @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
     #setup-map { height: 300px; border-radius: 0.75rem; border: 1px solid oklch(var(--b3)); }
     [x-cloak] { display: none !important; }
