@@ -4,25 +4,40 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('gis', '0002_emergencyservice_osm_id'),
+        ("gis", "0002_emergencyservice_osm_id"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='emergencyservice',
-            name='description',
-            field=models.TextField(blank=True, help_text='Optional details about this location'),
+            model_name="emergencyservice",
+            name="description",
+            field=models.TextField(
+                blank=True, help_text="Optional details about this location"
+            ),
         ),
         migrations.AddField(
-            model_name='emergencyservice',
-            name='icon_emoji',
-            field=models.CharField(blank=True, help_text="Custom emoji for 'other' types", max_length=10),
+            model_name="emergencyservice",
+            name="icon_emoji",
+            field=models.CharField(
+                blank=True, help_text="Custom emoji for 'other' types", max_length=10
+            ),
         ),
         migrations.AlterField(
-            model_name='emergencyservice',
-            name='service_type',
-            field=models.CharField(choices=[('police', 'Police Station'), ('fire', 'Fire Station'), ('hospital', 'Hospital / Clinic'), ('hall', 'Barangay Hall'), ('evacuation', 'Evacuation Center'), ('landmark', 'Landmark / Park'), ('education', 'School / Education'), ('other', 'Custom Point')], max_length=20),
+            model_name="emergencyservice",
+            name="service_type",
+            field=models.CharField(
+                choices=[
+                    ("police", "Police Station"),
+                    ("fire", "Fire Station"),
+                    ("hospital", "Hospital / Clinic"),
+                    ("hall", "Barangay Hall"),
+                    ("evacuation", "Evacuation Center"),
+                    ("landmark", "Landmark / Park"),
+                    ("education", "School / Education"),
+                    ("other", "Custom Point"),
+                ],
+                max_length=20,
+            ),
         ),
     ]

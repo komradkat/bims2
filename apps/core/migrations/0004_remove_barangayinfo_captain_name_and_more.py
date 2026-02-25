@@ -4,32 +4,33 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0003_barangayinfo'),
+        ("core", "0003_barangayinfo"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='barangayinfo',
-            name='captain_name',
+            model_name="barangayinfo",
+            name="captain_name",
         ),
         migrations.RemoveField(
-            model_name='barangayinfo',
-            name='secretary_name',
+            model_name="barangayinfo",
+            name="secretary_name",
         ),
         migrations.RemoveField(
-            model_name='barangayinfo',
-            name='treasurer_name',
+            model_name="barangayinfo",
+            name="treasurer_name",
         ),
         migrations.AddField(
-            model_name='barangayinfo',
-            name='latitude',
-            field=models.FloatField(blank=True, help_text='Center Latitude', null=True),
+            model_name="barangayinfo",
+            name="latitude",
+            field=models.FloatField(blank=True, help_text="Center Latitude", null=True),
         ),
         migrations.AddField(
-            model_name='barangayinfo',
-            name='longitude',
-            field=models.FloatField(blank=True, help_text='Center Longitude', null=True),
+            model_name="barangayinfo",
+            name="longitude",
+            field=models.FloatField(
+                blank=True, help_text="Center Longitude", null=True
+            ),
         ),
     ]

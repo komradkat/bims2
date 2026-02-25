@@ -4,15 +4,22 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('certificates', '0001_initial'),
+        ("certificates", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='certificatetype',
-            name='tier',
-            field=models.CharField(choices=[('community', 'Community (Free/Basic)'), ('pro', 'Pro (Advanced)'), ('ultra', 'Ultra (Premium/GIS)')], default='community', max_length=20),
+            model_name="certificatetype",
+            name="tier",
+            field=models.CharField(
+                choices=[
+                    ("community", "Community (Free/Basic)"),
+                    ("pro", "Pro (Advanced)"),
+                    ("ultra", "Ultra (Premium/GIS)"),
+                ],
+                default="community",
+                max_length=20,
+            ),
         ),
     ]

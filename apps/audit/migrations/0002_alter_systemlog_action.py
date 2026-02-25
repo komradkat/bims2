@@ -4,15 +4,32 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('audit', '0001_initial'),
+        ("audit", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='systemlog',
-            name='action',
-            field=models.CharField(choices=[('LOGIN', 'User Login'), ('LOGOUT', 'User Logout'), ('DATA_EXPORT', 'Data Export'), ('SETUP_STEP', 'Setup Step Completed'), ('INITIALIZE', 'System Initialized'), ('LICENSE_ACTIVATE', 'License Activated'), ('PERMISSION_DENIED', 'Permission Denied'), ('CRITICAL_ERROR', 'Critical System Error'), ('DB_BACKUP', 'Database Backup'), ('DB_RESTORE', 'Database Restore'), ('DB_IMPORT', 'Database Import'), ('DB_EXPORT', 'Database Export'), ('DB_CONFIG_CHANGE', 'Database Config Changed'), ('DB_ACCESS_DENIED', 'Database Access Denied')], max_length=50),
+            model_name="systemlog",
+            name="action",
+            field=models.CharField(
+                choices=[
+                    ("LOGIN", "User Login"),
+                    ("LOGOUT", "User Logout"),
+                    ("DATA_EXPORT", "Data Export"),
+                    ("SETUP_STEP", "Setup Step Completed"),
+                    ("INITIALIZE", "System Initialized"),
+                    ("LICENSE_ACTIVATE", "License Activated"),
+                    ("PERMISSION_DENIED", "Permission Denied"),
+                    ("CRITICAL_ERROR", "Critical System Error"),
+                    ("DB_BACKUP", "Database Backup"),
+                    ("DB_RESTORE", "Database Restore"),
+                    ("DB_IMPORT", "Database Import"),
+                    ("DB_EXPORT", "Database Export"),
+                    ("DB_CONFIG_CHANGE", "Database Config Changed"),
+                    ("DB_ACCESS_DENIED", "Database Access Denied"),
+                ],
+                max_length=50,
+            ),
         ),
     ]

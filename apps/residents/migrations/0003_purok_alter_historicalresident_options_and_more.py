@@ -4,44 +4,56 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('residents', '0002_historicalresident_latitude_and_more'),
+        ("residents", "0002_historicalresident_latitude_and_more"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Purok',
+            name="Purok",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100, unique=True)),
-                ('description', models.TextField(blank=True)),
-                ('slug', models.SlugField(blank=True, max_length=100, unique=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=100, unique=True)),
+                ("description", models.TextField(blank=True)),
+                ("slug", models.SlugField(blank=True, max_length=100, unique=True)),
             ],
             options={
-                'verbose_name': 'Purok',
-                'verbose_name_plural': 'Puroks',
-                'ordering': ['name'],
+                "verbose_name": "Purok",
+                "verbose_name_plural": "Puroks",
+                "ordering": ["name"],
             },
         ),
         migrations.AlterModelOptions(
-            name='historicalresident',
-            options={'get_latest_by': ('history_date', 'history_id'), 'ordering': ('-history_date', '-history_id'), 'verbose_name': 'historical resident', 'verbose_name_plural': 'historical residents'},
+            name="historicalresident",
+            options={
+                "get_latest_by": ("history_date", "history_id"),
+                "ordering": ("-history_date", "-history_id"),
+                "verbose_name": "historical resident",
+                "verbose_name_plural": "historical residents",
+            },
         ),
         migrations.AlterModelOptions(
-            name='resident',
-            options={'ordering': ['last_name', 'first_name']},
+            name="resident",
+            options={"ordering": ["last_name", "first_name"]},
         ),
         migrations.RemoveIndex(
-            model_name='resident',
-            name='residents_r_last_na_09bdf2_idx',
+            model_name="resident",
+            name="residents_r_last_na_09bdf2_idx",
         ),
         migrations.RemoveIndex(
-            model_name='resident',
-            name='residents_r_purok_f727b4_idx',
+            model_name="resident",
+            name="residents_r_purok_f727b4_idx",
         ),
         migrations.RemoveIndex(
-            model_name='resident',
-            name='residents_r_is_acti_2375eb_idx',
+            model_name="resident",
+            name="residents_r_is_acti_2375eb_idx",
         ),
     ]

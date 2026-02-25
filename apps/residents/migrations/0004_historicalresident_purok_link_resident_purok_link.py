@@ -5,20 +5,34 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('residents', '0003_purok_alter_historicalresident_options_and_more'),
+        ("residents", "0003_purok_alter_historicalresident_options_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='historicalresident',
-            name='purok_link',
-            field=models.ForeignKey(blank=True, db_constraint=False, help_text='Formal link to Purok table', null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to='residents.purok'),
+            model_name="historicalresident",
+            name="purok_link",
+            field=models.ForeignKey(
+                blank=True,
+                db_constraint=False,
+                help_text="Formal link to Purok table",
+                null=True,
+                on_delete=django.db.models.deletion.DO_NOTHING,
+                related_name="+",
+                to="residents.purok",
+            ),
         ),
         migrations.AddField(
-            model_name='resident',
-            name='purok_link',
-            field=models.ForeignKey(blank=True, help_text='Formal link to Purok table', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='residents', to='residents.purok'),
+            model_name="resident",
+            name="purok_link",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="Formal link to Purok table",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="residents",
+                to="residents.purok",
+            ),
         ),
     ]

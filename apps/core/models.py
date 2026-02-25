@@ -1,55 +1,60 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.conf import settings
-from django.core.validators import MinValueValidator
-from simple_history.models import HistoricalRecords
 from django.utils import timezone
+
 
 class User(AbstractUser):
     """Custom user model for BIMS"""
-    
+
     ROLE_CHOICES = [
-        ('admin', 'Administrator'),
-        ('clerk', 'Clerk'),
-        ('treasurer', 'Treasurer'),
+        ("admin", "Administrator"),
+        ("clerk", "Clerk"),
+        ("treasurer", "Treasurer"),
     ]
-    
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='clerk')
-    barangay_position = models.CharField(max_length=100, blank=True, null=True, help_text="Official designation (e.g., Barangay Secretary)")
-    
-    # Bootstrap and Official Linkage
-    is_bootstrap = models.BooleanField(default=False, help_text="System-created account for initial setup")
-    official = models.OneToOneField(
-        'BarangayOfficial', 
-        on_delete=models.SET_NULL, 
-        null=True, 
-        blank=True, 
-        related_name='user_account',
-        help_text="Link to the real official profile"
+
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="clerk")
+    barangay_position = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        help_text="Official designation (e.g., Barangay Secretary)",
     )
-    
+
+    # Bootstrap and Official Linkage
+    is_bootstrap = models.BooleanField(
+        default=False, help_text="System-created account for initial setup"
+    )
+    official = models.OneToOneField(
+        "BarangayOfficial",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="user_account",
+        help_text="Link to the real official profile",
+    )
+
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
-        verbose_name = 'User'
-        verbose_name_plural = 'Users'
+        verbose_name = "User"
+        verbose_name_plural = "Users"
 
     groups = models.ManyToManyField(
-        'auth.Group',
-        related_name='custom_user_set',
+        "auth.Group",
+        related_name="custom_user_set",
         blank=True,
-        help_text='The groups this user belongs to.',
-        verbose_name='groups',
+        help_text="The groups this user belongs to.",
+        verbose_name="groups",
     )
     user_permissions = models.ManyToManyField(
-        'auth.Permission',
-        related_name='custom_user_set',
+        "auth.Permission",
+        related_name="custom_user_set",
         blank=True,
-        help_text='Specific permissions for this user.',
-        verbose_name='user permissions',
+        help_text="Specific permissions for this user.",
+        verbose_name="user permissions",
     )
-        
+
     def save(self, *args, **kwargs):
         # Automatically sync data from official if linked and fields are currently empty
         if self.official:
@@ -69,26 +74,38 @@ class User(AbstractUser):
 
 class LicenseKey(models.Model):
     """License key model for tier-based feature access control"""
-    
+
     TIER_CHOICES = [
-        ('community', 'Community'),
-        ('pro', 'Pro'),
-        ('ultra', 'Ultra'),
+        ("community", "Community"),
+        ("pro", "Pro"),
+        ("ultra", "Ultra"),
     ]
-    
+
     key = models.CharField(max_length=255, unique=True, help_text="License key string")
-    tier = models.CharField(max_length=20, choices=TIER_CHOICES, help_text="License tier level")
-    hardware_id = models.CharField(max_length=255, blank=True, help_text="Hardware ID this license is bound to")
-    issued_date = models.DateTimeField(auto_now_add=True, help_text="Date license was issued")
-    expiry_date = models.DateField(null=True, blank=True, help_text="License expiration date (null = never expires)")
+    tier = models.CharField(
+        max_length=20, choices=TIER_CHOICES, help_text="License tier level"
+    )
+    hardware_id = models.CharField(
+        max_length=255, blank=True, help_text="Hardware ID this license is bound to"
+    )
+    issued_date = models.DateTimeField(
+        auto_now_add=True, help_text="Date license was issued"
+    )
+    expiry_date = models.DateField(
+        null=True,
+        blank=True,
+        help_text="License expiration date (null = never expires)",
+    )
     is_active = models.BooleanField(default=True, help_text="Whether license is active")
-    max_users = models.IntegerField(default=5, help_text="Maximum number of users allowed")
-    
+    max_users = models.IntegerField(
+        default=5, help_text="Maximum number of users allowed"
+    )
+
     class Meta:
-        verbose_name = 'License Key'
-        verbose_name_plural = 'License Keys'
-        ordering = ['-issued_date']
-    
+        verbose_name = "License Key"
+        verbose_name_plural = "License Keys"
+        ordering = ["-issued_date"]
+
     def is_valid(self):
         """Check if license is active and not expired"""
         if not self.is_active:
@@ -96,9 +113,13 @@ class LicenseKey(models.Model):
         if self.expiry_date and self.expiry_date < timezone.now().date():
             return False
         return True
-    
+
     def __str__(self):
-        return f"{self.tier.upper()} - {self.key[:8]}..." if len(self.key) > 8 else f"{self.tier.upper()} - {self.key}"
+        return (
+            f"{self.tier.upper()} - {self.key[:8]}..."
+            if len(self.key) > 8
+            else f"{self.tier.upper()} - {self.key}"
+        )
 
 
 class BarangayInfo(models.Model):
@@ -106,27 +127,38 @@ class BarangayInfo(models.Model):
     Singleton model to store Barangay Configuration.
     Ensures only one instance exists.
     """
+
     name = models.CharField(max_length=200, help_text="Official name of the Barangay")
 
     # Structured address fields
-    street = models.CharField(max_length=200, blank=True, help_text="Street / Purok / Sitio")
-    city_municipality = models.CharField(max_length=100, help_text="City or Municipality")
+    street = models.CharField(
+        max_length=200, blank=True, help_text="Street / Purok / Sitio"
+    )
+    city_municipality = models.CharField(
+        max_length=100, help_text="City or Municipality"
+    )
     province = models.CharField(max_length=100, help_text="Province")
     region = models.CharField(max_length=100, blank=True, help_text="Region")
     zip_code = models.CharField(max_length=10, blank=True)
 
-    logo = models.ImageField(upload_to='barangay/logo/', blank=True, null=True)
+    logo = models.ImageField(upload_to="barangay/logo/", blank=True, null=True)
+    logo_base64 = models.TextField(
+        blank=True,
+        null=True,
+        help_text="Base64 encoded logo for standalone persistence",
+    )
+    logo_mimetype = models.CharField(max_length=50, blank=True, null=True)
     contact_number = models.CharField(max_length=50, blank=True)
     email = models.EmailField(blank=True)
     captain_name = models.CharField(
         max_length=200,
         blank=True,
-        help_text="Full name of the Punong Barangay / Barangay Captain"
+        help_text="Full name of the Punong Barangay / Barangay Captain",
     )
     captain_title = models.CharField(
         max_length=100,
         default="Punong Barangay",
-        help_text="Official title (e.g. Punong Barangay, Barangay Captain)"
+        help_text="Official title (e.g. Punong Barangay, Barangay Captain)",
     )
 
     # GIS Location (Center of Barangay)
@@ -137,22 +169,37 @@ class BarangayInfo(models.Model):
     is_setup_complete = models.BooleanField(default=False)
 
     @property
+    def logo_url(self):
+        """Returns a data URI for the logo if stored in Base64, otherwise falls back to FileField or default."""
+        if self.logo_base64 and self.logo_mimetype:
+            return f"data:{self.logo_mimetype};base64,{self.logo_base64}"
+        if self.logo:
+            try:
+                return self.logo.url
+            except Exception:
+                pass
+        return None
+
+    @property
     def full_address(self):
         """Return a composed full address string."""
-        parts = filter(None, [
-            self.street,
-            self.city_municipality,
-            self.province,
-            self.region,
-            self.zip_code,
-        ])
+        parts = filter(
+            None,
+            [
+                self.street,
+                self.city_municipality,
+                self.province,
+                self.region,
+                self.zip_code,
+            ],
+        )
         return ", ".join(parts)
-    
+
     def save(self, *args, **kwargs):
         if not self.pk and BarangayInfo.objects.exists():
             # Strictly prevent secondary record creation
             existing = BarangayInfo.objects.first()
-            self.pk = existing.pk # Force update existing instead
+            self.pk = existing.pk  # Force update existing instead
         return super().save(*args, **kwargs)
 
     def __str__(self):
@@ -170,27 +217,27 @@ class BarangayOfficial(models.Model):
     """
 
     POSITION_CHOICES = [
-        ('punong_barangay', 'Punong Barangay / Barangay Captain'),
-        ('kagawad', 'Barangay Kagawad'),
-        ('sk_chairman', 'SK Chairman'),
-        ('secretary', 'Barangay Secretary'),
-        ('treasurer', 'Barangay Treasurer'),
-        ('lupong_tagapamayapa', 'Lupong Tagapamayapa'),
-        ('other', 'Other'),
+        ("punong_barangay", "Punong Barangay / Barangay Captain"),
+        ("kagawad", "Barangay Kagawad"),
+        ("sk_chairman", "SK Chairman"),
+        ("secretary", "Barangay Secretary"),
+        ("treasurer", "Barangay Treasurer"),
+        ("lupong_tagapamayapa", "Lupong Tagapamayapa"),
+        ("other", "Other"),
     ]
 
     COMMITTEE_CHOICES = [
-        ('', '— None —'),
-        ('peace_order', 'Peace & Order'),
-        ('health', 'Health & Sanitation'),
-        ('education', 'Education & Culture'),
-        ('infrastructure', 'Infrastructure'),
-        ('livelihood', 'Livelihood & Entrepreneurship'),
-        ('environment', 'Environment & Natural Resources'),
-        ('finance', 'Finance & Appropriation'),
-        ('women', 'Women & Family'),
-        ('youth', 'Youth & Sports'),
-        ('senior', 'Senior Citizen Affairs'),
+        ("", "— None —"),
+        ("peace_order", "Peace & Order"),
+        ("health", "Health & Sanitation"),
+        ("education", "Education & Culture"),
+        ("infrastructure", "Infrastructure"),
+        ("livelihood", "Livelihood & Entrepreneurship"),
+        ("environment", "Environment & Natural Resources"),
+        ("finance", "Finance & Appropriation"),
+        ("women", "Women & Family"),
+        ("youth", "Youth & Sports"),
+        ("senior", "Senior Citizen Affairs"),
     ]
 
     position = models.CharField(max_length=30, choices=POSITION_CHOICES)
@@ -203,12 +250,13 @@ class BarangayOfficial(models.Model):
     last_name = models.CharField(max_length=100)
     suffix = models.CharField(max_length=10, blank=True, help_text="e.g. Jr., Sr.")
 
-    photo = models.ImageField(upload_to='officials/photos/', blank=True, null=True)
+    photo = models.ImageField(upload_to="officials/photos/", blank=True, null=True)
 
     def clean(self):
         super().clean()
         if self.photo and self.photo.size > 2 * 1024 * 1024:
             from django.core.exceptions import ValidationError
+
             raise ValidationError("Image file too large. Max size is 2MB.")
 
     # Term info
@@ -219,52 +267,70 @@ class BarangayOfficial(models.Model):
     email = models.EmailField(blank=True)
 
     is_active = models.BooleanField(default=True)
-    order = models.PositiveSmallIntegerField(default=0, help_text="Display order (lower = first)")
+    order = models.PositiveSmallIntegerField(
+        default=0, help_text="Display order (lower = first)"
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ['order', 'position', 'last_name']
-        verbose_name = 'Barangay Official'
-        verbose_name_plural = 'Barangay Officials'
+        ordering = ["order", "position", "last_name"]
+        verbose_name = "Barangay Official"
+        verbose_name_plural = "Barangay Officials"
 
     @property
     def full_name(self):
-        parts = filter(None, [self.honorific, self.first_name, self.middle_name, self.last_name, self.suffix])
-        return ' '.join(parts)
+        parts = filter(
+            None,
+            [
+                self.honorific,
+                self.first_name,
+                self.middle_name,
+                self.last_name,
+                self.suffix,
+            ],
+        )
+        return " ".join(parts)
 
     @property
     def display_name(self):
         """Name without honorific, for document signatures."""
-        parts = filter(None, [self.first_name, self.middle_name, self.last_name, self.suffix])
-        return ' '.join(parts)
+        parts = filter(
+            None, [self.first_name, self.middle_name, self.last_name, self.suffix]
+        )
+        return " ".join(parts)
 
     def __str__(self):
         return f"{self.full_name} — {self.get_position_display()}"
 
+
 class Notification(models.Model):
     """System and user notifications"""
-    
+
     TYPES = [
-        ('info', 'Information'),
-        ('success', 'Success'),
-        ('warning', 'Warning'),
-        ('error', 'Error'),
+        ("info", "Information"),
+        ("success", "Success"),
+        ("warning", "Warning"),
+        ("error", "Error"),
     ]
-    
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="notifications"
+    )
     title = models.CharField(max_length=200)
     message = models.TextField()
-    type = models.CharField(max_length=20, choices=TYPES, default='info')
-    link = models.CharField(max_length=255, blank=True, null=True, help_text="Optional URL to redirect to")
+    type = models.CharField(max_length=20, choices=TYPES, default="info")
+    link = models.CharField(
+        max_length=255, blank=True, null=True, help_text="Optional URL to redirect to"
+    )
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
-        ordering = ['-created_at']
-        verbose_name = 'Notification'
-        verbose_name_plural = 'Notifications'
+        ordering = ["-created_at"]
+        verbose_name = "Notification"
+        verbose_name_plural = "Notifications"
 
     def __str__(self):
         return f"{self.user.username} - {self.title}"

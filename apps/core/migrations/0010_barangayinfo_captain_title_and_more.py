@@ -4,25 +4,43 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0009_user_is_bootstrap_user_official'),
+        ("core", "0009_user_is_bootstrap_user_official"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='barangayinfo',
-            name='captain_title',
-            field=models.CharField(default='Punong Barangay', help_text='Official title (e.g. Punong Barangay, Barangay Captain)', max_length=100),
+            model_name="barangayinfo",
+            name="captain_title",
+            field=models.CharField(
+                default="Punong Barangay",
+                help_text="Official title (e.g. Punong Barangay, Barangay Captain)",
+                max_length=100,
+            ),
         ),
         migrations.AlterField(
-            model_name='barangayinfo',
-            name='captain_name',
-            field=models.CharField(blank=True, help_text='Full name of the Punong Barangay / Barangay Captain', max_length=200),
+            model_name="barangayinfo",
+            name="captain_name",
+            field=models.CharField(
+                blank=True,
+                help_text="Full name of the Punong Barangay / Barangay Captain",
+                max_length=200,
+            ),
         ),
         migrations.AlterField(
-            model_name='barangayofficial',
-            name='position',
-            field=models.CharField(choices=[('punong_barangay', 'Punong Barangay / Barangay Captain'), ('kagawad', 'Barangay Kagawad'), ('sk_chairman', 'SK Chairman'), ('secretary', 'Barangay Secretary'), ('treasurer', 'Barangay Treasurer'), ('lupong_tagapamayapa', 'Lupong Tagapamayapa'), ('other', 'Other')], max_length=30),
+            model_name="barangayofficial",
+            name="position",
+            field=models.CharField(
+                choices=[
+                    ("punong_barangay", "Punong Barangay / Barangay Captain"),
+                    ("kagawad", "Barangay Kagawad"),
+                    ("sk_chairman", "SK Chairman"),
+                    ("secretary", "Barangay Secretary"),
+                    ("treasurer", "Barangay Treasurer"),
+                    ("lupong_tagapamayapa", "Lupong Tagapamayapa"),
+                    ("other", "Other"),
+                ],
+                max_length=30,
+            ),
         ),
     ]

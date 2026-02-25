@@ -7,97 +7,307 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('residents', '0001_initial'),
+        ("residents", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='BlotterCase',
+            name="BlotterCase",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('case_number', models.CharField(editable=False, max_length=20, unique=True)),
-                ('incident_type', models.CharField(choices=[('physical_injury', 'Physical Injury'), ('theft', 'Theft'), ('slander', 'Slander/Oral Defamation'), ('boundary_dispute', 'Boundary Dispute'), ('debt_collection', 'Debt Collection'), ('threats', 'Threats'), ('scam', 'Estafa/Scam'), ('others', 'Others')], max_length=50)),
-                ('incident_date', models.DateTimeField()),
-                ('incident_location', models.CharField(max_length=255)),
-                ('narrative', models.TextField()),
-                ('status', models.CharField(choices=[('mediation', 'Mediation'), ('conciliation', 'Conciliation'), ('arbitration', 'Arbitration'), ('settled', 'Settled'), ('dismissed', 'Dismissed'), ('cfa', 'Certified to File Action')], default='mediation', max_length=20)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('created_by', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "case_number",
+                    models.CharField(editable=False, max_length=20, unique=True),
+                ),
+                (
+                    "incident_type",
+                    models.CharField(
+                        choices=[
+                            ("physical_injury", "Physical Injury"),
+                            ("theft", "Theft"),
+                            ("slander", "Slander/Oral Defamation"),
+                            ("boundary_dispute", "Boundary Dispute"),
+                            ("debt_collection", "Debt Collection"),
+                            ("threats", "Threats"),
+                            ("scam", "Estafa/Scam"),
+                            ("others", "Others"),
+                        ],
+                        max_length=50,
+                    ),
+                ),
+                ("incident_date", models.DateTimeField()),
+                ("incident_location", models.CharField(max_length=255)),
+                ("narrative", models.TextField()),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("mediation", "Mediation"),
+                            ("conciliation", "Conciliation"),
+                            ("arbitration", "Arbitration"),
+                            ("settled", "Settled"),
+                            ("dismissed", "Dismissed"),
+                            ("cfa", "Certified to File Action"),
+                        ],
+                        default="mediation",
+                        max_length=20,
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "created_by",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Blotter Case',
-                'verbose_name_plural': 'Blotter Cases',
-                'ordering': ['-created_at'],
+                "verbose_name": "Blotter Case",
+                "verbose_name_plural": "Blotter Cases",
+                "ordering": ["-created_at"],
             },
         ),
         migrations.CreateModel(
-            name='Complainant',
+            name="Complainant",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(blank=True, help_text='Full name (if not a resident)', max_length=255)),
-                ('address', models.CharField(blank=True, help_text='Address (if not a resident)', max_length=255)),
-                ('contact_number', models.CharField(blank=True, max_length=20)),
-                ('case', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='complainants', to='blotter.blottercase')),
-                ('resident', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='complaints_filed', to='residents.resident')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "name",
+                    models.CharField(
+                        blank=True,
+                        help_text="Full name (if not a resident)",
+                        max_length=255,
+                    ),
+                ),
+                (
+                    "address",
+                    models.CharField(
+                        blank=True,
+                        help_text="Address (if not a resident)",
+                        max_length=255,
+                    ),
+                ),
+                ("contact_number", models.CharField(blank=True, max_length=20)),
+                (
+                    "case",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="complainants",
+                        to="blotter.blottercase",
+                    ),
+                ),
+                (
+                    "resident",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="complaints_filed",
+                        to="residents.resident",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Hearing',
+            name="Hearing",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('scheduled_at', models.DateTimeField()),
-                ('status', models.CharField(choices=[('scheduled', 'Scheduled'), ('completed', 'Completed'), ('cancelled', 'Cancelled'), ('no_show', 'No Show')], default='scheduled', max_length=20)),
-                ('remarks', models.TextField(blank=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('case', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='hearings', to='blotter.blottercase')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("scheduled_at", models.DateTimeField()),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("scheduled", "Scheduled"),
+                            ("completed", "Completed"),
+                            ("cancelled", "Cancelled"),
+                            ("no_show", "No Show"),
+                        ],
+                        default="scheduled",
+                        max_length=20,
+                    ),
+                ),
+                ("remarks", models.TextField(blank=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "case",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="hearings",
+                        to="blotter.blottercase",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['scheduled_at'],
+                "ordering": ["scheduled_at"],
             },
         ),
         migrations.CreateModel(
-            name='HistoricalBlotterCase',
+            name="HistoricalBlotterCase",
             fields=[
-                ('id', models.BigIntegerField(auto_created=True, blank=True, db_index=True, verbose_name='ID')),
-                ('case_number', models.CharField(db_index=True, editable=False, max_length=20)),
-                ('incident_type', models.CharField(choices=[('physical_injury', 'Physical Injury'), ('theft', 'Theft'), ('slander', 'Slander/Oral Defamation'), ('boundary_dispute', 'Boundary Dispute'), ('debt_collection', 'Debt Collection'), ('threats', 'Threats'), ('scam', 'Estafa/Scam'), ('others', 'Others')], max_length=50)),
-                ('incident_date', models.DateTimeField()),
-                ('incident_location', models.CharField(max_length=255)),
-                ('narrative', models.TextField()),
-                ('status', models.CharField(choices=[('mediation', 'Mediation'), ('conciliation', 'Conciliation'), ('arbitration', 'Arbitration'), ('settled', 'Settled'), ('dismissed', 'Dismissed'), ('cfa', 'Certified to File Action')], default='mediation', max_length=20)),
-                ('created_at', models.DateTimeField(blank=True, editable=False)),
-                ('updated_at', models.DateTimeField(blank=True, editable=False)),
-                ('history_id', models.AutoField(primary_key=True, serialize=False)),
-                ('history_date', models.DateTimeField(db_index=True)),
-                ('history_change_reason', models.CharField(max_length=100, null=True)),
-                ('history_type', models.CharField(choices=[('+', 'Created'), ('~', 'Changed'), ('-', 'Deleted')], max_length=1)),
-                ('created_by', models.ForeignKey(blank=True, db_constraint=False, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to=settings.AUTH_USER_MODEL)),
-                ('history_user', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigIntegerField(
+                        auto_created=True, blank=True, db_index=True, verbose_name="ID"
+                    ),
+                ),
+                (
+                    "case_number",
+                    models.CharField(db_index=True, editable=False, max_length=20),
+                ),
+                (
+                    "incident_type",
+                    models.CharField(
+                        choices=[
+                            ("physical_injury", "Physical Injury"),
+                            ("theft", "Theft"),
+                            ("slander", "Slander/Oral Defamation"),
+                            ("boundary_dispute", "Boundary Dispute"),
+                            ("debt_collection", "Debt Collection"),
+                            ("threats", "Threats"),
+                            ("scam", "Estafa/Scam"),
+                            ("others", "Others"),
+                        ],
+                        max_length=50,
+                    ),
+                ),
+                ("incident_date", models.DateTimeField()),
+                ("incident_location", models.CharField(max_length=255)),
+                ("narrative", models.TextField()),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("mediation", "Mediation"),
+                            ("conciliation", "Conciliation"),
+                            ("arbitration", "Arbitration"),
+                            ("settled", "Settled"),
+                            ("dismissed", "Dismissed"),
+                            ("cfa", "Certified to File Action"),
+                        ],
+                        default="mediation",
+                        max_length=20,
+                    ),
+                ),
+                ("created_at", models.DateTimeField(blank=True, editable=False)),
+                ("updated_at", models.DateTimeField(blank=True, editable=False)),
+                ("history_id", models.AutoField(primary_key=True, serialize=False)),
+                ("history_date", models.DateTimeField(db_index=True)),
+                ("history_change_reason", models.CharField(max_length=100, null=True)),
+                (
+                    "history_type",
+                    models.CharField(
+                        choices=[("+", "Created"), ("~", "Changed"), ("-", "Deleted")],
+                        max_length=1,
+                    ),
+                ),
+                (
+                    "created_by",
+                    models.ForeignKey(
+                        blank=True,
+                        db_constraint=False,
+                        null=True,
+                        on_delete=django.db.models.deletion.DO_NOTHING,
+                        related_name="+",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "history_user",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="+",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'historical Blotter Case',
-                'verbose_name_plural': 'historical Blotter Cases',
-                'ordering': ('-history_date', '-history_id'),
-                'get_latest_by': ('history_date', 'history_id'),
+                "verbose_name": "historical Blotter Case",
+                "verbose_name_plural": "historical Blotter Cases",
+                "ordering": ("-history_date", "-history_id"),
+                "get_latest_by": ("history_date", "history_id"),
             },
             bases=(simple_history.models.HistoricalChanges, models.Model),
         ),
         migrations.CreateModel(
-            name='Respondent',
+            name="Respondent",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(blank=True, help_text='Full name (if not a resident)', max_length=255)),
-                ('address', models.CharField(blank=True, help_text='Address (if not a resident)', max_length=255)),
-                ('contact_number', models.CharField(blank=True, max_length=20)),
-                ('case', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='respondents', to='blotter.blottercase')),
-                ('resident', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='complaints_received', to='residents.resident')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "name",
+                    models.CharField(
+                        blank=True,
+                        help_text="Full name (if not a resident)",
+                        max_length=255,
+                    ),
+                ),
+                (
+                    "address",
+                    models.CharField(
+                        blank=True,
+                        help_text="Address (if not a resident)",
+                        max_length=255,
+                    ),
+                ),
+                ("contact_number", models.CharField(blank=True, max_length=20)),
+                (
+                    "case",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="respondents",
+                        to="blotter.blottercase",
+                    ),
+                ),
+                (
+                    "resident",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="complaints_received",
+                        to="residents.resident",
+                    ),
+                ),
             ],
         ),
     ]

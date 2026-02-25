@@ -1,5 +1,0 @@
--r base.txt
-
-# Development dependencies
-django-debug-toolbar>=4.2.0
-ipython>=8.20.0

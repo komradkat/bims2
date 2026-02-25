@@ -4,49 +4,54 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('residents', '0004_historicalresident_purok_link_resident_purok_link'),
+        ("residents", "0004_historicalresident_purok_link_resident_purok_link"),
     ]
+
 
 from django.utils.text import slugify
 
+
 def migrate_puroks_to_links(apps, schema_editor):
-    Resident = apps.get_model('residents', 'Resident')
-    Purok = apps.get_model('residents', 'Purok')
-    
+    Resident = apps.get_model("residents", "Resident")
+    Purok = apps.get_model("residents", "Purok")
+
     # Scale: Get all unique purok names from current residents
-    unique_puroks = Resident.objects.filter(purok__isnull=False).exclude(purok='').values_list('purok', flat=True).distinct()
-    
+    unique_puroks = (
+        Resident.objects.filter(purok__isnull=False)
+        .exclude(purok="")
+        .values_list("purok", flat=True)
+        .distinct()
+    )
+
     # 1. Create Purok objects if they don't exist
     for name in unique_puroks:
-        if not name: continue
+        if not name:
+            continue
         name_clean = name.strip()
         if not Purok.objects.filter(name=name_clean).exists():
-            Purok.objects.create(
-                name=name_clean,
-                slug=slugify(name_clean)
-            )
-        
+            Purok.objects.create(name=name_clean, slug=slugify(name_clean))
+
     # 2. Link residents to their respective Purok objects
     for resident in Resident.objects.all():
         if resident.purok:
             purok_obj = Purok.objects.filter(name=resident.purok.strip()).first()
             if purok_obj:
                 resident.purok_link = purok_obj
-                resident.save(update_fields=['purok_link'])
+                resident.save(update_fields=["purok_link"])
+
 
 def reverse_migration(apps, schema_editor):
-    Resident = apps.get_model('residents', 'Resident')
+    Resident = apps.get_model("residents", "Resident")
     for resident in Resident.objects.all():
         if resident.purok_link:
             resident.purok = resident.purok_link.name
-            resident.save(update_fields=['purok'])
+            resident.save(update_fields=["purok"])
+
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('residents', '0004_historicalresident_purok_link_resident_purok_link'),
+        ("residents", "0004_historicalresident_purok_link_resident_purok_link"),
     ]
 
     operations = [

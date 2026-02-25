@@ -5,15 +5,22 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('certificates', '0004_certificate_digital_hash_certificate_document_and_more'),
+        ("certificates", "0004_certificate_digital_hash_certificate_document_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='certificate',
-            name='document',
-            field=models.FileField(blank=True, null=True, storage=django.core.files.storage.FileSystemStorage(base_url='/external-certs/', location='C:\\BIMS_Data\\Issued_Certificates'), upload_to='%Y/%m/'),
+            model_name="certificate",
+            name="document",
+            field=models.FileField(
+                blank=True,
+                null=True,
+                storage=django.core.files.storage.FileSystemStorage(
+                    base_url="/external-certs/",
+                    location="C:\\BIMS_Data\\Issued_Certificates",
+                ),
+                upload_to="%Y/%m/",
+            ),
         ),
     ]

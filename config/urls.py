@@ -14,25 +14,26 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 
 # Custom error handlers
-handler404 = 'apps.core.views.error_404'
-handler500 = 'apps.core.views.error_500'
+handler404 = "apps.core.views.error_404"
+handler500 = "apps.core.views.error_500"
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', include('apps.core.urls')),  # Core app URLs
-    path('residents/', include('apps.residents.urls')),
-    path('certificates/', include('apps.certificates.urls')),
-    path('blotter/', include('apps.blotter.urls')),
-    path('business/', include('apps.business.urls')),
-    path('finance/', include('apps.finance.urls')),
-    path('audit/', include('apps.audit.urls')),
-    path('gis/', include('apps.gis.urls')),  # GIS Map
+    path("admin/", admin.site.urls),
+    path("", include("apps.core.urls")),  # Core app URLs
+    path("residents/", include("apps.residents.urls")),
+    path("certificates/", include("apps.certificates.urls")),
+    path("blotter/", include("apps.blotter.urls")),
+    path("business/", include("apps.business.urls")),
+    path("finance/", include("apps.finance.urls")),
+    path("audit/", include("apps.audit.urls")),
+    path("gis/", include("apps.gis.urls")),  # GIS Map
 ]
 
 if settings.DEBUG:

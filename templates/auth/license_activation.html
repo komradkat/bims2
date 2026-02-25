@@ -3,145 +3,124 @@
 {% block title %}License Activation - {{ barangay_info.name }}{% endblock %}
 
 {% block content %}
-<div class="max-w-3xl mx-auto p-6">
+<div class="max-w-4xl mx-auto p-6 lg:p-12">
     <!-- Page Header -->
-    <div class="mb-6">
-        <h1 class="text-3xl font-bold flex items-center gap-3">
-            <i class="fas fa-key text-primary"></i>
-            License Activation
-        </h1>
-        <p class="text-base-content/70 mt-2">Activate your BIMS2 license to unlock premium features</p>
-    </div>
-
-    <!-- Current License Status (if exists) -->
-    {% if current_license %}
-    <div class="alert alert-info mb-6">
-        <i class="fas fa-info-circle text-xl"></i>
-        <div class="flex-1">
-            <h3 class="font-bold">Current License Information</h3>
-            <div class="mt-2 space-y-1 text-sm">
-                <p><strong>Tier:</strong> <span class="badge badge-{{ tier_info.badge_color }} badge-lg">{{ current_license.tier|upper }}</span></p>
-                <p><strong>Max Users:</strong> {{ current_license.max_users }}</p>
-                <p><strong>Expires:</strong> {{ current_license.expiry_date|default:"Never" }}</p>
-                <p><strong>Status:</strong> 
-                    {% if current_license.is_valid %}
-                        <span class="text-success font-semibold">✓ Active</span>
-                    {% else %}
-                        <span class="text-error font-semibold">✗ Expired/Inactive</span>
-                    {% endif %}
-                </p>
-            </div>
+    <div class="mb-10 text-center">
+        <div class="inline-flex p-4 rounded-2xl bg-primary/10 text-primary mb-4 shadow-inner">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>
         </div>
+        <h1 class="text-4xl font-black tracking-tighter uppercase text-white">System Activation</h1>
+        <p class="text-sm font-bold opacity-30 uppercase tracking-[0.3em] mt-2">Unlock the full power of BIMS {{ system_version }}</p>
     </div>
-    {% endif %}
 
-    <!-- Activation Form -->
-    <div class="card bg-base-100 shadow-xl">
-        <div class="card-body">
-            <h2 class="card-title text-2xl mb-4">
-                <i class="fas fa-unlock-alt text-primary"></i>
-                Activate New License
-            </h2>
-            
-            <form method="post" class="space-y-6">
-                {% csrf_token %}
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        <!-- Left Side: Tiers and Info -->
+        <div class="lg:col-span-5 space-y-6">
+            <div class="glass-panel p-8 rounded-3xl">
+                <h3 class="font-black text-xs uppercase tracking-[0.2em] opacity-40 mb-6 flex items-center gap-2">
+                    <i class="fas fa-layer-group"></i> Feature Tiers
+                </h3>
                 
-                <!-- License Key Input -->
-                <div class="form-control">
-                    <label class="label">
-                        <span class="label-text font-semibold">License Key</span>
-                        <span class="label-text-alt text-error">Required</span>
-                    </label>
-                    <input 
-                        type="text" 
-                        name="license_key" 
-                        class="input input-bordered input-lg font-mono" 
-                        placeholder="XXXX-XXXX-XXXX-XXXX-XXXX"
-                        required
-                        autofocus>
-                    <label class="label">
-                        <span class="label-text-alt">Enter the license key provided by your administrator</span>
-                    </label>
-                </div>
-                
-                <!-- Hardware ID Display -->
-                <div class="form-control">
-                    <label class="label">
-                        <span class="label-text font-semibold">Hardware ID</span>
-                        <span class="label-text-alt">Auto-detected</span>
-                    </label>
-                    <input 
-                        type="text" 
-                        value="{{ hardware_id }}" 
-                        class="input input-bordered font-mono text-sm bg-base-200" 
-                        readonly>
-                    <label class="label">
-                        <span class="label-text-alt">
-                            <i class="fas fa-info-circle"></i>
-                            This unique ID binds the license to this server
-                        </span>
-                    </label>
-                </div>
-                
-                <!-- Tier Information -->
-                <div class="bg-base-200 rounded-lg p-4">
-                    <h3 class="font-semibold mb-3 flex items-center gap-2">
-                        <i class="fas fa-layer-group"></i>
-                        Available Tiers
-                    </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                        <div class="bg-base-100 rounded p-3">
-                            <div class="badge badge-neutral mb-2">Community</div>
-                            <ul class="text-xs space-y-1">
-                                <li>✓ Residents</li>
-                                <li>✓ Certificates</li>
-                                <li>✓ Blotter</li>
-                                <li>✗ Finance</li>
-                                <li>✗ GIS Map</li>
-                            </ul>
+                <div class="space-y-4">
+                    <div class="p-4 rounded-2xl bg-white/5 border border-white/5 transition-all hover:bg-white/10">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-black uppercase tracking-widest opacity-60">Community</span>
+                            <span class="badge badge-neutral badge-xs py-2">FREE</span>
                         </div>
-                        <div class="bg-base-100 rounded p-3">
-                            <div class="badge badge-primary mb-2">Pro</div>
-                            <ul class="text-xs space-y-1">
-                                <li>✓ All Community</li>
-                                <li>✓ Business Permits</li>
-                                <li>✓ Finance</li>
-                                <li>✓ Audit Logs</li>
-                                <li>✗ GIS Map</li>
-                            </ul>
+                        <p class="text-[10px] opacity-40 font-bold uppercase">Basic Governance & Records</p>
+                    </div>
+
+                    <div class="p-4 rounded-2xl bg-primary/5 border border-primary/10 transition-all hover:bg-primary/10">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-black uppercase tracking-widest text-primary">Pro</span>
+                            <span class="badge badge-primary badge-xs py-2">CERTIFIED</span>
                         </div>
-                        <div class="bg-base-100 rounded p-3">
-                            <div class="badge badge-secondary mb-2">Ultra</div>
-                            <ul class="text-xs space-y-1">
-                                <li>✓ All Pro</li>
-                                <li>✓ GIS Mapping</li>
-                                <li>✓ Advanced Analytics</li>
-                                <li>✓ Priority Support</li>
-                            </ul>
+                        <p class="text-[10px] opacity-40 font-bold uppercase text-primary/70">Finance, Business & Audit Logs</p>
+                    </div>
+
+                    <div class="p-4 rounded-2xl bg-secondary/5 border border-secondary/10 border-dashed border-2 transition-all hover:bg-secondary/10">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-black uppercase tracking-widest text-secondary">Ultra</span>
+                            <span class="badge badge-secondary badge-xs py-2">UNLIMITED</span>
                         </div>
+                        <p class="text-[10px] opacity-40 font-bold uppercase text-secondary/70">Full GIS Mapping & Analytics</p>
                     </div>
                 </div>
-                
-                <!-- Action Buttons -->
-                <div class="card-actions justify-end gap-3 pt-4">
-                    <a href="{% url 'core:dashboard' %}" class="btn btn-ghost">
-                        <i class="fas fa-times"></i>
-                        Cancel
-                    </a>
-                    <button type="submit" class="btn btn-primary btn-lg">
-                        <i class="fas fa-check"></i>
-                        Activate License
-                    </button>
+            </div>
+
+            <!-- Current Status if exists -->
+            {% if current_license %}
+            <div class="p-6 rounded-3xl bg-primary/20 border border-primary/20">
+                <div class="flex items-center gap-4">
+                    <i class="fas fa-shield-check text-2xl text-primary animate-pulse"></i>
+                    <div>
+                        <div class="text-[10px] font-black uppercase tracking-widest opacity-40">Currently Active</div>
+                        <div class="text-lg font-black text-white uppercase">{{ current_license.tier }} TIER</div>
+                    </div>
                 </div>
-            </form>
+            </div>
+            {% endif %}
         </div>
+
+        <!-- Right Side: The Activation Form -->
+        <div class="lg:col-span-7">
+            <div class="glass-panel p-1 rounded-[2.5rem]">
+                <div class="bg-base-100 rounded-[2.3rem] p-8 lg:p-12">
+                    <form method="post" class="space-y-8">
+                        {% csrf_token %}
+                        
+                        <div class="form-control">
+                            <label class="label mb-2"><span class="label-text font-black uppercase tracking-widest opacity-50 px-1">Serial Key</span></label>
+                            <input 
+                                type="text" 
+                                name="license_key" 
+                                class="input input-bordered input-lg h-16 bg-base-200 border-white/5 font-mono text-xl tracking-wider text-center placeholder:opacity-20" 
+                                placeholder="XXXX-XXXX-XXXX-XXXX"
+                                required
+                                autofocus>
+                            <label class="label px-2">
+                                <span class="label-text-alt uppercase font-bold opacity-30 tracking-tight">Enter your 16 or 20 character deployment key</span>
+                            </label>
+                        </div>
+
+                        <div class="form-control">
+                            <label class="label mb-2"><span class="label-text font-black uppercase tracking-widest opacity-50 px-1">Hardware ID</span></label>
+                            <div class="relative">
+                                <input 
+                                    type="text" 
+                                    value="{{ hardware_id }}" 
+                                    class="input input-bordered w-full font-mono text-xs bg-base-200/50 border-white/5 opacity-50 pr-12" 
+                                    readonly>
+                                <div class="absolute right-4 top-1/2 -translate-y-1/2 opacity-20">
+                                    <i class="fas fa-microchip"></i>
+                                </div>
+                            </div>
+                            <label class="label px-2">
+                                <span class="label-text-alt text-[9px] uppercase font-bold opacity-20 italic">Machine Binding v2 — Host Identification Secured</span>
+                            </label>
+                        </div>
+
+                        <div class="pt-4">
+                            <button type="submit" class="btn btn-primary btn-block h-16 rounded-2xl text-lg font-black shadow-xl shadow-primary/20 group">
+                                <i class="fas fa-bolt group-hover:animate-bounce"></i>
+                                INITIALIZE LICENSE
+                            </button>
+                            <a href="{% url 'core:dashboard' %}" class="btn btn-ghost btn-block mt-4 text-xs font-black uppercase tracking-widest opacity-40">
+                                Skip for now
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
     </div>
 
-    <!-- Help Text -->
-    <div class="mt-6 text-center text-sm text-base-content/60">
-        <p>
-            <i class="fas fa-question-circle"></i>
-            Need help? Contact your system administrator or support team.
+    <!-- Security Note -->
+    <div class="mt-12 text-center">
+        <p class="text-[10px] font-bold uppercase tracking-[0.4em] opacity-20">
+            Secure Cryptographic Activation Protocol v2.26
         </p>
     </div>
 </div>

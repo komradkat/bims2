@@ -4,30 +4,43 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('residents', '0005_migrate_purok_to_link'),
+        ("residents", "0005_migrate_purok_to_link"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='historicalresident',
-            options={'get_latest_by': ('history_date', 'history_id'), 'ordering': ('-history_date', '-history_id'), 'verbose_name': 'historical Resident', 'verbose_name_plural': 'historical Residents'},
+            name="historicalresident",
+            options={
+                "get_latest_by": ("history_date", "history_id"),
+                "ordering": ("-history_date", "-history_id"),
+                "verbose_name": "historical Resident",
+                "verbose_name_plural": "historical Residents",
+            },
         ),
         migrations.AlterModelOptions(
-            name='resident',
-            options={'ordering': ['last_name', 'first_name'], 'verbose_name': 'Resident', 'verbose_name_plural': 'Residents'},
+            name="resident",
+            options={
+                "ordering": ["last_name", "first_name"],
+                "verbose_name": "Resident",
+                "verbose_name_plural": "Residents",
+            },
         ),
         migrations.AddIndex(
-            model_name='resident',
-            index=models.Index(fields=['last_name', 'first_name'], name='residents_r_last_na_09bdf2_idx'),
+            model_name="resident",
+            index=models.Index(
+                fields=["last_name", "first_name"],
+                name="residents_r_last_na_09bdf2_idx",
+            ),
         ),
         migrations.AddIndex(
-            model_name='resident',
-            index=models.Index(fields=['purok'], name='residents_r_purok_f727b4_idx'),
+            model_name="resident",
+            index=models.Index(fields=["purok"], name="residents_r_purok_f727b4_idx"),
         ),
         migrations.AddIndex(
-            model_name='resident',
-            index=models.Index(fields=['is_active'], name='residents_r_is_acti_2375eb_idx'),
+            model_name="resident",
+            index=models.Index(
+                fields=["is_active"], name="residents_r_is_acti_2375eb_idx"
+            ),
         ),
     ]

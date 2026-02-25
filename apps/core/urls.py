@@ -3,44 +3,64 @@ from django.urls import path
 from django.contrib.auth.views import LogoutView
 from . import views
 
-app_name = 'core'
+app_name = "core"
 
 urlpatterns = [
-    path('login/', views.CustomLoginView.as_view(), name='login'),
-    path('logout/', LogoutView.as_view(next_page='core:login'), name='logout'),
-    path('setup/', views.SetupView.as_view(), name='setup'),
-    path('initializing/', views.InitializingView.as_view(), name='initializing'),
-    path('api/initialize/', views.TriggerInitializeAPI.as_view(), name='api_initialize'),
-    path('settings/', views.SettingsView.as_view(), name='settings'),
-    
+    path("login/", views.CustomLoginView.as_view(), name="login"),
+    path("logout/", LogoutView.as_view(next_page="core:login"), name="logout"),
+    path("setup/", views.SetupView.as_view(), name="setup"),
+    path("initializing/", views.InitializingView.as_view(), name="initializing"),
+    path(
+        "api/initialize/", views.TriggerInitializeAPI.as_view(), name="api_initialize"
+    ),
+    path("settings/", views.SettingsView.as_view(), name="settings"),
     # License Management
-    path('license/', views.LicenseInfoView.as_view(), name='license_info'),
-    path('license/activate/', views.LicenseActivationView.as_view(), name='license_activation'),
-    
+    path("license/", views.LicenseInfoView.as_view(), name="license_info"),
+    path(
+        "license/activate/",
+        views.LicenseActivationView.as_view(),
+        name="license_activation",
+    ),
     # User Management
-    path('users/', views.UserListView.as_view(), name='user_list'),
-    path('users/add/', views.UserCreateView.as_view(), name='user_add'),
-    path('users/<int:pk>/edit/', views.UserUpdateView.as_view(), name='user_edit'),
+    path("users/", views.UserListView.as_view(), name="user_list"),
+    path("users/add/", views.UserCreateView.as_view(), name="user_add"),
+    path("users/<int:pk>/edit/", views.UserUpdateView.as_view(), name="user_edit"),
     # Dashboard
-    path('', views.DashboardView.as_view(), name='dashboard'),
-
+    path("", views.DashboardView.as_view(), name="dashboard"),
     # Officials
-    path('officials/', views.OfficialsListView.as_view(), name='officials'),
-    path('officials/add/', views.OfficialCreateView.as_view(), name='official_add'),
-    path('officials/<int:pk>/edit/', views.OfficialUpdateView.as_view(), name='official_edit'),
-    path('officials/<int:pk>/delete/', views.OfficialDeleteView.as_view(), name='official_delete'),
-
+    path("officials/", views.OfficialsListView.as_view(), name="officials"),
+    path("officials/add/", views.OfficialCreateView.as_view(), name="official_add"),
+    path(
+        "officials/<int:pk>/edit/",
+        views.OfficialUpdateView.as_view(),
+        name="official_edit",
+    ),
+    path(
+        "officials/<int:pk>/delete/",
+        views.OfficialDeleteView.as_view(),
+        name="official_delete",
+    ),
     # GIS Map (Ultra only)
-    path('gis-map/', views.GisMapView.as_view(), name='gis_map'),
-
+    path("gis-map/", views.GisMapView.as_view(), name="gis_map"),
     # Informational Pages
-    path('about/', views.AboutView.as_view(), name='about'),
-    path('privacy/', views.PrivacyView.as_view(), name='privacy'),
-    path('terms/', views.TermsView.as_view(), name='terms'),
-
+    path("about/", views.AboutView.as_view(), name="about"),
+    path("privacy/", views.PrivacyView.as_view(), name="privacy"),
+    path("terms/", views.TermsView.as_view(), name="terms"),
     # Profile & Notifications
-    path('profile/', views.ProfileView.as_view(), name='profile'),
-    path('password-change/', views.CustomPasswordChangeView.as_view(), name='change_password'),
-    path('notifications/<int:pk>/read/', views.MarkNotificationReadView.as_view(), name='notification_read'),
-    path('api/check-updates/', views.CheckForUpdatesAPI.as_view(), name='api_check_updates'),
+    path("profile/", views.ProfileView.as_view(), name="profile"),
+    path(
+        "password-change/",
+        views.CustomPasswordChangeView.as_view(),
+        name="change_password",
+    ),
+    path(
+        "notifications/<int:pk>/read/",
+        views.MarkNotificationReadView.as_view(),
+        name="notification_read",
+    ),
+    path(
+        "api/check-updates/",
+        views.CheckForUpdatesAPI.as_view(),
+        name="api_check_updates",
+    ),
 ]

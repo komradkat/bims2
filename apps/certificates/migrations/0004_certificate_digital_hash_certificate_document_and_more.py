@@ -4,30 +4,39 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('certificates', '0003_seed_certificate_types'),
+        ("certificates", "0003_seed_certificate_types"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='certificate',
-            name='digital_hash',
-            field=models.CharField(blank=True, help_text='SHA256 hash of the generated document', max_length=64),
+            model_name="certificate",
+            name="digital_hash",
+            field=models.CharField(
+                blank=True,
+                help_text="SHA256 hash of the generated document",
+                max_length=64,
+            ),
         ),
         migrations.AddField(
-            model_name='certificate',
-            name='document',
-            field=models.FileField(blank=True, null=True, upload_to='certificates/issued/%Y/%m/'),
+            model_name="certificate",
+            name="document",
+            field=models.FileField(
+                blank=True, null=True, upload_to="certificates/issued/%Y/%m/"
+            ),
         ),
         migrations.AddField(
-            model_name='historicalcertificate',
-            name='digital_hash',
-            field=models.CharField(blank=True, help_text='SHA256 hash of the generated document', max_length=64),
+            model_name="historicalcertificate",
+            name="digital_hash",
+            field=models.CharField(
+                blank=True,
+                help_text="SHA256 hash of the generated document",
+                max_length=64,
+            ),
         ),
         migrations.AddField(
-            model_name='historicalcertificate',
-            name='document',
+            model_name="historicalcertificate",
+            name="document",
             field=models.TextField(blank=True, max_length=100, null=True),
         ),
     ]

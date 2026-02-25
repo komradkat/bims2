@@ -23,6 +23,7 @@ db.sqlite3-journal
 .env
 .envs/*
 !.envs/.gitkeep
+.env.prod
 
 # IDE
 .vscode/
@@ -40,3 +41,6 @@ init_apps.py
 
 # Build output
 /dist_hardened
+
+test_data/
+prod_test_data/

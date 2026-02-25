@@ -5,20 +5,28 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0008_notification'),
+        ("core", "0008_notification"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='user',
-            name='is_bootstrap',
-            field=models.BooleanField(default=False, help_text='System-created account for initial setup'),
+            model_name="user",
+            name="is_bootstrap",
+            field=models.BooleanField(
+                default=False, help_text="System-created account for initial setup"
+            ),
         ),
         migrations.AddField(
-            model_name='user',
-            name='official',
-            field=models.OneToOneField(blank=True, help_text='Link to the real official profile', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='user_account', to='core.barangayofficial'),
+            model_name="user",
+            name="official",
+            field=models.OneToOneField(
+                blank=True,
+                help_text="Link to the real official profile",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="user_account",
+                to="core.barangayofficial",
+            ),
         ),
     ]

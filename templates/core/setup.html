@@ -3,34 +3,55 @@
 
 {% block title %}System Setup | BIMS{% endblock %}
 
-{% block body_class %}bg-base-200 min-h-screen flex items-center justify-center py-12{% endblock %}
+{% block body_class %}bg-base-200 min-h-screen flex items-center justify-center py-12 relative overflow-hidden{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 <style>
-    #setup-map { height: 300px; border-radius: 0.75rem; border: 2px solid hsl(var(--bc) / 0.1); }
+    /* Premium Background */
+    body::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle at center, oklch(25% 0.15 262 / 0.15) 0%, transparent 70%);
+        z-index: -1;
+        animation: rotate 60s linear infinite;
+    }
+    @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+    #setup-map { height: 300px; border-radius: 0.75rem; border: 1px solid oklch(var(--b3)); }
     [x-cloak] { display: none !important; }
+
+    .setup-card {
+        background: oklch(var(--b1) / 0.8) !important;
+        backdrop-filter: blur(20px);
+        border: 1px solid oklch(var(--b3) / 0.5);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="max-w-4xl w-full mx-auto p-4" x-data="setupWizard()" x-cloak>
+<div class="max-w-4xl w-full mx-auto p-4 z-10" x-data="setupWizard()" x-cloak>
     {# Progress Bar #}
-    <div class="mb-8 overflow-hidden rounded-full bg-base-100 h-2 flex">
-        <div class="bg-primary transition-all duration-500" :style="`width: ${(step / 4) * 100}%`"></div>
+    <div class="mb-8 overflow-hidden rounded-full bg-base-300/30 h-1.5 flex shadow-inner">
+        <div class="bg-primary transition-all duration-700 ease-out shadow-[0_0_15px_oklch(var(--p))]" :style="`width: ${(step / 4) * 100}%`"></div>
     </div>
 
-    <div class="card bg-base-100 shadow-xl overflow-hidden">
+    <div class="card setup-card overflow-hidden">
         {# Step Counters #}
-        <div class="bg-base-200/50 px-8 py-4 flex justify-between items-center border-b border-base-200">
+        <div class="bg-base-200/40 px-8 py-5 flex justify-between items-center border-b border-base-300/50">
             <div class="flex gap-4">
                 <template x-for="i in 4">
-                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors"
-                         :class="step >= i ? 'bg-primary text-primary-content' : 'bg-base-300 text-base-content/50'"
+                    <div class="w-9 h-9 rounded-xl flex items-center justify-center text-xs font-black transition-all duration-300"
+                         :class="step >= i ? 'bg-primary text-primary-content shadow-lg shadow-primary/20 scale-110' : 'bg-base-300/50 text-base-content/30'"
                          x-text="i"></div>
                 </template>
             </div>
-            <div class="text-sm font-bold opacity-60 uppercase tracking-widest" x-text="stepTitle()"></div>
+            <div class="text-[10px] font-black opacity-40 uppercase tracking-[0.2em] italic" x-text="stepTitle()"></div>
         </div>
 
         <form method="post" enctype="multipart/form-data" class="card-body p-8">

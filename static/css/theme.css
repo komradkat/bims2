@@ -1,0 +1,86 @@
+/* ─── BIMS Premium Custom Theme ─── */
+[data-theme="bims"] {
+    color-scheme: dark;
+
+    /* Surfaces — raw L C H values (DaisyUI wraps with oklch() internally) */
+    --b1: 24% 0.030 252;
+    /* cards, sidebar, modals      */
+    --b2: 16% 0.022 255;
+    /* page background              */
+    --b3: 32% 0.028 250;
+    /* inputs, borders, dividers    */
+    --bc: 90% 0.012 245;
+    /* body text — near-white       */
+
+    /* Primary — Philippine Blue */
+    --p: 58% 0.20 262;
+    --pc: 98% 0.004 245;
+
+    /* Secondary — Teal */
+    --s: 64% 0.14 200;
+    --sc: 98% 0.004 200;
+
+    /* Accent — Philippine Gold */
+    --a: 78% 0.16 78;
+    --ac: 20% 0.04 78;
+
+    /* Neutral */
+    --n: 30% 0.025 255;
+    --nc: 80% 0.012 250;
+
+    /* Semantic colours */
+    --in: 64% 0.18 230;
+    --inc: 98% 0 0;
+    --su: 68% 0.18 145;
+    --suc: 98% 0 0;
+    --wa: 80% 0.18 80;
+    --wac: 20% 0.04 80;
+    --er: 65% 0.22 27;
+    --erc: 98% 0 0;
+
+    /* Shape */
+    --rounded-box: 0.75rem;
+    --rounded-btn: 0.5rem;
+    --rounded-badge: 0.4rem;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: oklch(16% 0.022 255);
+    /* Matches --b2 */
+    color: oklch(90% 0.012 245);
+    /* Matches --bc */
+}
+
+/* ─── Scrollbars ─── */
+::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: oklch(36% 0.026 252);
+    border-radius: 3px;
+}
+
+/* ─── Global Overrides for Dark Mode ─── */
+input::placeholder {
+    color: oklch(50% 0.012 245 / 0.5) !important;
+}
+
+.select option {
+    background-color: oklch(24% 0.030 252);
+    color: oklch(90% 0.012 245);
+}
+
+/* ─── Premium Glassmorphism ─── */
+.glass-panel {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}

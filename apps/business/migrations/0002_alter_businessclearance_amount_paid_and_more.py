@@ -5,40 +5,67 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('business', '0001_initial'),
+        ("business", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='businessclearance',
-            name='amount_paid',
-            field=models.DecimalField(decimal_places=2, max_digits=10, validators=[django.core.validators.MinValueValidator(0)]),
+            model_name="businessclearance",
+            name="amount_paid",
+            field=models.DecimalField(
+                decimal_places=2,
+                max_digits=10,
+                validators=[django.core.validators.MinValueValidator(0)],
+            ),
         ),
         migrations.AlterField(
-            model_name='businesspermit',
-            name='clearance_fee',
-            field=models.DecimalField(decimal_places=2, default=0.0, max_digits=10, validators=[django.core.validators.MinValueValidator(0)]),
+            model_name="businesspermit",
+            name="clearance_fee",
+            field=models.DecimalField(
+                decimal_places=2,
+                default=0.0,
+                max_digits=10,
+                validators=[django.core.validators.MinValueValidator(0)],
+            ),
         ),
         migrations.AlterField(
-            model_name='businesspermit',
-            name='gross_sales',
-            field=models.DecimalField(decimal_places=2, default=0.0, max_digits=12, validators=[django.core.validators.MinValueValidator(0)]),
+            model_name="businesspermit",
+            name="gross_sales",
+            field=models.DecimalField(
+                decimal_places=2,
+                default=0.0,
+                max_digits=12,
+                validators=[django.core.validators.MinValueValidator(0)],
+            ),
         ),
         migrations.AlterField(
-            model_name='historicalbusinessclearance',
-            name='amount_paid',
-            field=models.DecimalField(decimal_places=2, max_digits=10, validators=[django.core.validators.MinValueValidator(0)]),
+            model_name="historicalbusinessclearance",
+            name="amount_paid",
+            field=models.DecimalField(
+                decimal_places=2,
+                max_digits=10,
+                validators=[django.core.validators.MinValueValidator(0)],
+            ),
         ),
         migrations.AlterField(
-            model_name='historicalbusinesspermit',
-            name='clearance_fee',
-            field=models.DecimalField(decimal_places=2, default=0.0, max_digits=10, validators=[django.core.validators.MinValueValidator(0)]),
+            model_name="historicalbusinesspermit",
+            name="clearance_fee",
+            field=models.DecimalField(
+                decimal_places=2,
+                default=0.0,
+                max_digits=10,
+                validators=[django.core.validators.MinValueValidator(0)],
+            ),
         ),
         migrations.AlterField(
-            model_name='historicalbusinesspermit',
-            name='gross_sales',
-            field=models.DecimalField(decimal_places=2, default=0.0, max_digits=12, validators=[django.core.validators.MinValueValidator(0)]),
+            model_name="historicalbusinesspermit",
+            name="gross_sales",
+            field=models.DecimalField(
+                decimal_places=2,
+                default=0.0,
+                max_digits=12,
+                validators=[django.core.validators.MinValueValidator(0)],
+            ),
         ),
     ]

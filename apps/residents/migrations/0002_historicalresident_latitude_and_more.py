@@ -4,30 +4,37 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('residents', '0001_initial'),
+        ("residents", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='historicalresident',
-            name='latitude',
-            field=models.FloatField(blank=True, help_text='Latitude coordinate', null=True),
+            model_name="historicalresident",
+            name="latitude",
+            field=models.FloatField(
+                blank=True, help_text="Latitude coordinate", null=True
+            ),
         ),
         migrations.AddField(
-            model_name='historicalresident',
-            name='longitude',
-            field=models.FloatField(blank=True, help_text='Longitude coordinate', null=True),
+            model_name="historicalresident",
+            name="longitude",
+            field=models.FloatField(
+                blank=True, help_text="Longitude coordinate", null=True
+            ),
         ),
         migrations.AddField(
-            model_name='resident',
-            name='latitude',
-            field=models.FloatField(blank=True, help_text='Latitude coordinate', null=True),
+            model_name="resident",
+            name="latitude",
+            field=models.FloatField(
+                blank=True, help_text="Latitude coordinate", null=True
+            ),
         ),
         migrations.AddField(
-            model_name='resident',
-            name='longitude',
-            field=models.FloatField(blank=True, help_text='Longitude coordinate', null=True),
+            model_name="resident",
+            name="longitude",
+            field=models.FloatField(
+                blank=True, help_text="Longitude coordinate", null=True
+            ),
         ),
     ]

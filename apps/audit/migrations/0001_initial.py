@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -15,19 +14,51 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='SystemLog',
+            name="SystemLog",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('action', models.CharField(choices=[('LOGIN', 'User Login'), ('LOGOUT', 'User Logout'), ('DATA_EXPORT', 'Data Export'), ('SETUP_STEP', 'Setup Step Completed'), ('INITIALIZE', 'System Initialized'), ('LICENSE_ACTIVATE', 'License Activated'), ('PERMISSION_DENIED', 'Permission Denied'), ('CRITICAL_ERROR', 'Critical System Error')], max_length=50)),
-                ('details', models.JSONField(blank=True, default=dict)),
-                ('ip_address', models.GenericIPAddressField(blank=True, null=True)),
-                ('timestamp', models.DateTimeField(auto_now_add=True)),
-                ('user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='system_logs', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "action",
+                    models.CharField(
+                        choices=[
+                            ("LOGIN", "User Login"),
+                            ("LOGOUT", "User Logout"),
+                            ("DATA_EXPORT", "Data Export"),
+                            ("SETUP_STEP", "Setup Step Completed"),
+                            ("INITIALIZE", "System Initialized"),
+                            ("LICENSE_ACTIVATE", "License Activated"),
+                            ("PERMISSION_DENIED", "Permission Denied"),
+                            ("CRITICAL_ERROR", "Critical System Error"),
+                        ],
+                        max_length=50,
+                    ),
+                ),
+                ("details", models.JSONField(blank=True, default=dict)),
+                ("ip_address", models.GenericIPAddressField(blank=True, null=True)),
+                ("timestamp", models.DateTimeField(auto_now_add=True)),
+                (
+                    "user",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="system_logs",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'System Log',
-                'verbose_name_plural': 'System Logs',
-                'ordering': ['-timestamp'],
+                "verbose_name": "System Log",
+                "verbose_name_plural": "System Logs",
+                "ordering": ["-timestamp"],
             },
         ),
     ]

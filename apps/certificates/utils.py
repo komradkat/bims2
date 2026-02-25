@@ -15,7 +15,7 @@ def _url_fetcher(url):
     from django.contrib.staticfiles import finders
 
     static_url = settings.STATIC_URL
-    media_url  = settings.MEDIA_URL
+    media_url = settings.MEDIA_URL
 
     if url.startswith("file://"):
         return weasyprint.default_url_fetcher(url)
@@ -23,9 +23,9 @@ def _url_fetcher(url):
     path = None
 
     if url.startswith(media_url):
-        path = os.path.join(settings.MEDIA_ROOT, url[len(media_url):])
+        path = os.path.join(settings.MEDIA_ROOT, url[len(media_url) :])
     elif url.startswith(static_url):
-        relative = url[len(static_url):]
+        relative = url[len(static_url) :]
         found = finders.find(relative)
         if found:
             path = found
@@ -53,7 +53,7 @@ def generate_qr_code(data):
     qr.make(fit=True)
 
     img = qr.make_image(fill_color="black", back_color="white")
-    
+
     buffered = BytesIO()
     img.save(buffered, format="PNG")
     return base64.b64encode(buffered.getvalue()).decode()
@@ -65,15 +65,20 @@ def generate_pdf(template_name, context):
     Returns (pdf_bytes, sha256_hash).
     """
     # 1. Generate QR Code if transaction_number exists in context
-    cert_obj = context.get('certificate')
-    if cert_obj and hasattr(cert_obj, 'transaction_number'):
+    cert_obj = context.get("certificate")
+    if cert_obj and hasattr(cert_obj, "transaction_number"):
         # Generate the absolute verification URL
         from django.urls import reverse
-        host = context.get('request').get_host() if context.get('request') else 'localhost:8000'
-        scheme = 'https' if not settings.DEBUG else 'http'
+
+        host = (
+            context.get("request").get_host()
+            if context.get("request")
+            else "localhost:8000"
+        )
+        scheme = "https" if not settings.DEBUG else "http"
         verify_url = f"{scheme}://{host}{reverse('certificates:verify', kwargs={'tn': cert_obj.transaction_number})}"
-        
-        context['qr_code_base64'] = generate_qr_code(verify_url)
+
+        context["qr_code_base64"] = generate_qr_code(verify_url)
 
     # 2. Render Template
     html_string = render_to_string(template_name, context)
@@ -81,10 +86,9 @@ def generate_pdf(template_name, context):
 
     # 3. Generate PDF
     try:
-        pdf_bytes = (
-            weasyprint.HTML(string=html_string, base_url=base_url, url_fetcher=_url_fetcher)
-            .write_pdf()
-        )
+        pdf_bytes = weasyprint.HTML(
+            string=html_string, base_url=base_url, url_fetcher=_url_fetcher
+        ).write_pdf()
     except Exception as exc:
         raise ValueError(f"PDF rendering failed for '{template_name}': {exc}") from exc
 

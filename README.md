@@ -67,7 +67,41 @@ If you prefer using Docker, you can start the system with:
 docker compose up --build
 ```
 
-The system will be available at `http://localhost:8000`.
+## Quick Start (PowerShell / Windows)
+
+For a fresh install, everything (dependencies, environment, and database) can be set up automatically:
+
+```powershell
+./run.ps1 -Setup
+```
+
+This will:
+1.  Verify `uv` is installed.
+2.  Auto-create `.env` if missing.
+3.  Install all Python dependencies (`uv sync`).
+4.  Run all database migrations.
+5.  Launch the development server on `http://localhost:8001`.
+
+---
+
+## Local Testing & Environments
+
+BIMS2 supports multiple configuration profiles for local development and production simulation.
+
+### 🟢 Development Environment (Default)
+Uses standard `.env` settings and stores data in `C:\BIMS_Data`.
+```powershell
+./run.ps1 dev 8001
+```
+
+### 🔵 Production Simulation (Hardened Test)
+Uses `.env.prod` and production security settings.
+```powershell
+./run.ps1 prod 9002
+```
+
+> [!TIP]
+> **Protip**: Use port `9002` or `9003` for production tests to avoid "Sticky" HTTPS redirections your browser might have cached for port 8000/8001.
 
 ---
 

@@ -4,15 +4,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('gis', '0001_initial'),
+        ("gis", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='emergencyservice',
-            name='osm_id',
-            field=models.BigIntegerField(blank=True, db_index=True, null=True, unique=True),
+            model_name="emergencyservice",
+            name="osm_id",
+            field=models.BigIntegerField(
+                blank=True, db_index=True, null=True, unique=True
+            ),
         ),
     ]
