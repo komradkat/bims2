@@ -3,76 +3,196 @@
 {% block title %}User Management{% endblock %}
 
 {% block content %}
-<div class="container mx-auto">
-    <div class="flex justify-between items-center mb-6">
+<div class="w-full py-8 px-4 space-y-6">
+
+    {# ── Page Header ── #}
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-bold">User Management</h1>
-            <p class="text-sm opacity-60">Manage system access and roles</p>
+            <h1 class="text-3xl font-black tracking-tight">User Management</h1>
+            <p class="text-sm text-base-content/60 uppercase tracking-widest font-bold mt-0.5">System Access &amp; Role Control</p>
         </div>
-        <a href="{% url 'core:user_add' %}" class="btn btn-primary btn-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-            Add User
+        <a href="{% url 'core:user_add' %}" class="btn btn-primary gap-2 shadow-lg shadow-primary/20">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            Deploy Account
         </a>
     </div>
 
-    <div class="card bg-base-100 shadow-sm border border-base-200">
+    {# ── Stats Bar ── #}
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div class="stat bg-base-100 rounded-2xl shadow border border-base-200 px-4 py-4">
+            <div class="stat-title text-[10px] font-black uppercase tracking-widest opacity-50">Total Users</div>
+            <div class="stat-value text-3xl font-black">{{ users|length }}</div>
+        </div>
+        <div class="stat bg-base-100 rounded-2xl shadow border border-base-200 px-4 py-4">
+            <div class="stat-title text-[10px] font-black uppercase tracking-widest opacity-50">Active</div>
+            <div class="stat-value text-3xl font-black text-success">{{ users|length }}</div>
+        </div>
+        <div class="stat bg-base-100 rounded-2xl shadow border border-base-200 px-4 py-4">
+            <div class="stat-title text-[10px] font-black uppercase tracking-widest opacity-50">Admins</div>
+            <div class="stat-value text-3xl font-black text-primary">
+                {% with admin_count=0 %}{% for u in users %}{% if u.role == 'admin' %}{% with admin_count=admin_count|add:1 %}{% endwith %}{% endif %}{% endfor %}{% endwith %}
+                {{ users|length }}
+            </div>
+        </div>
+        <div class="stat bg-base-100 rounded-2xl shadow border border-base-200 px-4 py-4">
+            <div class="stat-title text-[10px] font-black uppercase tracking-widest opacity-50">Linked Officials</div>
+            <div class="stat-value text-3xl font-black text-secondary">
+                {% regroup users by official as linked_groups %}{{ linked_groups|length }}
+            </div>
+        </div>
+    </div>
+
+    {# ── Search & Filter Bar ── #}
+    <div class="flex flex-col sm:flex-row gap-3"
+         x-data="{ search: '', role: '' }">
+        <div class="relative flex-1">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+            </span>
+            <input type="text" x-model="search" placeholder="Search by name, username, or email…"
+                   class="input input-bordered w-full pl-9 focus:input-primary text-sm" />
+        </div>
+        <select x-model="role" class="select select-bordered focus:select-primary text-sm w-full sm:w-48">
+            <option value="">All Roles</option>
+            <option value="admin">Admin</option>
+            <option value="treasurer">Treasurer</option>
+            <option value="clerk">Clerk</option>
+        </select>
+
+    {# ── Table ── #}
+    <div class="card bg-base-100 shadow-xl border border-base-200 overflow-hidden">
         <div class="overflow-x-auto">
             <table class="table w-full">
                 <thead>
-                    <tr>
-                        <th>User</th>
+                    <tr class="bg-base-200/50 text-[10px] uppercase tracking-widest font-black opacity-60 border-b border-base-200">
+                        <th class="py-4">User</th>
                         <th>Role</th>
                         <th>Position</th>
+                        <th>Linked Official</th>
                         <th>Status</th>
                         <th>Joined</th>
-                        <th>Actions</th>
+                        <th class="text-right">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for user in users %}
-                    <tr class="hover">
-                        <td>
-                            <div class="flex items-center space-x-3">
+                    <tr class="hover border-b border-base-200/50 transition-all duration-200 group"
+                        x-show="
+                            (search === '' || '{{ user.username }} {{ user.first_name }} {{ user.last_name }} {{ user.email }}'.toLowerCase().includes(search.toLowerCase())) &&
+                            (role === '' || '{{ user.role }}' === role)
+                        ">
+                        {# User Identity #}
+                        <td class="py-4">
+                            <div class="flex items-center gap-3">
                                 <div class="avatar placeholder">
-                                    <div class="bg-neutral-focus text-neutral-content rounded-full w-8 h-8">
-                                        <span class="text-xs">{{ user.username|slice:":2"|upper }}</span>
+                                    <div class="w-10 h-10 rounded-full ring-2 ring-offset-2 ring-offset-base-100 shadow
+                                        {% if user.role == 'admin' %}bg-primary/20 ring-primary/40 text-primary
+                                        {% elif user.role == 'treasurer' %}bg-secondary/20 ring-secondary/40 text-secondary
+                                        {% else %}bg-base-300 ring-base-300 text-base-content/60{% endif %}">
+                                        <span class="text-sm font-black">{{ user.username|slice:":2"|upper }}</span>
                                     </div>
                                 </div>
                                 <div>
-                                    <div class="font-bold">{{ user.username }}</div>
-                                    <div class="text-xs opacity-50">{{ user.email }}</div>
+                                    <div class="font-bold leading-tight">
+                                        {% if user.first_name %}{{ user.first_name }} {{ user.last_name }}{% else %}{{ user.username }}{% endif %}
+                                        {% if user == request.user %}
+                                        <span class="badge badge-xs badge-accent ml-1">YOU</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="text-xs text-base-content/50 mt-0.5">@{{ user.username }}{% if user.email %} · {{ user.email }}{% endif %}</div>
                                 </div>
                             </div>
                         </td>
+
+                        {# Role Badge #}
                         <td>
-                            <span class="badge badge-sm 
+                            <span class="badge font-bold text-[10px] gap-1
                                 {% if user.role == 'admin' %}badge-primary
                                 {% elif user.role == 'treasurer' %}badge-secondary
                                 {% else %}badge-ghost{% endif %}">
+                                {% if user.role == 'admin' %}
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" /></svg>
+                                {% endif %}
                                 {{ user.get_role_display }}
                             </span>
                         </td>
-                        <td>{{ user.barangay_position|default:"-" }}</td>
+
+                        {# Position #}
+                        <td class="text-sm text-base-content/70">{{ user.barangay_position|default:"—" }}</td>
+
+                        {# Linked Official #}
                         <td>
-                            {% if user.is_active %}
-                            <span class="badge badge-success badge-xs gap-1">Active</span>
+                            {% if user.official %}
+                            <div class="flex items-center gap-1.5">
+                                <span class="h-2 w-2 rounded-full bg-success inline-block"></span>
+                                <span class="text-sm font-medium">{{ user.official.full_name }}</span>
+                            </div>
                             {% else %}
-                            <span class="badge badge-error badge-xs gap-1">Inactive</span>
+                            <span class="text-xs text-base-content/30 italic">Unlinked</span>
                             {% endif %}
                         </td>
-                        <td class="text-sm opacity-70">{{ user.created_at|date:"M d, Y" }}</td>
+
+                        {# Status #}
                         <td>
-                            {% if user != request.user %}
-                            <div class="dropdown dropdown-end">
-                                <label tabindex="0" class="btn btn-ghost btn-xs">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" /></svg>
-                                </label>
-                                <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 z-50 border border-base-200">
-                                    <li><a href="{% url 'core:user_edit' user.pk %}">Edit Details</a></li>
-                                    <li><a class="text-error">Deactivate User</a></li>
-                                </ul>
+                            {% if user.is_active %}
+                            <div class="flex items-center gap-1.5">
+                                <span class="relative flex h-2 w-2">
+                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-2 w-2 bg-success"></span>
+                                </span>
+                                <span class="text-xs font-bold text-success">Active</span>
+                            </div>
+                            {% else %}
+                            <div class="flex items-center gap-1.5">
+                                <span class="h-2 w-2 rounded-full bg-error inline-block"></span>
+                                <span class="text-xs font-bold text-error">Inactive</span>
                             </div>
                             {% endif %}
+                        </td>
+
+                        {# Joined Date #}
+                        <td class="text-xs text-base-content/50">{{ user.created_at|date:"M d, Y" }}</td>
+
+                        {# Actions #}
+                        <td class="text-right">
+                            {% if user != request.user %}
+                            <div class="dropdown dropdown-end">
+                                <label tabindex="0" class="btn btn-ghost btn-sm btn-circle opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" /></svg>
+                                </label>
+                                <ul tabindex="0" class="dropdown-content menu p-2 shadow-xl bg-base-100 rounded-xl w-48 z-50 border border-base-200">
+                                    <li>
+                                        <a href="{% url 'core:user_edit' user.pk %}" class="text-sm gap-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                                            Edit User
+                                        </a>
+                                    </li>
+                                    <li class="border-t border-base-200 mt-1 pt-1">
+                                        <a class="text-sm text-error gap-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg>
+                                            {% if user.is_active %}Deactivate{% else %}Activate{% endif %}
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            {% else %}
+                            <span class="badge badge-accent badge-xs font-bold">Current Session</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="py-20 text-center">
+                            <div class="flex flex-col items-center gap-4 opacity-50">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                <div>
+                                    <p class="font-bold">No users found</p>
+                                    <p class="text-sm mt-1">Deploy your first system account to get started.</p>
+                                </div>
+                                <a href="{% url 'core:user_add' %}" class="btn btn-primary btn-sm mt-2">Deploy First Account</a>
+                            </div>
                         </td>
                     </tr>
                     {% endfor %}
@@ -80,5 +200,7 @@
             </table>
         </div>
     </div>
+
+    </div>{# closes x-data div for filter bar #}
 </div>
 {% endblock %}

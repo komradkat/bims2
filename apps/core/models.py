@@ -50,6 +50,19 @@ class User(AbstractUser):
         verbose_name='user permissions',
     )
         
+    def save(self, *args, **kwargs):
+        # Automatically sync data from official if linked and fields are currently empty
+        if self.official:
+            if not self.first_name:
+                self.first_name = self.official.first_name
+            if not self.last_name:
+                self.last_name = self.official.last_name
+            if not self.email:
+                self.email = self.official.email
+            if not self.barangay_position:
+                self.barangay_position = self.official.get_position_display()
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f"{self.username} - {self.get_role_display()}"
 

@@ -4,7 +4,7 @@
 {% block title %}{{ action }} User — BIMS{% endblock %}
 
 {% block content %}
-<div class="container mx-auto max-w-4xl py-8">
+<div class="w-full py-8 px-4">
     {# Header & Breadcrumbs #}
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div class="flex items-center gap-4">
@@ -16,13 +16,14 @@
                 <p class="text-sm text-base-content/60 uppercase tracking-widest font-bold">System Access Management</p>
             </div>
         </div>
-        
         <div class="badge badge-lg badge-primary font-bold py-4">
             {% if action == 'Add' %}NEW ACCOUNT{% else %}EDITING: {{ form.username.value }}{% endif %}
         </div>
     </div>
 
-    <form method="post" class="space-y-6">
+    <form method="post" id="userForm" class="space-y-6"
+          x-data="userAccountForm()"
+          x-init="init()">
         {% csrf_token %}
 
         {% if form.non_field_errors %}
@@ -35,84 +36,101 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {# Left Column: Account Details #}
             <div class="lg:col-span-2 space-y-6">
-                {# Section 1: Basic Information #}
-                <div class="card bg-base-100 shadow-xl border border-base-200">
+                {# Section 1: Identity Source & Official Selection #}
+                <div class="card bg-base-100 shadow-xl border-2 border-primary/20 overflow-visible">
                     <div class="card-body">
-                        <h2 class="card-title text-primary mb-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-                            Account Credentials
-                        </h2>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {# Username #}
+                        <div class="flex items-center justify-between gap-4 mb-4">
+                            <h2 class="card-title text-primary">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                                1. Account Identity Source
+                            </h2>
+                                <template x-if="isLocked">
+                                    <div class="badge badge-success gap-2 animate__animated animate__fadeIn">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                                        SYNCED WITH ROSTER
+                                    </div>
+                                </template>
+                            </div>
+    
                             <div class="form-control w-full">
                                 <label class="label">
-                                    <span class="label-text font-bold">Username</span>
-                                    <span class="label-text-alt text-error">* required</span>
+                                    <span class="label-text font-bold">Select Official to Link</span>
+                                    <span class="label-text-alt text-primary font-bold">AUTOMATES DATA FILL</span>
                                 </label>
-                                <div class="join w-full">
-                                    <span class="join-item btn btn-ghost bg-base-200 pointer-events-none">@</span>
-                                    <input type="text" name="username" value="{{ form.username.value|default:'' }}" 
-                                           class="input input-bordered w-full join-item focus:input-primary transition-all" 
-                                           placeholder="jdoe" required />
-                                </div>
-                                {% if form.username.errors %}<p class="text-error text-xs mt-1 font-medium">{{ form.username.errors.0 }}</p>{% endif %}
-                            </div>
-
-                            {# Email #}
-                            <div class="form-control w-full">
-                                <label class="label">
-                                    <span class="label-text font-bold">Email Address</span>
-                                </label>
-                                <input type="email" name="email" value="{{ form.email.value|default:'' }}" 
-                                       class="input input-bordered w-full focus:input-primary transition-all" 
-                                       placeholder="official@barangay.gov.ph" />
-                                {% if form.email.errors %}<p class="text-error text-xs mt-1 font-medium">{{ form.email.errors.0 }}</p>{% endif %}
-                            </div>
-
-                            {% if action == 'Add' %}
-                            {# Password #}
-                            <div class="form-control w-full">
-                                <label class="label">
-                                    <span class="label-text font-bold">Initial Password</span>
-                                </label>
-                                <input type="password" name="password" class="input input-bordered w-full focus:input-primary transition-all" required />
-                            </div>
-                            
-                            {# Confirm Password #}
-                            <div class="form-control w-full">
-                                <label class="label">
-                                    <span class="label-text font-bold">Confirm Password</span>
-                                </label>
-                                <input type="password" name="confirm_password" class="input input-bordered w-full focus:input-primary transition-all" required />
-                            </div>
-                            {% endif %}
+                                <select name="official" x-model="selectedOfficial"
+                                        @change="console.log('Select changed!', $event.target.value); updateFields()"
+                                        class="select select-bordered w-full focus:select-primary border-primary/30"
+                                        :class="isLocked ? 'bg-primary/5' : ''">
+                                    <option value="">— Unlinked / External System User —</option>
+                                    {% for official in officials %}
+                                    <option value="{{ official.id }}"
+                                            {% if preselected_official_id|stringformat:"s" == official.id|stringformat:"s" %}selected{% endif %}>
+                                        {{ official.full_name }} ({{ official.get_position_display }})
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                <p class="text-xs opacity-60 mt-3 italic px-1">
+                                    <template x-if="isLocked">
+                                        <span>Information below will stay synchronized with the official's roster record.</span>
+                                    </template>
+                                    <template x-if="!isLocked">
+                                        <span>This account will not be linked to any physical official in the barangay roster.</span>
+                                    </template>
+                                </p>
                         </div>
                     </div>
                 </div>
 
-                {# Section 2: Role & Linkage #}
-                <div class="card bg-base-100 shadow-xl border border-base-200 overflow-visible">
+                {# Section 2: Personal Profile (Auto-populated) #}
+                <div class="card bg-base-100 shadow-xl border border-base-200" :class="selectedOfficial ? 'opacity-90' : ''">
                     <div class="card-body">
-                        <h2 class="card-title text-secondary mb-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
-                            Official Association & Access
+                        <h2 class="card-title text-primary mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                            2. Personal Information
                         </h2>
-
+                        
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {# Role Select #}
+                            {# First Name #}
                             <div class="form-control w-full">
                                 <label class="label">
-                                    <span class="label-text font-bold">System Role</span>
+                                    <span class="label-text font-bold">First Name</span>
+                                    <template x-if="selectedOfficial">
+                                        <span class="label-text-alt text-success font-bold flex items-center gap-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM5.884 6.68a1 1 0 10-1.415-1.414l.707-.707a1 1 0 001.415 1.414l-.707.707zm1.414 8.486a1 1 0 00-1.415-1.414l-.707.707a1 1 0 001.415 1.414l.707-.707zM10.828 14.757a1 1 0 10-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM15.828 9.757a1 1 0 10-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM15.535 5.97a1 1 0 00-1.414-1.415l-.707.707a1 1 0 001.414 1.415l.707-.707zM3 10a1 1 0 100-2H2a1 1 0 100 2h1zM14 11a1 1 0 100-2h-1a1 1 0 100 2h1z" /></svg>
+                                            AUTO-PULLED
+                                        </span>
+                                    </template>
                                 </label>
-                                <select name="role" class="select select-bordered w-full focus:select-secondary">
-                                    {% for value, label in form.fields.role.choices %}
-                                    <option value="{{ value }}" {% if form.role.value == value %}selected{% endif %}>{{ label }}</option>
-                                    {% endfor %}
-                                </select>
+                                <input type="text" name="first_name" x-model="firstName"
+                                       class="input input-bordered w-full transition-all duration-300"
+                                       :class="isLocked ? 'bg-base-300/50 border-base-300 opacity-70 cursor-not-allowed text-base-content/50' : 'focus:input-primary'"
+                                       :readonly="isLocked"
+                                       placeholder="Juan" />
+                                <template x-if="selectedOfficial">
+                                    <p class="text-[9px] text-success font-black mt-1 uppercase tracking-tighter">
+                                        <i class="fas fa-lock mr-1"></i> Managed by Official Profile
+                                    </p>
+                                </template>
+                            </div>
+
+                            {# Last Name #}
+                            <div class="form-control w-full">
                                 <label class="label">
-                                    <span class="label-text-alt opacity-60 italic">Determines module access.</span>
+                                    <span class="label-text font-bold">Last Name</span>
+                                    <template x-if="selectedOfficial">
+                                        <span class="label-text-alt text-success font-bold flex items-center gap-1 line-through opacity-50">SYNCED</span>
+                                    </template>
                                 </label>
+                                <input type="text" name="last_name" x-model="lastName"
+                                       class="input input-bordered w-full transition-all duration-300" 
+                                       :class="isLocked ? 'bg-base-300/50 border-base-300 opacity-70 cursor-not-allowed text-base-content/50' : 'focus:input-primary'"
+                                       :readonly="isLocked"
+                                       placeholder="Dela Cruz" />
+                                <template x-if="selectedOfficial">
+                                    <p class="text-[9px] text-success font-black mt-1 uppercase tracking-tighter">
+                                        <i class="fas fa-lock mr-1"></i> Managed by Official Profile
+                                    </p>
+                                </template>
                             </div>
 
                             {# Position Text #}
@@ -120,46 +138,113 @@
                                 <label class="label">
                                     <span class="label-text font-bold">Barangay Position</span>
                                 </label>
-                                <input type="text" name="barangay_position" value="{{ form.barangay_position.value|default:'' }}" 
-                                       class="input input-bordered w-full focus:input-secondary" placeholder="e.g. Barangay Secretary" />
+                                <input type="text" name="barangay_position" x-model="position"
+                                       class="input input-bordered w-full transition-all duration-300"
+                                       :class="isLocked ? 'bg-base-300/50 border-base-300 opacity-70 cursor-not-allowed text-base-content/50' : 'focus:input-secondary'" 
+                                       :readonly="isLocked"
+                                       placeholder="e.g. Barangay Secretary" />
+                                <template x-if="selectedOfficial">
+                                    <p class="text-[9px] text-success font-black mt-1 uppercase tracking-tighter">
+                                        <i class="fas fa-lock mr-1"></i> Managed by Official Profile
+                                    </p>
+                                </template>
                             </div>
 
-                            {# Official Linkage Dropdown #}
-                            <div class="form-control w-full md:col-span-2">
+                            {# Email #}
+                            <div class="form-control w-full">
                                 <label class="label">
-                                    <span class="label-text font-bold">Link to Real Official Profile</span>
-                                    <span class="badge badge-ghost badge-sm font-bold">IDENTITY VERIFICATION</span>
+                                    <span class="label-text font-bold">Email Address</span>
                                 </label>
-                                <select name="official" class="select select-bordered w-full focus:select-secondary">
-                                    <option value="">— Unlinked / System User —</option>
-                                    {% for official in officials %}
-                                    <option value="{{ official.id }}" {% if form.official.value|stringformat:"s" == official.id|stringformat:"s" %}selected{% endif %}>
-                                        {{ official.full_name }} ({{ official.get_position_display }})
-                                    </option>
+                                <input type="email" name="email" x-model="email"
+                                       class="input input-bordered w-full transition-all duration-300"
+                                       :class="isLocked ? 'bg-base-300/50 border-base-300 opacity-70 cursor-not-allowed text-base-content/50' : 'focus:input-primary'" 
+                                       :readonly="isLocked"
+                                       placeholder="official@barangay.gov.ph" />
+                                <template x-if="selectedOfficial">
+                                    <p class="text-[9px] text-success font-black mt-1 uppercase tracking-tighter">
+                                        <i class="fas fa-lock mr-1"></i> Managed by Official Profile
+                                    </p>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {# Section 3: Credentials #}
+                <div class="card bg-base-100 shadow-xl border border-base-200 overflow-visible">
+                    <div class="card-body">
+                        <h2 class="card-title text-secondary mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                            3. Account Access & Role
+                        </h2>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {# Username #}
+                            <div class="form-control w-full">
+                                <label class="label">
+                                    <span class="label-text font-bold">Username</span>
+                                    <span class="label-text-alt text-error font-black uppercase">* Required</span>
+                                </label>
+                                <div class="join w-full">
+                                    <span class="join-item btn btn-ghost bg-base-200 pointer-events-none text-base-content/40">@</span>
+                                    <input type="text" name="username" value="{{ form.username.value|default:'' }}" 
+                                           class="input input-bordered w-full join-item focus:input-secondary transition-all" 
+                                           placeholder="jdoe" required />
+                                </div>
+                                {% if form.username.errors %}<p class="text-error text-xs mt-1 font-medium">{{ form.username.errors.0 }}</p>{% endif %}
+                            </div>
+
+                            {# Role Select #}
+                            <div class="form-control w-full">
+                                <label class="label">
+                                    <span class="label-text font-bold">System Role</span>
+                                    <template x-if="selectedOfficial">
+                                        <span class="label-text-alt text-secondary animate-pulse font-bold">SUGGESTED</span>
+                                    </template>
+                                </label>
+                                <select name="role" x-model="role" class="select select-bordered w-full focus:select-secondary border-secondary/30"
+                                        :class="selectedOfficial ? 'bg-secondary/5' : ''">
+                                    {% for value, label in form.fields.role.choices %}
+                                    <option value="{{ value }}">{{ label }}</option>
                                     {% endfor %}
                                 </select>
-                                <p class="text-xs opacity-60 mt-2 italic px-1">
-                                    Required for this account to perform operational tasks (Residents, Blotter, etc.) if restricted accounts are enabled.
-                                </p>
                             </div>
+
+                            {% if action == 'Add' %}
+                            {# Password #}
+                            <div class="form-control w-full">
+                                <label class="label">
+                                    <span class="label-text font-bold">Password</span>
+                                </label>
+                                <input type="password" name="password" class="input input-bordered w-full focus:input-secondary transition-all" required />
+                            </div>
+                            
+                            {# Confirm Password #}
+                            <div class="form-control w-full">
+                                <label class="label">
+                                    <span class="label-text font-bold">Confirm Password</span>
+                                </label>
+                                <input type="password" name="confirm_password" class="input input-bordered w-full focus:input-secondary transition-all" required />
+                            </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
             </div>
 
-            {# Right Column: Status & Options #}
+            {# Right Column: Status & Handover #}
             <div class="lg:col-span-1 space-y-6">
-                <div class="card bg-base-100 shadow-xl border border-base-200">
+                <div class="card bg-base-100 shadow-xl border border-base-200 sticky top-8">
                     <div class="card-body">
                         <h2 class="card-title text-accent mb-4">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>
-                            Account Status
+                            Finalization
                         </h2>
                         
-                        <div class="form-control bg-base-200 p-4 rounded-xl border border-base-300">
+                        <div class="form-control bg-base-200 p-4 rounded-xl border border-base-300 group hover:border-success/50 transition-colors">
                             <label class="label cursor-pointer justify-between">
                                 <div class="flex flex-col">
-                                    <span class="label-text font-bold">Login Access</span>
+                                    <span class="label-text font-black text-[10px] tracking-widest uppercase">Login Access</span>
                                     <span class="label-text-alt opacity-60">Allow user to authenticate</span>
                                 </div>
                                 <input type="checkbox" name="is_active" class="toggle toggle-success toggle-md" 
@@ -168,19 +253,17 @@
                         </div>
 
                         {% if action == 'Add' and request.user.is_bootstrap %}
-                        <div class="divider text-xs opacity-40 uppercase font-black tracking-widest">Setup Phase</div>
-                        
-                        <div class="alert alert-warning p-4 rounded-xl shadow-inner border border-warning/30">
+                        <div class="alert alert-warning p-4 rounded-xl shadow-inner border border-warning/30 bg-warning/10 mt-4">
                             <div class="flex flex-col gap-3">
                                 <div class="flex items-center gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                                    <p class="text-xs font-bold uppercase tracking-tight">Handover Option</p>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0 text-warning" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                                    <p class="text-[10px] font-black uppercase tracking-widest">Handover Mode</p>
                                 </div>
                                 <label class="label cursor-pointer justify-start gap-4 p-0">
-                                    <input type="checkbox" name="link_as_bootstrap" class="checkbox checkbox-primary shadow-sm" />
+                                    <input type="checkbox" name="link_as_bootstrap" class="checkbox checkbox-warning checkbox-sm shadow-sm" />
                                     <div class="flex flex-col">
-                                        <span class="text-[11px] font-bold leading-tight">LINK TO CURRENT BOOTSTRAP</span>
-                                        <span class="text-[9px] opacity-70 leading-tight">Apply this official profile to your current session. You will no longer be in bootstrap mode.</span>
+                                        <span class="text-[11px] font-bold leading-tight uppercase">Transfer to Current Session</span>
+                                        <span class="text-[9px] opacity-70 leading-tight">Exit bootstrap mode by adopting this official profile as your own account.</span>
                                     </div>
                                 </label>
                             </div>
@@ -188,28 +271,29 @@
                         {% endif %}
 
                         <div class="mt-8 space-y-3">
-                            <button type="submit" class="btn btn-primary w-full shadow-lg shadow-primary/20">
-                                {% if action == 'Add' %}Create User Account{% else %}Apply Changes{% endif %}
+                            <button type="submit" class="btn btn-primary w-full shadow-lg shadow-primary/20 gap-2">
+                                <template x-if="isLocked">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" /></svg>
+                                </template>
+                                {% if action == 'Add' %}Deploy Account{% else %}Apply Changes{% endif %}
                             </button>
-                            <a href="{% url 'core:user_list' %}" class="btn btn-ghost w-full">
+                            <a href="{% url 'core:user_list' %}" class="btn btn-ghost w-full btn-sm">
                                 Cancel & Return
                             </a>
                         </div>
                     </div>
                 </div>
 
-                {# Info Card #}
-                <div class="card bg-primary text-primary-content shadow-xl">
+                {# Tip Card #}
+                <div class="card bg-neutral text-neutral-content shadow-xl">
                     <div class="card-body p-6">
-                        <h3 class="font-black text-lg mb-2 flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                            Role Permissions
+                        <h3 class="font-black text-[10px] tracking-widest mb-4 flex items-center gap-2 uppercase opacity-60">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            Did you know?
                         </h3>
-                        <div class="space-y-3 text-xs opacity-90">
-                            <p><strong>Administrator:</strong> Full access to all modules and system settings.</p>
-                            <p><strong>Clerk:</strong> Access to Residents, Blotter, and Certificates issuance.</p>
-                            <p><strong>Treasurer:</strong> Focus on Finance, Fees, and Collection records.</p>
-                        </div>
+                        <p class="text-xs leading-relaxed opacity-80">
+                            Linking a user to an official profile ensures that system audit logs reflect the person's real-world identity. This is critical for <strong>Accountability</strong> and <strong>Security Verification</strong>.
+                        </p>
                     </div>
                 </div>
             </div>
@@ -226,4 +310,74 @@
         @apply ring-2 ring-primary ring-offset-2;
     }
 </style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function userAccountForm() {
+        console.log('Alpine userAccountForm component factory called');
+        return {
+            selectedOfficial: '{{ preselected_official_id|default:'' }}',
+            officials: {{ officials_json|safe|default:'{}' }},
+            firstName: '{{ form.first_name.value|default:''|escapejs }}',
+            lastName: '{{ form.last_name.value|default:''|escapejs }}',
+            email: '{{ form.email.value|default:''|escapejs }}',
+            position: '{{ form.barangay_position.value|default:''|escapejs }}',
+            role: '{{ form.role.value|default:'clerk' }}',
+            
+            init() {
+                console.log('User Account Form Initialized');
+                console.log('Officials Loaded:', Object.keys(this.officials).length);
+                this.updateFields();
+                this.$watch('selectedOfficial', (val) => {
+                    console.log('Watcher: selectedOfficial changed to', val);
+                    this.updateFields();
+                });
+            },
+
+            get isLocked() {
+                const val = (this.selectedOfficial || '').toString().trim();
+                const locked = val !== '' && val !== '0' && val !== 'None' && val !== 'null';
+                return locked;
+            },
+
+            updateFields() {
+                const offId = (this.selectedOfficial || '').toString();
+                console.log('Attempting update for Official ID:', offId);
+                
+                if (offId && this.officials[offId]) {
+                    const off = this.officials[offId];
+                    console.log('Matched Official Data:', off);
+                    this.firstName = off.first_name || '';
+                    this.lastName = off.last_name || '';
+                    this.email = off.email || '';
+                    this.position = off.position || '';
+                    
+                    // Smart Role Suggestion
+                    const posLower = (off.position || '').toLowerCase();
+                    if (posLower.includes('captain') || posLower.includes('punong') || posLower.includes('chairman')) {
+                        this.role = 'admin';
+                    } else if (posLower.includes('treasurer')) {
+                        this.role = 'treasurer';
+                    } else {
+                        // Default for Kagawad, Secretary, etc.
+                        this.role = 'clerk';
+                    }
+                } else {
+                    console.log('No match for ID or not locked. ID was:', offId);
+                    if (!this.isLocked) {
+                        console.log('Clearing fields (Add mode only)');
+                        {% if action == 'Add' %}
+                        this.firstName = '';
+                        this.lastName = '';
+                        this.email = '';
+                        this.position = '';
+                        this.role = 'clerk';
+                        {% endif %}
+                    }
+                }
+            }
+        };
+    }
+</script>
 {% endblock %}

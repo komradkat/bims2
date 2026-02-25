@@ -12,6 +12,7 @@ from django.db.models import Sum, Q
 from django.utils import timezone
 from django.utils.safestring import mark_safe
 from datetime import timedelta
+import json
 
 # Import models for Dashboard
 from .models import Notification
@@ -55,13 +56,43 @@ class UserListView(LoginRequiredMixin, ListView):
 class UserCreateView(LoginRequiredMixin, CreateView):
     model = User
     template_name = 'auth/user_form.html'
-    fields = ['username', 'email', 'role', 'barangay_position', 'official', 'is_active']
+    fields = ['username', 'first_name', 'last_name', 'email', 'role', 'barangay_position', 'official', 'is_active']
     success_url = reverse_lazy('core:user_list')
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['action'] = 'Add'
-        context['officials'] = BarangayOfficial.objects.filter(is_active=True, user_account__isnull=True)
+        
+        # Get requested official ID (if any) from GET parameter
+        official_id = self.request.GET.get('official_id')
+        
+        # Show all officials in serialized data to ensure auto-population works even if 
+        # the official doesn't meet filter criteria (e.g. inactive)
+        all_officials = BarangayOfficial.objects.all()
+        # For the dropdown, we want unlinked ones, BUT always include the specifically requested one
+        q = Q(user_account__isnull=True)
+        if official_id:
+            try:
+                q |= Q(id=int(official_id))
+            except (ValueError, TypeError):
+                pass
+            
+        context['officials'] = all_officials.filter(q)
+        
+        # Serialize ALL for Alpine.js so we can ALWAYS auto-populate if an ID is passed
+        officials_data = {
+            str(off.id): {
+                'first_name': off.first_name,
+                'last_name': off.last_name,
+                'email': off.email,
+                'position': off.get_position_display(),
+            } for off in all_officials
+        }
+        context['officials_json'] = json.dumps(officials_data)
+        
+        if official_id:
+            context['preselected_official_id'] = str(official_id)
+            
         return context
         
     def form_valid(self, form):
@@ -81,10 +112,12 @@ class UserCreateView(LoginRequiredMixin, CreateView):
             self.request.user.barangay_position = user.barangay_position
             self.request.user.is_bootstrap = False
             
-            # Sync names from official if linked
+            # Sync data from official if linked
             if user.official:
                 self.request.user.first_name = user.official.first_name
                 self.request.user.last_name = user.official.last_name
+                self.request.user.email = user.official.email
+                self.request.user.barangay_position = user.official.get_position_display()
             
             if password:
                 self.request.user.set_password(password)
@@ -97,6 +130,17 @@ class UserCreateView(LoginRequiredMixin, CreateView):
             messages.success(self.request, f"Account '{self.request.user.username}' successfully linked to Official: {self.request.user.official.full_name}. You are no longer in bootstrap mode.")
             return redirect('core:profile')
 
+        # Sync data from official if linked and fields were left empty
+        if user.official:
+            if not user.first_name:
+                user.first_name = user.official.first_name
+            if not user.last_name:
+                user.last_name = user.official.last_name
+            if not user.email:
+                user.email = user.official.email
+            if not user.barangay_position:
+                user.barangay_position = user.official.get_position_display()
+
         user.save()
         messages.success(self.request, f"User {user.username} created successfully.")
         self.object = user
@@ -106,16 +150,52 @@ class UserCreateView(LoginRequiredMixin, CreateView):
 class UserUpdateView(LoginRequiredMixin, UpdateView):
     model = User
     template_name = 'auth/user_form.html'
-    fields = ['username', 'email', 'role', 'barangay_position', 'official', 'is_active']
+    fields = ['username', 'first_name', 'last_name', 'email', 'role', 'barangay_position', 'official', 'is_active']
     success_url = reverse_lazy('core:user_list')
     
+    def form_valid(self, form):
+        user = form.save(commit=False)
+        
+        # Sync data from official if linked and fields were left empty (or locked)
+        if user.official:
+            if not user.first_name:
+                user.first_name = user.official.first_name
+            if not user.last_name:
+                user.last_name = user.official.last_name
+            if not user.email:
+                user.email = user.official.email
+            if not user.barangay_position:
+                user.barangay_position = user.official.get_position_display()
+        
+        user.save()
+        messages.success(self.request, f"User {user.username} updated successfully.")
+        return HttpResponseRedirect(self.get_success_url())
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['action'] = 'Edit'
+        
+        all_officials = BarangayOfficial.objects.all()
         # Show all officials but prioritize the currently linked one
-        context['officials'] = BarangayOfficial.objects.filter(
+        eligible_officials = all_officials.filter(
             Q(user_account__isnull=True) | Q(user_account=self.object)
         )
+        context['officials'] = eligible_officials
+        
+        # Serialize ALL for Alpine.js auto-population
+        officials_data = {
+            str(off.id): {
+                'first_name': off.first_name,
+                'last_name': off.last_name,
+                'email': off.email,
+                'position': off.get_position_display(),
+            } for off in all_officials
+        }
+        context['officials_json'] = json.dumps(officials_data)
+        
+        if self.object.official:
+            context['preselected_official_id'] = str(self.object.official.id)
+            
         return context
 
 
@@ -632,13 +712,28 @@ class PrivacyView(LoginRequiredMixin, TemplateView):
 class TermsView(LoginRequiredMixin, TemplateView):
     template_name = 'pages/info/terms.html'
 
-class ProfileView(LoginRequiredMixin, TemplateView):
+class ProfileView(LoginRequiredMixin, View):
     template_name = 'core/profile.html'
     
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        # Add any extra profile info here if needed
-        return context
+    def get(self, request):
+        return render(request, self.template_name)
+        
+    def post(self, request):
+        user = request.user
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        email = request.POST.get('email')
+        
+        try:
+            user.first_name = first_name
+            user.last_name = last_name
+            user.email = email
+            user.save()
+            messages.success(request, "Profile updated successfully.")
+        except Exception as e:
+            messages.error(request, f"Error updating profile: {str(e)}")
+            
+        return redirect('core:profile')
 
 class MarkNotificationReadView(LoginRequiredMixin, View):
     def post(self, request, pk):
