@@ -13,6 +13,13 @@ class SystemLog(models.Model):
         ('LICENSE_ACTIVATE', 'License Activated'),
         ('PERMISSION_DENIED', 'Permission Denied'),
         ('CRITICAL_ERROR', 'Critical System Error'),
+        # Database management
+        ('DB_BACKUP', 'Database Backup'),
+        ('DB_RESTORE', 'Database Restore'),
+        ('DB_IMPORT', 'Database Import'),
+        ('DB_EXPORT', 'Database Export'),
+        ('DB_CONFIG_CHANGE', 'Database Config Changed'),
+        ('DB_ACCESS_DENIED', 'Database Access Denied'),
     ]
 
     user = models.ForeignKey(

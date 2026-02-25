@@ -1,0 +1,273 @@
+{% extends 'base.html' %}
+{% block title %}Database Management{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    {# ── Page Header ── #}
+    <div class="flex flex-wrap items-start justify-between gap-3">
+        <div>
+            <div class="flex items-center gap-2 text-xs text-base-content/40 mb-1">
+                <a href="{% url 'audit:logs' %}" class="hover:text-primary transition-colors">Audit Logs</a>
+                <span>›</span>
+                <span>Database Management</span>
+            </div>
+            <h1 class="text-2xl font-bold flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/></svg>
+                Database Management
+            </h1>
+            <p class="text-sm opacity-50 mt-0.5">Backup, export and audit your database</p>
+        </div>
+        <a href="{% url 'audit:logs' %}?module=Database" class="btn btn-sm btn-ghost gap-2">
+            ← All Logs
+        </a>
+    </div>
+
+    {# ── DB Info Cards ── #}
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="card bg-base-100 border border-base-200 shadow-sm p-4">
+            <div class="text-[10px] uppercase tracking-widest opacity-40 mb-1">Engine</div>
+            <div class="font-bold text-lg">{{ db_info.type }}</div>
+            <div class="text-[10px] opacity-40 mt-0.5 font-mono truncate" title="{{ db_info.engine }}">{{ db_info.engine }}</div>
+        </div>
+        <div class="card bg-base-100 border border-base-200 shadow-sm p-4">
+            <div class="text-[10px] uppercase tracking-widest opacity-40 mb-1">Database</div>
+            <div class="font-bold text-base truncate" title="{{ db_info.name }}">{{ db_info.name }}</div>
+            <div class="text-[10px] opacity-40 mt-0.5">{{ db_info.host }}{% if db_info.port != '—' %}:{{ db_info.port }}{% endif %}</div>
+        </div>
+        <div class="card bg-base-100 border border-base-200 shadow-sm p-4">
+            <div class="text-[10px] uppercase tracking-widest opacity-40 mb-1">Size</div>
+            <div class="font-bold text-lg">{{ db_info.size }}</div>
+            <div class="text-[10px] opacity-40 mt-0.5">on disk</div>
+        </div>
+        <div class="card bg-base-100 border border-base-200 shadow-sm p-4">
+            <div class="text-[10px] uppercase tracking-widest opacity-40 mb-1">Tables</div>
+            <div class="font-bold text-lg">{{ db_info.table_count }}</div>
+            <div class="text-[10px] opacity-40 mt-0.5">in schema</div>
+        </div>
+    </div>
+
+    {# ── Action Cards ── #}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+        {# Backup Card #}
+        <div class="card bg-base-100 border border-base-200 shadow-sm">
+            <div class="card-body gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="bg-success/10 text-success rounded-xl p-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+                    </div>
+                    <div>
+                        <h3 class="font-bold">Download Backup</h3>
+                        <p class="text-xs opacity-50">
+                            {% if db_info.type == 'SQLite' %}
+                            Downloads the raw <code class="bg-base-300 px-1 rounded text-[10px]">.sqlite3</code> file
+                            {% else %}
+                            Downloads a <code class="bg-base-300 px-1 rounded text-[10px]">dumpdata</code> JSON snapshot
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+                <div class="divider my-0"></div>
+                <p class="text-xs opacity-60 leading-relaxed">
+                    Creates a complete snapshot of the current database.
+                    {% if db_info.type == 'SQLite' %}
+                    The file can be restored by replacing <code class="bg-base-300 px-1 rounded">db.sqlite3</code>.
+                    {% else %}
+                    The JSON dump can be restored via <code class="bg-base-300 px-1 rounded">loaddata</code>.
+                    {% endif %}
+                    This action is recorded in the audit log.
+                </p>
+                <form method="post" action="{% url 'audit:db_backup' %}" class="mt-1">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success btn-sm gap-2 w-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                        Download Backup
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        {# Export / Dumpdata Card #}
+        <div class="card bg-base-100 border border-base-200 shadow-sm">
+            <div class="card-body gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="bg-info/10 text-info rounded-xl p-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    </div>
+                    <div>
+                        <h3 class="font-bold">Export Data (dumpdata)</h3>
+                        <p class="text-xs opacity-50">Select apps and format to export</p>
+                    </div>
+                </div>
+                <div class="divider my-0"></div>
+                <form method="post" action="{% url 'audit:db_export' %}">
+                    {% csrf_token %}
+                    <div class="space-y-3">
+                        <div class="form-control">
+                            <label class="label py-1"><span class="label-text text-xs font-semibold uppercase tracking-widest opacity-60">Apps to export</span></label>
+                            <label class="flex items-center gap-2 cursor-pointer bg-base-200/60 rounded px-2 py-1.5 mb-1.5 text-xs font-semibold" id="export-select-all-label">
+                                <input type="checkbox" id="export-select-all" class="checkbox checkbox-xs checkbox-primary"
+                                    onchange="document.querySelectorAll('.export-app-cb').forEach(cb => cb.checked = this.checked)" />
+                                Export Everything (all apps)
+                            </label>
+                            <div class="grid grid-cols-2 gap-1.5 text-xs">
+                                {% for app in export_apps %}
+                                <label class="flex items-center gap-2 cursor-pointer hover:bg-base-200 rounded px-2 py-1">
+                                    <input type="checkbox" name="apps[]" value="{{ app }}"
+                                        class="checkbox checkbox-xs checkbox-primary export-app-cb"
+                                        onchange="if(!this.checked) document.getElementById('export-select-all').checked=false;" />
+                                    {{ app }}
+                                </label>
+                                {% endfor %}
+                            </div>
+                            <p class="text-[10px] opacity-40 mt-1">If nothing is selected, all data is exported.</p>
+                        </div>
+                        <div class="form-control">
+                            <label class="label py-1"><span class="label-text text-xs font-semibold uppercase tracking-widest opacity-60">Format</span></label>
+                            <div class="space-y-1.5 text-sm">
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="format" value="json" class="radio radio-xs radio-primary" checked />
+                                    JSON <span class="badge badge-success badge-xs">cross-compatible</span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="format" value="yaml" class="radio radio-xs radio-primary" />
+                                    YAML <span class="badge badge-success badge-xs">cross-compatible</span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="format" value="xml" class="radio radio-xs radio-primary" />
+                                    XML <span class="badge badge-success badge-xs">cross-compatible</span>
+                                </label>
+                            </div>
+                            <p class="text-[10px] opacity-40 mt-1">All formats can be imported into any DB engine. Use the Backup button for a raw .sqlite3 file.</p>
+                        </div>
+                        <button type="submit" class="btn btn-info btn-sm gap-2 w-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                            Export Selected
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        {# Import Fixture Card #}
+        <div class="card bg-base-100 border border-base-200 shadow-sm">
+            <div class="card-body gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="bg-warning/10 text-warning rounded-xl p-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v12"/></svg>
+                    </div>
+                    <div>
+                        <h3 class="font-bold">Import Fixture</h3>
+                        <p class="text-xs opacity-50">Load data from a <code class="bg-base-300 px-1 rounded text-[10px]">loaddata</code> fixture file</p>
+                    </div>
+                </div>
+                <div class="divider my-0"></div>
+                <div class="alert alert-warning py-2 text-xs">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    This will overwrite existing records with matching primary keys.
+                </div>
+                <form method="post" action="{% url 'audit:db_import' %}" enctype="multipart/form-data" class="space-y-3">
+                    {% csrf_token %}
+                    <div class="form-control">
+                        <label class="label py-1"><span class="label-text text-xs font-semibold uppercase tracking-widest opacity-60">File</span></label>
+                        <input type="file" name="fixture" accept=".json,.yaml,.yml,.xml,.sqlite3"
+                            class="file-input file-input-bordered file-input-sm w-full" required />
+                        <div class="mt-2 space-y-1 text-[10px] opacity-50 leading-relaxed">
+                            <p><span class="badge badge-success badge-xs mr-1">Cross-compatible</span> <strong>.json / .yaml / .xml</strong> — works with any database engine (SQLite, PostgreSQL, MySQL)</p>
+                            <p><span class="badge badge-warning badge-xs mr-1">SQLite only</span> <strong>.sqlite3</strong> — direct file restore, only works when current database is SQLite</p>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-warning btn-sm gap-2 w-full"
+                        onclick="return confirm('Import this file? Existing records with matching IDs will be overwritten.')">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                        Import
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        {# DB Config Info Card #}
+        <div class="card bg-base-100 border border-base-200 shadow-sm md:col-span-2">
+            <div class="card-body gap-2">
+                <h3 class="font-bold flex items-center gap-2 text-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    Current Configuration
+                </h3>
+                <div class="overflow-x-auto">
+                    <table class="table table-xs">
+                        <tbody>
+                            <tr><td class="opacity-50 w-36">Engine</td><td class="font-mono text-xs">{{ db_info.engine }}</td></tr>
+                            <tr><td class="opacity-50">Database Name</td><td class="font-mono text-xs">{{ db_info.name }}</td></tr>
+                            <tr><td class="opacity-50">Host</td><td class="font-mono text-xs">{{ db_info.host }}</td></tr>
+                            <tr><td class="opacity-50">Port</td><td class="font-mono text-xs">{{ db_info.port }}</td></tr>
+                            <tr><td class="opacity-50">File Size</td><td class="font-mono text-xs">{{ db_info.size }}</td></tr>
+                            <tr><td class="opacity-50">Table Count</td><td class="font-mono text-xs">{{ db_info.table_count }}</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="alert alert-info py-2 text-xs mt-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    To switch between SQLite and PostgreSQL, update <code class="bg-base-300 px-1 rounded">DATABASE_ENGINE</code> and related variables in your <code class="bg-base-300 px-1 rounded">.env</code> file and restart the server.
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    {# ── DB Audit Log ── #}
+    <div class="card bg-base-100 border border-base-200 shadow-sm overflow-hidden">
+        <div class="flex items-center justify-between px-4 py-3 border-b border-base-200 bg-base-200/30">
+            <h3 class="font-bold text-sm flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                Database Activity Log
+            </h3>
+            <a href="{% url 'audit:logs' %}?module=Database" class="btn btn-xs btn-ghost">View all →</a>
+        </div>
+        {% if db_logs %}
+        <div class="overflow-x-auto">
+            <table class="table table-sm">
+                <thead class="bg-base-200/50 text-[10px] uppercase tracking-widest text-base-content/50">
+                    <tr>
+                        <th class="w-36">Timestamp</th>
+                        <th class="w-28">User</th>
+                        <th class="w-40">Action</th>
+                        <th>Details</th>
+                        <th class="w-28 hidden lg:table-cell">IP</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in db_logs %}
+                    <tr class="hover:bg-base-200/30 transition-colors border-b border-base-200/50">
+                        <td class="whitespace-nowrap">
+                            <div class="text-xs font-mono">{{ log.timestamp|date:"Y-m-d" }}</div>
+                            <div class="text-[10px] opacity-40 font-mono">{{ log.timestamp|date:"H:i:s" }}</div>
+                        </td>
+                        <td><span class="badge badge-outline badge-sm">{{ log.user }}</span></td>
+                        <td>
+                            <span class="badge badge-{{ log.action_color }} badge-sm gap-1 font-semibold">
+                                <span class="text-[10px]">{{ log.action_icon }}</span>
+                                {{ log.action }}
+                            </span>
+                        </td>
+                        <td><span class="block truncate text-xs opacity-80 max-w-xs" title="{{ log.details }}">{{ log.details }}</span></td>
+                        <td class="hidden lg:table-cell">
+                            {% if log.ip %}<span class="font-mono text-[10px] opacity-50">{{ log.ip }}</span>
+                            {% else %}<span class="text-[10px] opacity-25">—</span>{% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="flex flex-col items-center justify-center py-12 opacity-40">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"/></svg>
+            <p class="text-sm font-semibold">No database events recorded yet</p>
+            <p class="text-xs mt-1">Backups and exports will appear here</p>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}
