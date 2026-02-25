@@ -6,12 +6,14 @@ from django.views import View
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.utils.decorators import method_decorator
+import threading
 
 from apps.residents.models import Resident
 from apps.core.models import BarangayInfo
 from apps.core.decorators import tier_required
 from .models import EmergencyService
 from .forms import EmergencyServiceForm
+
 
 class MapView(LoginRequiredMixin, NonBootstrapRequiredMixin, TemplateView):
     template_name = 'gis/map.html'
@@ -163,3 +165,48 @@ class EmergencyServiceGeoJSONView(LoginRequiredMixin, NonBootstrapRequiredMixin,
         }
 
         return JsonResponse(geojson)
+
+
+class RefreshBlipsView(LoginRequiredMixin, NonBootstrapRequiredMixin, View):
+    """Trigger an OSM import of nearby emergency services in the background.
+    Uses the same `import_nearby_services` management command as the setup wizard."""
+
+    def post(self, request, *args, **kwargs):
+        from django.core.management import call_command
+
+        # Synchronously upsert the Barangay Hall blip from current BarangayInfo
+        try:
+            info = BarangayInfo.objects.first()
+            if info:
+                hall_defaults = {
+                    'name': f"{info.name} — Barangay Hall",
+                    'address': info.full_address or '',
+                    'contact_number': info.contact_number or '',
+                    'description': f"Official Barangay Hall of {info.name}.",
+                    'icon_emoji': '🏛️',
+                    'is_active': True,
+                }
+                if info.latitude and info.longitude:
+                    hall_defaults['latitude'] = info.latitude
+                    hall_defaults['longitude'] = info.longitude
+                EmergencyService.objects.update_or_create(
+                    service_type='hall',
+                    defaults=hall_defaults,
+                )
+        except Exception as e:
+            print(f"[RefreshBlipsView] Hall upsert error: {e}")
+
+        def run_import():
+            try:
+                call_command('import_nearby_services', radius=5000)
+            except Exception as e:
+                print(f"[RefreshBlipsView] Background import error: {e}")
+
+        t = threading.Thread(target=run_import)
+        t.daemon = True
+        t.start()
+
+        return JsonResponse({
+            'status': 'started',
+            'message': 'OSM import running in background. Blips will update shortly.',
+        })

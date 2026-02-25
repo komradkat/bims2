@@ -79,14 +79,24 @@
             box-shadow:
                 inset 0 3px 0 oklch(58% 0.20 262),
                 0 4px 20px rgba(0,0,0,0.35);
-            transition: box-shadow 0.2s, transform 0.2s;
         }
+
+        /* ─── NO HOVER ANIMATIONS (system-wide) ─── */
+        .card,
+        .card:hover,
         .card:not(.static-card):hover {
+            transform: none !important;
             box-shadow:
                 inset 0 3px 0 oklch(58% 0.20 262),
-                0 10px 30px rgba(0,0,0,0.50);
-            transform: translateY(-2px);
+                0 4px 20px rgba(0,0,0,0.35) !important;
+            transition: none !important;
         }
+        table tbody tr,
+        table tbody tr:hover { background-color: transparent !important; }
+        .form-control:hover,
+        .input:hover,
+        .select:hover,
+        .textarea:hover { transform: none !important; }
         .card-title {
             color: oklch(93% 0.008 245);
             font-weight: 600;

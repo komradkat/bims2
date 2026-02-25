@@ -320,9 +320,10 @@ class SettingsView(LoginRequiredMixin, View):
     template_name = 'core/settings.html'
 
     def get(self, request):
-        from apps.core.models import BarangayInfo
+        from apps.core.models import BarangayInfo, BarangayOfficial
         info = BarangayInfo.objects.first()
-        return render(request, self.template_name, {'info': info})
+        captain = BarangayOfficial.objects.filter(position='punong_barangay', is_active=True).first()
+        return render(request, self.template_name, {'info': info, 'captain': captain})
 
     def post(self, request):
         from apps.core.models import BarangayInfo
@@ -330,10 +331,13 @@ class SettingsView(LoginRequiredMixin, View):
         
         info.name = request.POST.get('barangay_name')
         info.street = request.POST.get('barangay_street', '')
-        info.city_municipality = request.POST.get('barangay_city_municipality')
-        info.province = request.POST.get('barangay_province')
+        info.city_municipality = request.POST.get('barangay_city_municipality', '')
+        info.province = request.POST.get('barangay_province', '')
+        info.region = request.POST.get('region', '')
+        info.zip_code = request.POST.get('zip_code', '')
         info.contact_number = request.POST.get('contact_number', '')
         info.email = request.POST.get('barangay_email', '')
+        # captain_name & captain_title are auto-synced from the officials roster
         
         if request.POST.get('latitude'):
             info.latitude = float(request.POST.get('latitude'))
@@ -344,6 +348,28 @@ class SettingsView(LoginRequiredMixin, View):
             info.logo = request.FILES['barangay_logo']
             
         info.save()
+
+        # Keep the Barangay Hall blip in sync with settings
+        try:
+            from apps.gis.models import EmergencyService
+            hall_defaults = {
+                'name': f"{info.name} — Barangay Hall",
+                'address': info.full_address or '',
+                'contact_number': info.contact_number or '',
+                'description': f"Official Barangay Hall of {info.name}.",
+                'icon_emoji': '🏛️',
+                'is_active': True,
+            }
+            if info.latitude and info.longitude:
+                hall_defaults['latitude'] = info.latitude
+                hall_defaults['longitude'] = info.longitude
+            EmergencyService.objects.update_or_create(
+                service_type='hall',
+                defaults=hall_defaults,
+            )
+        except Exception:
+            pass  # Non-fatal
+
         messages.success(request, "System settings updated successfully.")
         return redirect('core:settings')
 
@@ -502,6 +528,28 @@ class SetupView(View):
             
             info.is_setup_complete = True
             info.save()
+
+            # Auto-create / update the Barangay Hall blip
+            try:
+                from apps.gis.models import EmergencyService
+                hall_address = info.full_address or f"{info.street}, {info.city_municipality}, {info.province}".strip(', ')
+                defaults = {
+                    'name': f"{info.name} — Barangay Hall",
+                    'address': hall_address,
+                    'contact_number': info.contact_number or '',
+                    'description': f"Official Barangay Hall of {info.name}.",
+                    'icon_emoji': '🏛️',
+                    'is_active': True,
+                }
+                if info.latitude and info.longitude:
+                    defaults['latitude'] = info.latitude
+                    defaults['longitude'] = info.longitude
+                EmergencyService.objects.update_or_create(
+                    service_type='hall',
+                    defaults=defaults,
+                )
+            except Exception as _hall_err:
+                pass  # Non-fatal; don't block setup completion
 
             # Save Puroks
             from apps.residents.models import Purok

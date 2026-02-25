@@ -13,4 +13,5 @@ urlpatterns = [
 
     path('api/residents/', views.ResidentGeoJSONView.as_view(), name='resident_geojson'),
     path('api/emergency/', views.EmergencyServiceGeoJSONView.as_view(), name='emergency_service_geojson'),
+    path('api/refresh-blips/', views.RefreshBlipsView.as_view(), name='refresh_blips'),
 ]

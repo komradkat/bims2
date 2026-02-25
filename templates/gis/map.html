@@ -57,7 +57,7 @@
 
 {% block content %}
 {# Full height container #}
-<div class="-m-6 flex flex-col overflow-hidden" style="height: calc(100vh - 80px);">
+<div id="gis-root" class="-m-6 flex flex-col overflow-hidden" style="height: calc(100vh - 80px);">
     
     {# Header Bar #}
     <div class="bg-base-100 border-b border-base-300 px-6 py-3 flex justify-between items-center shrink-0 z-20 shadow-sm">
@@ -78,18 +78,73 @@
                 Manage Markers
             </button>
             {% endif %}
-            <div class="join">
-                <button id="layer-streets" onclick="updateLayer('streets')" class="btn btn-xs join-item btn-primary">Dark Maps</button>
-                <button id="layer-satellite" onclick="updateLayer('satellite')" class="btn btn-xs join-item btn-outline">Satellite</button>
-            </div>
             <button onclick="resetMapView()" class="btn btn-xs btn-ghost gap-1">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
                 Centre
             </button>
+            <button onclick="refreshBlips()" id="refresh-blips-btn" class="btn btn-xs btn-ghost gap-1" title="Refresh map markers">
+                <svg id="refresh-icon" xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                Refresh
+            </button>
+            <button onclick="toggleLayerPanel()" class="btn btn-xs btn-ghost gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                Layers
+            </button>
+            <button onclick="toggleFullscreen()" id="fullscreen-btn" class="btn btn-xs btn-ghost gap-1" title="Toggle fullscreen">
+                <svg id="fs-icon-expand" xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+                <svg id="fs-icon-compress" xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25"/></svg>
+                Fullscreen
+            </button>
         </div>
     </div>
 
-    {# No Coords Warning #}
+    {# ── Layer Picker Panel ── #}
+    <div id="layer-panel" class="hidden absolute top-4 right-4 z-30 w-64 bg-black/85 border border-white/10 backdrop-blur-md shadow-2xl rounded-lg overflow-hidden">
+        <div class="p-3 border-b border-white/10 bg-white/5 flex justify-between items-center">
+            <span class="text-[10px] font-black uppercase tracking-widest text-white">Map Layers</span>
+            <button onclick="toggleLayerPanel()" class="text-white/40 hover:text-white text-xs">✕</button>
+        </div>
+
+        {# Base Layers #}
+        <div class="p-3 border-b border-white/10">
+            <p class="text-[9px] uppercase tracking-widest text-white/40 mb-2">Base Layer</p>
+            <div class="space-y-1.5">
+                <button onclick="selectBase('dark')" id="base-dark" class="layer-base-btn w-full flex items-center gap-2 px-3 py-2 rounded text-xs text-white bg-primary/30 border border-primary/50">
+                    <span class="text-base">🌑</span> Dark (CARTO)
+                </button>
+                <button onclick="selectBase('satellite')" id="base-satellite" class="layer-base-btn w-full flex items-center gap-2 px-3 py-2 rounded text-xs text-white/60 hover:bg-white/10 border border-transparent">
+                    <span class="text-base">🛰️</span> Satellite (ESRI)
+                </button>
+                <button onclick="selectBase('topo')" id="base-topo" class="layer-base-btn w-full flex items-center gap-2 px-3 py-2 rounded text-xs text-white/60 hover:bg-white/10 border border-transparent">
+                    <span class="text-base">🏔️</span> Topographic (OSM)
+                </button>
+                <button onclick="selectBase('esritopo')" id="base-esritopo" class="layer-base-btn w-full flex items-center gap-2 px-3 py-2 rounded text-xs text-white/60 hover:bg-white/10 border border-transparent">
+                    <span class="text-base">🗺️</span> ESRI Topo Map
+                </button>
+            </div>
+        </div>
+
+        {# Overlay Layers #}
+        <div class="p-3">
+            <p class="text-[9px] uppercase tracking-widest text-white/40 mb-2">Overlays</p>
+            <div class="space-y-1.5">
+                <label class="flex items-center gap-2 px-3 py-2 rounded text-xs text-white/70 hover:bg-white/10 cursor-pointer">
+                    <input type="checkbox" id="overlay-relief" onchange="toggleOverlay('relief', this.checked)" class="checkbox checkbox-xs checkbox-primary" />
+                    <span class="text-base">🏞️</span> Shaded Relief
+                </label>
+                <label class="flex items-center gap-2 px-3 py-2 rounded text-xs text-white/70 hover:bg-white/10 cursor-pointer">
+                    <input type="checkbox" id="overlay-flood" onchange="toggleOverlay('flood', this.checked)" class="checkbox checkbox-xs checkbox-warning" />
+                    <span class="text-base">🌊</span> Flood Hazard (DOST)
+                </label>
+                <label class="flex items-center gap-2 px-3 py-2 rounded text-xs text-white/70 hover:bg-white/10 cursor-pointer">
+                    <input type="checkbox" id="overlay-landslide" onchange="toggleOverlay('landslide', this.checked)" class="checkbox checkbox-xs checkbox-error" />
+                    <span class="text-base">⛰️</span> Landslide Hazard (DOST)
+                </label>
+            </div>
+            <p class="text-[9px] text-white/25 mt-3 italic leading-tight">Hazard data © DOST-PAGASA/NOAH. May take a moment to load.</p>
+        </div>
+    </div>
+
     {% if not has_coords %}
     <div class="alert alert-warning rounded-none border-none py-2 px-6 flex justify-between shrink-0">
         <div class="flex items-center gap-2">
@@ -365,40 +420,119 @@
         fadeAnimation: true
     });
 
-    // ── Tile Layers ──
+    // ── Tile Layers ──────────────────────────────────────────────────────────
     const darkMap = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-        subdomains: 'abcd',
-        maxZoom: 20
+        subdomains: 'abcd', maxZoom: 20
     });
 
     const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
         attribution: 'Tiles &copy; Esri &mdash; Source: Esri, USDA, USGS, and the GIS User Community'
     });
 
+    const topoMap = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+        attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a>',
+        maxZoom: 17
+    });
+
+    const esriTopo = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ, TomTom, Intermap, iPC, USGS, FAO, NPS, NRCAN, GeoBase, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), and the GIS User Community'
+    });
+
+    // ── Overlay Layers ───────────────────────────────────────────────────────
+    const shadedRelief = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Shaded_Relief/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri &mdash; Source: Esri',
+        opacity: 0.4
+    });
+
+    // DOST Project NOAH / DREAM public WMS hazard overlays
+    const floodHazard = L.tileLayer.wms('https://geoserver.dream.upd.edu.ph/geoserver/ows', {
+        layers: 'ph_fhm',
+        format: 'image/png',
+        transparent: true,
+        opacity: 0.6,
+        attribution: '© DOST-DREAM/UP NOAH Center'
+    });
+
+    const landslideHazard = L.tileLayer.wms('https://geoserver.dream.upd.edu.ph/geoserver/ows', {
+        layers: 'ph_lhm',
+        format: 'image/png',
+        transparent: true,
+        opacity: 0.6,
+        attribution: '© DOST-DREAM/UP NOAH Center'
+    });
+
+    const baseLayers = { dark: darkMap, satellite, topo: topoMap, esritopo: esriTopo };
+    const overlays   = { relief: shadedRelief, flood: floodHazard, landslide: landslideHazard };
+    let activeBase   = 'dark';
+
     darkMap.on('tileload', () => {
         const loader = document.getElementById('map-loading');
-        if (loader) {
-            loader.style.opacity = '0';
-            setTimeout(() => loader.remove(), 500);
-        }
+        if (loader) { loader.style.opacity = '0'; setTimeout(() => loader.remove(), 500); }
     });
 
     darkMap.addTo(map);
 
-    function updateLayer(type) {
-        if (type === 'streets') {
-            map.removeLayer(satellite);
-            darkMap.addTo(map);
-            document.getElementById('layer-streets').className = 'btn btn-xs join-item btn-primary';
-            document.getElementById('layer-satellite').className = 'btn btn-xs join-item btn-outline';
-        } else {
-            map.removeLayer(darkMap);
-            satellite.addTo(map);
-            document.getElementById('layer-satellite').className = 'btn btn-xs join-item btn-primary';
-            document.getElementById('layer-streets').className = 'btn btn-xs join-item btn-outline';
+    function selectBase(name) {
+        if (name === activeBase) return;
+        map.removeLayer(baseLayers[activeBase]);
+        baseLayers[name].addTo(map);
+        baseLayers[name].bringToBack();
+        activeBase = name;
+        // Update button styles
+        document.querySelectorAll('.layer-base-btn').forEach(b => {
+            b.className = b.className
+                .replace('bg-primary/30 border-primary/50', '')
+                .replace('text-white', 'text-white/60')
+                .trim() + ' border border-transparent';
+        });
+        const active = document.getElementById('base-' + name);
+        if (active) {
+            active.className = active.className
+                .replace('text-white/60', 'text-white')
+                .replace('border border-transparent', '')
+                .trim() + ' bg-primary/30 border border-primary/50';
         }
     }
+
+    function toggleOverlay(name, on) {
+        if (on) { overlays[name].addTo(map); }
+        else    { map.removeLayer(overlays[name]); }
+    }
+
+    function toggleLayerPanel() {
+        document.getElementById('layer-panel').classList.toggle('hidden');
+    }
+
+    function toggleFullscreen() {
+        const el = document.getElementById('gis-root');
+        const expand  = document.getElementById('fs-icon-expand');
+        const compress = document.getElementById('fs-icon-compress');
+        if (!document.fullscreenElement) {
+            el.requestFullscreen().then(() => {
+                expand.classList.add('hidden');
+                compress.classList.remove('hidden');
+                setTimeout(() => map.invalidateSize(), 200);
+            }).catch(() => {});
+        } else {
+            document.exitFullscreen().then(() => {
+                expand.classList.remove('hidden');
+                compress.classList.add('hidden');
+                setTimeout(() => map.invalidateSize(), 200);
+            }).catch(() => {});
+        }
+    }
+
+    // Keep icon in sync if user presses Esc to exit fullscreen
+    document.addEventListener('fullscreenchange', () => {
+        const expand   = document.getElementById('fs-icon-expand');
+        const compress = document.getElementById('fs-icon-compress');
+        if (!document.fullscreenElement) {
+            expand.classList.remove('hidden');
+            compress.classList.add('hidden');
+        }
+        setTimeout(() => map.invalidateSize(), 200);
+    });
 
     function resetMapView() {
         map.flyTo([LAT, LNG], ZOOM, { duration: 1.5 });
@@ -518,44 +652,137 @@
         iconSize: [10,10], iconAnchor: [5,5]
     });
 
-    fetch('{% url "gis:resident_geojson" %}')
-        .then(r => r.json())
-        .then(data => {
-            L.geoJSON(data, {
-                pointToLayer: (f, latlng) => L.marker(latlng, {icon: residentIcon}),
-                onEachFeature: (f, layer) => {
-                    const p = f.properties;
-                    layer.bindPopup(`<div class="p-1"><div class="font-bold text-sm mb-1">${p.name}</div><div class="text-[10px] opacity-70">${p.address || ''}</div></div>`, { className: 'dynamic-popup' });
-                }
-            }).addTo(map);
-        });
+    // ── Blip layer tracking — so we can clear + reload ──────────────────
+    const blipLayers = [];
 
-    fetch('{% url "gis:emergency_service_geojson" %}')
+    function clearBlips() {
+        blipLayers.forEach(l => map.removeLayer(l));
+        blipLayers.length = 0;
+    }
+
+    function loadResidentBlips() {
+        return fetch('{% url "gis:resident_geojson" %}')
+            .then(r => r.json())
+            .then(data => {
+                const layer = L.geoJSON(data, {
+                    pointToLayer: (f, latlng) => L.marker(latlng, {icon: residentIcon}),
+                    onEachFeature: (f, layer) => {
+                        const p = f.properties;
+                        layer.bindPopup(`<div class="p-1"><div class="font-bold text-sm mb-1">${p.name}</div><div class="text-[10px] opacity-70">${p.address || ''}</div></div>`, { className: 'dynamic-popup' });
+                    }
+                }).addTo(map);
+                blipLayers.push(layer);
+            });
+    }
+
+    function loadEmergencyBlips() {
+        return fetch('{% url "gis:emergency_service_geojson" %}')
+            .then(r => r.json())
+            .then(data => {
+                const layer = L.geoJSON(data, {
+                    pointToLayer: (f, latlng) => L.marker(latlng, {icon: getEmergencyIcon(f)}),
+                    onEachFeature: (f, layer) => {
+                        const p = f.properties;
+                        const typeLabel = p.type.charAt(0).toUpperCase() + p.type.slice(1);
+                        layer.bindPopup(`
+                            <div class="max-w-[300px] w-fit min-w-[150px] p-2">
+                                <div class="text-[10px] uppercase tracking-wider font-bold opacity-50 mb-1">${typeLabel}</div>
+                                <div class="font-bold text-base mb-1 leading-tight">${p.name}</div>
+                                ${p.description ? `<div class="text-xs opacity-80 mb-3 italic">${p.description}</div>` : ''}
+                                <div class="space-y-1.5 pt-2 border-t border-base-content/10">
+                                    <div class="flex items-start gap-2"><span class="text-xs font-semibold">📞 ${p.contact || 'N/A'}</span></div>
+                                    <div class="flex items-start gap-2"><span class="text-[11px] opacity-70">📍 ${p.address || ''}</span></div>
+                                </div>
+                                {% if user.is_staff %}
+                                <div class="mt-3 pt-2 border-t border-base-content/10">
+                                    <a href="/gis/blips/${p.id}/edit/" class="btn btn-xs btn-ghost btn-block text-[10px]">Edit Blip</a>
+                                </div>
+                                {% endif %}
+                            </div>
+                        `, { maxWidth:320, className: 'dynamic-popup' });
+                    }
+                }).addTo(map);
+                blipLayers.push(layer);
+            });
+    }
+
+    function refreshBlips() {
+        const btn = document.getElementById('refresh-blips-btn');
+        const icon = document.getElementById('refresh-icon');
+        btn.disabled = true;
+        icon.style.transition = 'transform 1s linear';
+        icon.style.transform = 'rotate(360deg)';
+
+        // Keep spinning by re-triggering the rotation
+        const spinInterval = setInterval(() => {
+            icon.style.transition = 'none';
+            icon.style.transform = 'rotate(0deg)';
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    icon.style.transition = 'transform 1s linear';
+                    icon.style.transform = 'rotate(360deg)';
+                });
+            });
+        }, 1100);
+
+        // Step 1: Trigger backend OSM import
+        fetch('{% url "gis:refresh_blips" %}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json',
+            },
+        })
         .then(r => r.json())
-        .then(data => {
-            L.geoJSON(data, {
-                pointToLayer: (f, latlng) => L.marker(latlng, {icon: getEmergencyIcon(f)}),
-                onEachFeature: (f, layer) => {
-                    const p = f.properties;
-                    const typeLabel = p.type.charAt(0).toUpperCase() + p.type.slice(1);
-                    layer.bindPopup(`
-                        <div class="max-w-[300px] w-fit min-w-[150px] p-2">
-                            <div class="text-[10px] uppercase tracking-wider font-bold opacity-50 mb-1">${typeLabel}</div>
-                            <div class="font-bold text-base mb-1 leading-tight">${p.name}</div>
-                            ${p.description ? `<div class="text-xs opacity-80 mb-3 italic">${p.description}</div>` : ''}
-                            <div class="space-y-1.5 pt-2 border-t border-base-content/10">
-                                <div class="flex items-start gap-2"><span class="text-xs font-semibold">📞 ${p.contact || 'N/A'}</span></div>
-                                <div class="flex items-start gap-2"><span class="text-[11px] opacity-70">📍 ${p.address || ''}</span></div>
-                            </div>
-                            {% if user.is_staff %}
-                            <div class="mt-3 pt-2 border-t border-base-content/10">
-                                <a href="/gis/blips/${p.id}/edit/" class="btn btn-xs btn-ghost btn-block text-[10px]">Edit Blip</a>
-                            </div>
-                            {% endif %}
-                        </div>
-                    `, { maxWidth:320, className: 'dynamic-popup' });
-                }
-            }).addTo(map);
+        .then(() => {
+            // Step 2: Poll for new blips (import runs in background thread ~3-10s)
+            const prevCount = blipLayers.reduce((sum, l) => {
+                let n = 0;
+                try { l.eachLayer(() => n++); } catch(_) {}
+                return sum + n;
+            }, 0);
+
+            let polls = 0;
+            const maxPolls = 10; // 10 × 3s = 30s max wait
+
+            const pollInterval = setInterval(() => {
+                fetch('{% url "gis:emergency_service_geojson" %}')
+                    .then(r => r.json())
+                    .then(data => {
+                        polls++;
+                        const newCount = data.features ? data.features.length : 0;
+                        // Reload once we see more blips OR after 3 polls (9s) as a fallback
+                        if (newCount !== prevCount || polls >= 3) {
+                            clearInterval(pollInterval);
+                            clearInterval(spinInterval);
+                            clearBlips();
+                            loadResidentBlips();
+                            loadEmergencyBlips().then(() => {
+                                icon.style.transition = 'none';
+                                icon.style.transform = 'rotate(0deg)';
+                                btn.disabled = false;
+                            });
+                        }
+                        if (polls >= maxPolls) {
+                            clearInterval(pollInterval);
+                            clearInterval(spinInterval);
+                            btn.disabled = false;
+                            icon.style.transition = 'none';
+                            icon.style.transform = 'rotate(0deg)';
+                        }
+                    });
+            }, 3000);
+        })
+        .catch(() => {
+            clearInterval(spinInterval);
+            icon.style.transition = 'none';
+            icon.style.transform = 'rotate(0deg)';
+            btn.disabled = false;
         });
+    }
+
+    // Initial load
+    loadResidentBlips();
+    loadEmergencyBlips();
 </script>
 {% endblock %}
