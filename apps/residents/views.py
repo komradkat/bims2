@@ -79,6 +79,8 @@ class ResidentsListView(LoginRequiredMixin, NonBootstrapRequiredMixin, ListView)
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        from django.db.models import Count, Q
+        from datetime import date
         
         # Get formal puroks from the Purok model
         from .models import Purok
@@ -91,8 +93,44 @@ class ResidentsListView(LoginRequiredMixin, NonBootstrapRequiredMixin, ListView)
         context['age_min'] = self.request.GET.get('age_min', '')
         context['age_max'] = self.request.GET.get('age_max', '')
         
-        # Total residents count
-        context['total_residents'] = Resident.objects.filter(is_active=True).count()
+        # ── Demographic Dashboard Data ──────────────────────────
+        all_residents = Resident.objects.filter(is_active=True)
+        total_residents = all_residents.count()
+        context['total_residents'] = total_residents
+        
+        if total_residents > 0:
+            # Gender Breakdown
+            context['male_count'] = all_residents.filter(sex='M').count()
+            context['female_count'] = all_residents.filter(sex='F').count()
+            
+            # Sector Stats
+            context['senior_count'] = all_residents.filter(is_senior_citizen=True).count()
+            context['pwd_count'] = all_residents.filter(is_pwd=True).count()
+            context['solo_parent_count'] = all_residents.filter(is_solo_parent=True).count()
+            context['four_ps_count'] = all_residents.filter(is_4ps=True).count()
+            context['voter_count'] = all_residents.filter(is_voter=True).count()
+            
+            # Age Groups Breakdown
+            today = date.today()
+            # Age grouping logic (calculated from date_of_birth)
+            # Groups: 0-12 (Child), 13-19 (Youth), 20-59 (Adult), 60+ (Senior)
+            child_limit = date(today.year - 12, today.month, today.day)
+            youth_limit = date(today.year - 19, today.month, today.day)
+            adult_limit = date(today.year - 59, today.month, today.day)
+            
+            context['age_group_counts'] = {
+                'Children': all_residents.filter(date_of_birth__gt=child_limit).count(),
+                'Youth': all_residents.filter(date_of_birth__lte=child_limit, date_of_birth__gt=youth_limit).count(),
+                'Adults': all_residents.filter(date_of_birth__lte=youth_limit, date_of_birth__gt=adult_limit).count(),
+                'Seniors': all_residents.filter(date_of_birth__lte=adult_limit).count(),
+            }
+            
+            # Purok Distribution
+            purok_dist = all_residents.values('purok_link__name').annotate(count=Count('id')).order_by('-count')
+            context['purok_distribution'] = [
+                {'name': item['purok_link__name'] or 'Unknown', 'count': item['count']}
+                for item in purok_dist
+            ]
         
         return context
 

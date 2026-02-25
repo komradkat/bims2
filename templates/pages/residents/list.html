@@ -2,6 +2,110 @@
 
 {% block title %}Residents Masterlist{% endblock %}
 
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Theme Colors (Matching base.html oklch values)
+        const themeColor = 'rgba(58, 123, 213, 1)'; // Primary Blue (Approx)
+        const successColor = '#4ade80';
+        const infoColor = '#3b82f6';
+        const warningColor = '#facc15';
+        const secondaryColor = '#2dd4bf';
+        const textColor = '#a0aec0';
+
+        Chart.defaults.color = textColor;
+        Chart.defaults.font.family = "'Inter', sans-serif";
+
+        // 1. Gender Chart
+        new Chart(document.getElementById('genderChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Male', 'Female'],
+                datasets: [{
+                    data: [{{ male_count|default:0 }}, {{ female_count|default:0 }}],
+                    backgroundColor: [infoColor, '#ec4899'],
+                    borderWidth: 0,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '75%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { boxWidth: 10, padding: 20, font: { size: 11 }, usePointStyle: true }
+                    }
+                }
+            }
+        });
+
+        // 2. Age Group Chart
+        new Chart(document.getElementById('ageGroupChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Children', 'Youth', 'Adults', 'Seniors'],
+                datasets: [{
+                    label: 'Residents',
+                    data: [
+                        {{ age_group_counts.Children|default:0 }}, 
+                        {{ age_group_counts.Youth|default:0 }}, 
+                        {{ age_group_counts.Adults|default:0 }}, 
+                        {{ age_group_counts.Seniors|default:0 }}
+                    ],
+                    backgroundColor: themeColor,
+                    borderRadius: 6,
+                    maxBarThickness: 30
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { font: { size: 10 } } },
+                    x: { grid: { display: false }, ticks: { font: { size: 10 } } }
+                }
+            }
+        });
+
+        // 3. Purok Chart
+        const purokLabels = [];
+        const purokCounts = [];
+        {% for p in purok_distribution %}
+            purokLabels.push("{{ p.name }}");
+            purokCounts.push({{ p.count }});
+        {% endfor %}
+
+        new Chart(document.getElementById('purokChart'), {
+            type: 'bar',
+            data: {
+                labels: purokLabels,
+                datasets: [{
+                    label: 'Population',
+                    data: purokCounts,
+                    backgroundColor: secondaryColor,
+                    borderRadius: 4,
+                    maxBarThickness: 15
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { font: { size: 10 } } },
+                    y: { grid: { display: false }, ticks: { font: { size: 10 } } }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
+
 {% block content %}
 <div class="container mx-auto">
     {# Page Header #}
@@ -60,6 +164,86 @@
                     Search
                 </button>
             </form>
+        </div>
+    </div>
+
+    {# Demographic Breakdown #}
+    <div x-data="{ showCharts: true }" class="mb-8">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-bold flex items-center gap-2">
+                <i class="fas fa-chart-pie text-primary"></i>
+                Demographic Overview
+            </h2>
+            <button @click="showCharts = !showCharts" class="btn btn-ghost btn-xs">
+                <span x-text="showCharts ? 'Hide Charts' : 'Show Charts'"></span>
+            </button>
+        </div>
+
+        {# Sector Stat Tiles #}
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+            <div class="card bg-base-100 border-l-4 border-l-warning">
+                <div class="p-3">
+                    <div class="text-[10px] opacity-50 uppercase font-bold tracking-wider">Seniors</div>
+                    <div class="text-xl font-bold text-warning">{{ senior_count }}</div>
+                </div>
+            </div>
+            <div class="card bg-base-100 border-l-4 border-l-secondary">
+                <div class="p-3">
+                    <div class="text-[10px] opacity-50 uppercase font-bold tracking-wider">PWD</div>
+                    <div class="text-xl font-bold text-secondary">{{ pwd_count }}</div>
+                </div>
+            </div>
+            <div class="card bg-base-100 border-l-4 border-l-success">
+                <div class="p-3">
+                    <div class="text-[10px] opacity-50 uppercase font-bold tracking-wider">4Ps</div>
+                    <div class="text-xl font-bold text-success">{{ four_ps_count }}</div>
+                </div>
+            </div>
+            <div class="card bg-base-100 border-l-4 border-l-accent">
+                <div class="p-3">
+                    <div class="text-[10px] opacity-50 uppercase font-bold tracking-wider">Solo Parents</div>
+                    <div class="text-xl font-bold text-accent">{{ solo_parent_count }}</div>
+                </div>
+            </div>
+            <div class="card bg-base-100 border-l-4 border-l-info">
+                <div class="p-3">
+                    <div class="text-[10px] opacity-50 uppercase font-bold tracking-wider">Voters</div>
+                    <div class="text-xl font-bold text-info">{{ voter_count }}</div>
+                </div>
+            </div>
+        </div>
+
+        {# Charts Row #}
+        <div x-show="showCharts" x-transition class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {# Gender Distro #}
+            <div class="card bg-base-100 shadow-sm border border-base-200">
+                <div class="p-4">
+                    <h3 class="text-xs font-bold opacity-50 uppercase tracking-widest mb-4">Gender Distribution</h3>
+                    <div class="h-48">
+                        <canvas id="genderChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            {# Age Groups #}
+            <div class="card bg-base-100 shadow-sm border border-base-200">
+                <div class="p-4">
+                    <h3 class="text-xs font-bold opacity-50 uppercase tracking-widest mb-4">Age Groups</h3>
+                    <div class="h-48">
+                        <canvas id="ageGroupChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            {# Purok Distro #}
+            <div class="card bg-base-100 shadow-sm border border-base-200">
+                <div class="p-4">
+                    <h3 class="text-xs font-bold opacity-50 uppercase tracking-widest mb-4">Purok Population</h3>
+                    <div class="h-48">
+                        <canvas id="purokChart"></canvas>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
