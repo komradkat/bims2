@@ -4,9 +4,6 @@
 
 {% block extra_css %}
 <style>
-    .drawer-side, .navbar, .sticky { display: none !important; }
-    .drawer-content { margin: 0 !important; }
-
     main {
         display: flex;
         align-items: center;
@@ -71,8 +68,62 @@
     .login-brand .divider-line {
         width: 40px;
         height: 2px;
-        background: rgba(59,130,246,0.5);
+        background: rgba(255,255,255,0.2);
         border-radius: 2px;
+        margin: 1.5rem 0;
+    }
+
+    /* Footer in brand panel */
+    .login-footer {
+        margin-top: auto;
+        width: 100%;
+        padding-top: 1.5rem;
+        border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    .login-footer .links {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+    .login-footer a {
+        color: rgba(255,255,255,0.4);
+        text-decoration: none;
+        font-size: 0.65rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        transition: color 0.2s;
+    }
+    .login-footer a:hover { color: #fff; }
+    .login-footer .copyright {
+        color: rgba(255,255,255,0.3);
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        letter-spacing: -0.02em;
+        margin-bottom: 0.75rem;
+    }
+    .login-footer .badges {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    .login-footer .badge-custom {
+        display: inline-block;
+        font-size: 0.55rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        padding: 2px 6px;
+        border-radius: 4px;
+        background: rgba(255,255,255,0.1);
+        color: rgba(255,255,255,0.5);
+        border: 1px solid rgba(255,255,255,0.05);
+    }
+    .login-footer .badge-tier {
+        background: oklch(78% 0.16 78); /* Accent gold-ish */
+        color: oklch(20% 0.04 78);
     }
 
     /* Right panel — form */
@@ -181,14 +232,33 @@
 
     <!-- Brand panel -->
     <div class="login-brand">
-        {% if barangay_info.logo_url %}
-            <img src="{{ barangay_info.logo_url }}" alt="{{ barangay_info.name }}"/>
-        {% else %}
-            <div class="logo-placeholder">{{ barangay_info.name|slice:":1" }}</div>
-        {% endif %}
-        <div class="divider-line"></div>
-        <h1>{{ barangay_info.name }}</h1>
-        <p>Barangay Information<br>Management System</p>
+        <div class="flex-1 flex flex-col items-center justify-center">
+            {% if barangay_info.logo_url %}
+                <img src="{{ barangay_info.logo_url }}" alt="{{ barangay_info.name }}"/>
+            {% else %}
+                <div class="logo-placeholder">{{ barangay_info.name|slice:":1" }}</div>
+            {% endif %}
+            <div class="divider-line"></div>
+            <h1>{{ barangay_info.name }}</h1>
+            <p>Barangay Information<br>Management System</p>
+        </div>
+
+        <!-- Integrated Footer -->
+        <div class="login-footer">
+            <div class="links">
+                <a href="{% url 'core:about' %}">About</a>
+                <a href="{% url 'core:license_info' %}">License</a>
+                <a href="{% url 'core:privacy' %}">Privacy</a>
+                <a href="{% url 'core:terms' %}">Terms</a>
+            </div>
+            <div class="copyright">
+                © 2026 <strong>{{ barangay_info.name }}</strong>
+            </div>
+            <div class="badges">
+                <span class="badge-custom">v{{ system_version }}</span>
+                <span class="badge-custom badge-tier">{{ tier_info.name }}</span>
+            </div>
+        </div>
     </div>
 
     <!-- Form panel -->

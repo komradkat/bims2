@@ -6,6 +6,14 @@
 {% block content %}
 <div class="container mx-auto max-w-4xl py-12 px-4">
 
+    {# ── Navigation Back Button ── #}
+    <div class="mb-8">
+        <a href="{% if user.is_authenticated %}{% url 'core:dashboard' %}{% else %}{% url 'core:login' %}{% endif %}" class="btn btn-ghost btn-sm gap-2 opacity-50 hover:opacity-100 transition-opacity">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+            Back to {% if user.is_authenticated %}Dashboard{% else %}Sign In{% endif %}
+        </a>
+    </div>
+
     {# ── Hero Header ── #}
     <div class="text-center mb-12">
         <h1 class="text-4xl font-black tracking-tight mb-3">Privacy <span class="text-secondary">Policy</span></h1>

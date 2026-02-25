@@ -241,24 +241,24 @@
 
         /* ─── Layout Stability for Drawer (Prevents JIT Flash) ─── */
         @media (min-width: 1024px) {
-            .drawer {
+            .drawer.lg\:drawer-open {
                 display: grid !important;
                 grid-template-columns: 20rem 1fr !important;
             }
-            .drawer-side {
+            .drawer.lg\:drawer-open .drawer-side {
                 grid-column-start: 1 !important;
                 width: 20rem !important;
                 display: block !important;
                 position: relative !important;
                 height: 100% !important;
             }
-            .drawer-content {
+            .drawer.lg\:drawer-open .drawer-content {
                 grid-column-start: 2 !important;
                 width: auto !important;
                 display: flex !important;
                 flex-direction: column !important;
             }
-            .drawer-toggle ~ .drawer-content {
+            .drawer.lg\:drawer-open .drawer-toggle ~ .drawer-content {
                 margin-left: 0 !important;
             }
         }
@@ -278,15 +278,17 @@
 
 <div class="flex flex-col h-screen">
   {# Top Navigation Bar - Fixed at top #}
+  {% if user.is_authenticated %}
   <div class="sticky top-0 z-30">
     {% include 'partials/topbar.html' %}
   </div>
+  {% endif %}
   
   {# Messages/Toasts #}
   {% include 'partials/messages.html' %}
 
   {# Main Content Area with Drawer (Sidebar) #}
-  <div class="drawer lg:drawer-open flex-1 overflow-hidden">
+  <div class="drawer {% if user.is_authenticated %}lg:drawer-open{% endif %} flex-1 overflow-hidden">
     <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
     
     {# Main Content - Scrollable #}
@@ -300,7 +302,9 @@
     </div> 
     
     {# Sidebar - Fixed and scrollable #}
+    {% if user.is_authenticated %}
     {% include 'partials/sidebar.html' %}
+    {% endif %}
   </div>
 </div>
 

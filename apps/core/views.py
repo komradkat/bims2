@@ -453,7 +453,7 @@ class LicenseActivationView(LoginRequiredMixin, View):
             return redirect('core:license_activation')
 
 
-class LicenseInfoView(LoginRequiredMixin, TemplateView):
+class LicenseInfoView(TemplateView):
     """View to display detailed license and hardware information"""
     template_name = 'auth/license_info.html'
     
@@ -763,13 +763,13 @@ class OfficialDeleteView(LoginRequiredMixin, View):
 
 # ── Informational Pages ──────────────────────────────────────────────────
 
-class AboutView(LoginRequiredMixin, TemplateView):
+class AboutView(TemplateView):
     template_name = 'pages/info/about.html'
 
-class PrivacyView(LoginRequiredMixin, TemplateView):
+class PrivacyView(TemplateView):
     template_name = 'pages/info/privacy.html'
 
-class TermsView(LoginRequiredMixin, TemplateView):
+class TermsView(TemplateView):
     template_name = 'pages/info/terms.html'
 
 class ProfileView(LoginRequiredMixin, View):
