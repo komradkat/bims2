@@ -8,7 +8,7 @@ from django.contrib.auth import get_user_model, update_session_auth_hash
 from django.urls import reverse_lazy, reverse
 from django.contrib import messages
 from django.core.cache import cache
-from django.db.models import Sum, Q
+from django.db.models import Sum, Q, Count
 from django.utils import timezone
 from django.utils.safestring import mark_safe
 from datetime import timedelta
@@ -19,7 +19,7 @@ from .models import Notification
 from apps.residents.models import Resident
 from apps.certificates.models import Certificate
 from apps.blotter.models import BlotterCase, Hearing
-from apps.business.models import BusinessClearance
+from apps.business.models import BusinessClearance, BusinessPermit
 from apps.finance.models import OfficialReceipt
 
 # Custom Login
@@ -202,117 +202,129 @@ class UserUpdateView(LoginRequiredMixin, UpdateView):
 class DashboardView(LoginRequiredMixin, TemplateView):
     """Dashboard view with real data"""
     template_name = 'pages/dashboard.html'
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         today = timezone.now().date()
-        
-        # Stats
-        total_residents = Resident.objects.filter(is_active=True).count()
-        documents_issued = Certificate.objects.filter(status='issued').count()
-        
-        # Revenue: Sum of OfficialReceipts + BusinessClearances (if not in OR) + Certificates (if not in OR)
-        # For simplicity, assuming all revenue is tracked in OfficialReceipt if we enforced it,
-        # Let's sum OfficialReceipts for now as it's the intended source of truth for Finance.
-        # If BusinessClearance creates an OR, it should be there.
-        # In my BusinessCreateView, I created BusinessClearance but not OfficialReceipt explicitly in Finance app.
-        # But BusinessClearance has 'amount_paid'.
-        
-        # Revenue Calculation (Pro/Ultra feature optimization)
-        total_revenue = 0
-        license_tier = getattr(self.request, 'license', {}).get('tier', 'community')
-        
-        if license_tier in ['pro', 'ultra']:
-            revenue_or = OfficialReceipt.objects.filter(status='paid').aggregate(Sum('amount'))['amount__sum'] or 0
-            revenue_biz = BusinessClearance.objects.aggregate(Sum('amount_paid'))['amount_paid__sum'] or 0
-            revenue_cert = Certificate.objects.filter(status='paid').aggregate(Sum('amount_paid'))['amount_paid__sum'] or 0
-            total_revenue = revenue_or + revenue_biz + revenue_cert
-        
-        active_cases = BlotterCase.objects.exclude(status__in=['settled', 'dismissed', 'cfa']).count()
-        
-        context['stats'] = {
-            'total_residents': total_residents,
-            'documents_issued': documents_issued,
-            'total_revenue': total_revenue,
-            'active_cases': active_cases,
-        }
-        
-        # Recent Certificates
-        recent_certs = Certificate.objects.select_related('resident', 'certificate_type').order_by('-created_at')[:5]
-        context['recent_certificates'] = [
-            {
-                'recipient': c.resident.full_name,
-                'type': c.certificate_type.name,
-                'date': c.created_at,
-                'status': c.get_status_display(),
-            } for c in recent_certs
-        ]
-        
-        # Urgent Blotter Cases (Hearings scheduled for today/tomorrow)
         tomorrow = today + timedelta(days=1)
+        this_month_start = today.replace(day=1)
+
+        # ── Residents ────────────────────────────────────────────────
+        residents_qs = Resident.objects.filter(is_active=True)
+        total_residents  = residents_qs.count()
+        male_count       = residents_qs.filter(sex='M').count()
+        female_count     = residents_qs.filter(sex='F').count()
+        senior_count     = residents_qs.filter(is_senior_citizen=True).count()
+        pwd_count        = residents_qs.filter(is_pwd=True).count()
+        fourps_count     = residents_qs.filter(is_4ps=True).count()
+        solo_parent_count = residents_qs.filter(is_solo_parent=True).count()
+        voter_count      = residents_qs.filter(is_voter=True).count()
+        new_this_month   = residents_qs.filter(created_at__date__gte=this_month_start).count()
+
+        # ── Certificates ─────────────────────────────────────────────
+        from apps.certificates.models import CertificateType
+        total_certs   = Certificate.objects.count()
+        issued_certs  = Certificate.objects.filter(status='issued').count()
+        pending_certs = Certificate.objects.filter(status='pending').count()
+        certs_this_month = Certificate.objects.filter(created_at__date__gte=this_month_start).count()
+        cert_by_type = list(
+            Certificate.objects.values('certificate_type__name')
+            .annotate(count=Count('id'))
+            .order_by('-count')
+        )
+        recent_certs = Certificate.objects.select_related('resident', 'certificate_type').order_by('-created_at')[:6]
+
+        # ── Blotter ──────────────────────────────────────────────────
+        total_cases    = BlotterCase.objects.count()
+        active_cases   = BlotterCase.objects.exclude(status__in=['settled', 'dismissed', 'cfa']).count()
+        pending_cases  = BlotterCase.objects.filter(status='pending').count()
+        ongoing_cases  = BlotterCase.objects.filter(status='ongoing').count()
+        settled_cases  = BlotterCase.objects.filter(status='settled').count()
+        dismissed_cases = BlotterCase.objects.filter(status='dismissed').count()
         upcoming_hearings = Hearing.objects.filter(
             scheduled_at__date__gte=today,
-            scheduled_at__date__lte=tomorrow,
+            scheduled_at__date__lte=today + timedelta(days=7),
             status='scheduled'
         ).select_related('case').order_by('scheduled_at')[:5]
-        
-        context['urgent_cases'] = [
+
+        # ── Business ─────────────────────────────────────────────────
+        license_tier = getattr(self.request, 'license', {}).get('tier', 'community')
+        total_permits      = BusinessPermit.objects.count()
+        active_permits     = BusinessPermit.objects.filter(status='active').count()
+        pending_permits    = BusinessPermit.objects.filter(status='pending').count()
+        expired_permits    = BusinessPermit.objects.filter(status='expired').count()
+        recent_permits     = BusinessPermit.objects.order_by('-created_at')[:5]
+
+        # ── Finance ──────────────────────────────────────────────────
+        total_revenue = 0
+        ytd_receipts  = 0
+        if license_tier in ['pro', 'ultra']:
+            revenue_or   = OfficialReceipt.objects.filter(status='paid').aggregate(s=Sum('amount'))['s'] or 0
+            revenue_biz  = BusinessClearance.objects.aggregate(s=Sum('amount_paid'))['s'] or 0
+            revenue_cert = Certificate.objects.filter(status='paid').aggregate(s=Sum('amount_paid'))['s'] or 0
+            total_revenue = revenue_or + revenue_biz + revenue_cert
+            ytd_receipts  = OfficialReceipt.objects.filter(
+                status='paid', date__year=today.year
+            ).count()
+
+        # ── Recent System Activity ────────────────────────────────────
+        from apps.audit.models import SystemLog
+        recent_logs = SystemLog.objects.select_related('user').order_by('-timestamp')[:8]
+
+        # ── Upcoming hearings for dashboard ──────────────────────────
+        upcoming_cases_ctx = [
             {
-                'priority_number': idx + 1,
-                'priority_color': 'error' if h.scheduled_at.date() == today else 'warning',
-                'title': h.case.case_number,
-                'description': f"{h.case.get_incident_type_display()} - {h.remarks}",
-                'schedule': h.scheduled_at,
-            } for idx, h in enumerate(upcoming_hearings)
-        ]
-        
-        # Activity Logs (from Audit/History)
-        from django.apps import apps
-        
-        models_to_track = [
-            ('residents', 'Resident'),
-            ('certificates', 'Certificate'),
-            ('blotter', 'BlotterCase'),
-            ('business', 'BusinessPermit'),
+                'color':    'error' if h.scheduled_at.date() == today else 'warning',
+                'number':   h.case.case_number,
+                'type':     h.case.get_incident_type_display(),
+                'date':     h.scheduled_at,
+                'today':    h.scheduled_at.date() == today,
+            } for h in upcoming_hearings
         ]
 
-        activities = []
-        for app_label, model_name in models_to_track:
-            try:
-                model = apps.get_model(app_label, model_name)
-                if hasattr(model, 'history'):
-                    # Fix N+1 by selecting history_user
-                    records = model.history.select_related('history_user').all().order_by('-history_date')[:5]
-                    for record in records:
-                        action_map = {'+': 'Created', '~': 'Updated', '-': 'Deleted'}
-                        action = action_map.get(record.history_type, 'Unknown')
-
-                        activities.append({
-                            'time': record.history_date,
-                            'activity': f"{action} {model_name}: {str(record)}",
-                            'user': record.history_user.username if record.history_user else 'System',
-                            'status': 'Completed'
-                        })
-            except LookupError:
-                continue
-
-        activities.sort(key=lambda x: x['time'], reverse=True)
-        activities = activities[:5]
-
-        context['activity_headers'] = ['Time', 'Activity', 'User', 'Status']
-        context['activity_rows'] = [
-            {
-                'cells': [
-                    a['time'],
-                    a['activity'],
-                    a['user'],
-                    a['status']
-                ],
-                'status_class': 'badge-success' if a['status'] == 'Completed' else 'badge-ghost'
-            } for a in activities
-        ]
-        
+        # ── Build context ─────────────────────────────────────────────
+        context.update({
+            # Resident stats
+            'total_residents':    total_residents,
+            'male_count':         male_count,
+            'female_count':       female_count,
+            'senior_count':       senior_count,
+            'pwd_count':          pwd_count,
+            'fourps_count':       fourps_count,
+            'solo_parent_count':  solo_parent_count,
+            'voter_count':        voter_count,
+            'new_this_month':     new_this_month,
+            # Certificate stats
+            'total_certs':        total_certs,
+            'issued_certs':       issued_certs,
+            'pending_certs':      pending_certs,
+            'certs_this_month':   certs_this_month,
+            'cert_by_type':       cert_by_type,
+            'recent_certs':       recent_certs,
+            # Blotter stats
+            'total_cases':        total_cases,
+            'active_cases':       active_cases,
+            'pending_cases':      pending_cases,
+            'ongoing_cases':      ongoing_cases,
+            'settled_cases':      settled_cases,
+            'dismissed_cases':    dismissed_cases,
+            'upcoming_cases':     upcoming_cases_ctx,
+            # Business stats
+            'total_permits':      total_permits,
+            'active_permits':     active_permits,
+            'pending_permits':    pending_permits,
+            'expired_permits':    expired_permits,
+            'recent_permits':     recent_permits,
+            # Finance
+            'total_revenue':      total_revenue,
+            'ytd_receipts':       ytd_receipts,
+            # Activity
+            'recent_logs':        recent_logs,
+            # Convenience
+            'today':              today,
+        })
         return context
+
 
 @method_decorator(role_required(['admin']), name='dispatch')
 class SettingsView(LoginRequiredMixin, View):

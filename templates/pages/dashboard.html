@@ -3,148 +3,355 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-<div class="container mx-auto">
-    <h1 class="text-3xl font-bold mb-6">Dashboard</h1>
-    
-    {# Stats Cards using Component #}
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {% include 'components/stat_card.html' with title="Total Residents" value=stats.total_residents icon="users" color="primary" description="↗︎ 14 new this month" %}
-        {% include 'components/stat_card.html' with title="Documents Issued" value=stats.documents_issued icon="document" color="secondary" description="This week" %}
-        
-        {% if tier_info.features.finance or tier_info.features.business %}
-        {% include 'components/stat_card.html' with title="Revenue (YTD)" value=stats.total_revenue|default:0 icon="money" color="accent" description="Est. from transactions" %}
-        {% endif %}
+<div class="container mx-auto space-y-6">
 
-        {% include 'components/stat_card.html' with title="Pending Incidents" value=stats.active_cases icon="case" color="warning" description="Requires attention" %}
+    {# ── Page header ───────────────────────────── #}
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold">Dashboard</h1>
+            <p class="text-sm text-base-content/50 mt-0.5">Overview of barangay operations</p>
+        </div>
+        <div class="badge badge-outline text-xs">{{ today|date:"l, F j, Y" }}</div>
     </div>
 
-    {# Quick Actions #}
-    <div class="mb-8">
-        <h2 class="text-xl font-bold mb-4">Quick Actions</h2>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <a href="{% url 'residents:add' %}" class="btn btn-primary h-auto py-4 flex flex-col items-center gap-2 text-white border-none shadow-md hover:scale-105 transition-transform">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg>
-                New Resident
+    {# ── Top KPI row ───────────────────────────── #}
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {# Residents #}
+        <div class="card bg-primary text-primary-content shadow">
+            <div class="card-body p-4">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold uppercase tracking-widest opacity-70">Residents</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                </div>
+                <div class="text-4xl font-bold mt-1">{{ total_residents }}</div>
+                <div class="text-xs opacity-70 mt-1">+{{ new_this_month }} this month</div>
+            </div>
+        </div>
+
+        {# Certificates #}
+        <div class="card bg-secondary text-secondary-content shadow">
+            <div class="card-body p-4">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold uppercase tracking-widest opacity-70">Certificates</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                </div>
+                <div class="text-4xl font-bold mt-1">{{ total_certs }}</div>
+                <div class="text-xs opacity-70 mt-1">{{ issued_certs }} issued · {{ pending_certs }} pending</div>
+            </div>
+        </div>
+
+        {# Blotter #}
+        <div class="card bg-warning text-warning-content shadow">
+            <div class="card-body p-4">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold uppercase tracking-widest opacity-70">Blotter Cases</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                </div>
+                <div class="text-4xl font-bold mt-1">{{ total_cases }}</div>
+                <div class="text-xs opacity-70 mt-1">{{ active_cases }} active · {{ settled_cases }} settled</div>
+            </div>
+        </div>
+
+        {# Business / Revenue #}
+        {% if tier_info.features.business or tier_info.features.finance %}
+        <div class="card bg-accent text-accent-content shadow">
+            <div class="card-body p-4">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold uppercase tracking-widest opacity-70">Business Permits</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                </div>
+                <div class="text-4xl font-bold mt-1">{{ total_permits }}</div>
+                <div class="text-xs opacity-70 mt-1">{{ active_permits }} active · {{ pending_permits }} pending</div>
+            </div>
+        </div>
+        {% else %}
+        <div class="card bg-neutral text-neutral-content shadow">
+            <div class="card-body p-4">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold uppercase tracking-widest opacity-70">Business</span>
+                </div>
+                <div class="text-sm font-medium mt-3 opacity-60">Upgrade to Pro/Ultra to enable</div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    {# ── Quick Actions ─────────────────────────── #}
+    <div>
+        <h2 class="text-sm font-semibold uppercase tracking-widest opacity-50 mb-3">Quick Actions</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <a href="{% url 'residents:add' %}" class="btn btn-primary h-auto py-3 flex flex-col items-center gap-1.5 border-none shadow hover:scale-105 transition-transform">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
+                <span class="text-xs font-semibold">New Resident</span>
             </a>
-            <a href="{% url 'certificates:center' %}" class="btn btn-secondary h-auto py-4 flex flex-col items-center gap-2 text-white border-none shadow-md hover:scale-105 transition-transform">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                Issue Certificate
+            <a href="{% url 'certificates:center' %}" class="btn btn-secondary h-auto py-3 flex flex-col items-center gap-1.5 border-none shadow hover:scale-105 transition-transform">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                <span class="text-xs font-semibold">Issue Certificate</span>
             </a>
-            <a href="{% url 'blotter:list' %}" class="btn btn-warning h-auto py-4 flex flex-col items-center gap-2 text-warning-content border-none shadow-md hover:scale-105 transition-transform">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-                New Blotter
+            <a href="{% url 'blotter:add' %}" class="btn btn-warning h-auto py-3 flex flex-col items-center gap-1.5 border-none shadow hover:scale-105 transition-transform">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                <span class="text-xs font-semibold">New Blotter</span>
             </a>
             {% if tier_info.features.business %}
-            <a href="{% url 'business:list' %}" class="btn btn-accent h-auto py-4 flex flex-col items-center gap-2 text-accent-content border-none shadow-md hover:scale-105 transition-transform">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                Renew Permit
+            <a href="{% url 'business:add' %}" class="btn btn-accent h-auto py-3 flex flex-col items-center gap-1.5 border-none shadow hover:scale-105 transition-transform">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span class="text-xs font-semibold">New Permit</span>
             </a>
             {% endif %}
         </div>
     </div>
 
-    {# Two Column Layout: Recent Certificates & Urgent Blotter Cases #}
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        {# Recent Certificates #}
-        <div class="card bg-base-100 shadow-sm border border-base-200 static-card">
-            <div class="card-body">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="card-title text-lg">Recent Certificates</h2>
-                    <span class="badge badge-sm badge-primary">Latest</span>
+    {# ── Resident Demographics ──────────────────── #}
+    <div class="card bg-base-100 border border-base-200 shadow-sm">
+        <div class="card-body p-4">
+            <div class="flex justify-between items-center mb-3">
+                <h2 class="card-title text-base">Resident Demographics</h2>
+                <a href="{% url 'residents:list' %}" class="link link-primary text-xs">View All</a>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 text-center">
+                <div class="bg-base-200/60 rounded-lg p-3">
+                    <div class="text-2xl font-bold text-primary">{{ male_count }}</div>
+                    <div class="text-[10px] uppercase tracking-widest opacity-60 mt-0.5">Male</div>
                 </div>
-                
+                <div class="bg-base-200/60 rounded-lg p-3">
+                    <div class="text-2xl font-bold text-secondary">{{ female_count }}</div>
+                    <div class="text-[10px] uppercase tracking-widest opacity-60 mt-0.5">Female</div>
+                </div>
+                <div class="bg-base-200/60 rounded-lg p-3">
+                    <div class="text-2xl font-bold text-info">{{ senior_count }}</div>
+                    <div class="text-[10px] uppercase tracking-widest opacity-60 mt-0.5">Senior</div>
+                </div>
+                <div class="bg-base-200/60 rounded-lg p-3">
+                    <div class="text-2xl font-bold text-success">{{ pwd_count }}</div>
+                    <div class="text-[10px] uppercase tracking-widest opacity-60 mt-0.5">PWD</div>
+                </div>
+                <div class="bg-base-200/60 rounded-lg p-3">
+                    <div class="text-2xl font-bold text-warning">{{ fourps_count }}</div>
+                    <div class="text-[10px] uppercase tracking-widest opacity-60 mt-0.5">4Ps</div>
+                </div>
+                <div class="bg-base-200/60 rounded-lg p-3">
+                    <div class="text-2xl font-bold text-error">{{ solo_parent_count }}</div>
+                    <div class="text-[10px] uppercase tracking-widest opacity-60 mt-0.5">Solo Parent</div>
+                </div>
+                <div class="bg-base-200/60 rounded-lg p-3">
+                    <div class="text-2xl font-bold text-accent">{{ voter_count }}</div>
+                    <div class="text-[10px] uppercase tracking-widest opacity-60 mt-0.5">Registered Voters</div>
+                </div>
+                <div class="bg-primary/10 rounded-lg p-3">
+                    <div class="text-2xl font-bold text-primary">{{ new_this_month }}</div>
+                    <div class="text-[10px] uppercase tracking-widest opacity-60 mt-0.5">New This Month</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# ── Module Summary Row ────────────────────── #}
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+        {# Blotter Status #}
+        <div class="card bg-base-100 border border-base-200 shadow-sm">
+            <div class="card-body p-4">
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="card-title text-base">Blotter Cases</h2>
+                    <a href="{% url 'blotter:list' %}" class="link link-primary text-xs">View All</a>
+                </div>
+                <div class="space-y-2">
+                    <div class="flex justify-between text-sm">
+                        <span class="opacity-60">Pending</span>
+                        <span class="font-semibold badge badge-warning badge-sm">{{ pending_cases }}</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="opacity-60">Ongoing</span>
+                        <span class="font-semibold badge badge-error badge-sm">{{ ongoing_cases }}</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="opacity-60">Settled</span>
+                        <span class="font-semibold badge badge-success badge-sm">{{ settled_cases }}</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="opacity-60">Dismissed</span>
+                        <span class="font-semibold badge badge-ghost badge-sm">{{ dismissed_cases }}</span>
+                    </div>
+                </div>
+                {% if upcoming_cases %}
+                <div class="divider my-2 text-xs opacity-40">Upcoming Hearings (7 days)</div>
+                <div class="space-y-2">
+                    {% for h in upcoming_cases %}
+                    <div class="flex items-start gap-2">
+                        <div class="badge badge-{{ h.color }} badge-xs mt-1 shrink-0">{% if h.today %}TODAY{% else %}SOON{% endif %}</div>
+                        <div class="text-xs">
+                            <div class="font-medium">{{ h.number }}</div>
+                            <div class="opacity-50">{{ h.type }} · {{ h.date|date:"M j, g:i A" }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {# Certificate breakdown #}
+        <div class="card bg-base-100 border border-base-200 shadow-sm">
+            <div class="card-body p-4">
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="card-title text-base">Certificates</h2>
+                    <a href="{% url 'certificates:list' %}" class="link link-primary text-xs">View All</a>
+                </div>
+                <div class="flex gap-6 mb-3">
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-success">{{ issued_certs }}</div>
+                        <div class="text-[10px] opacity-50 uppercase tracking-widest">Issued</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-warning">{{ pending_certs }}</div>
+                        <div class="text-[10px] opacity-50 uppercase tracking-widest">Pending</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-info">{{ certs_this_month }}</div>
+                        <div class="text-[10px] opacity-50 uppercase tracking-widest">This Month</div>
+                    </div>
+                </div>
+                {% if cert_by_type %}
+                <div class="divider my-1 text-xs opacity-40">By Type</div>
+                <div class="space-y-1.5">
+                    {% for ct in cert_by_type %}
+                    <div class="flex justify-between text-xs">
+                        <span class="opacity-70 truncate max-w-[75%]">{{ ct.certificate_type__name }}</span>
+                        <span class="font-bold">{{ ct.count }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {# Business / Finance #}
+        {% if tier_info.features.business or tier_info.features.finance %}
+        <div class="card bg-base-100 border border-base-200 shadow-sm">
+            <div class="card-body p-4">
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="card-title text-base">Business & Finance</h2>
+                    <a href="{% url 'business:list' %}" class="link link-primary text-xs">View All</a>
+                </div>
+                <div class="flex gap-6 mb-3">
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-success">{{ active_permits }}</div>
+                        <div class="text-[10px] opacity-50 uppercase tracking-widest">Active</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-warning">{{ pending_permits }}</div>
+                        <div class="text-[10px] opacity-50 uppercase tracking-widest">Pending</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-error">{{ expired_permits }}</div>
+                        <div class="text-[10px] opacity-50 uppercase tracking-widest">Expired</div>
+                    </div>
+                </div>
+                {% if tier_info.features.finance %}
+                <div class="divider my-1 text-xs opacity-40">Revenue</div>
+                <div class="flex justify-between items-center text-sm">
+                    <span class="opacity-60">Total Revenue</span>
+                    <span class="font-bold text-success">₱{{ total_revenue|floatformat:2 }}</span>
+                </div>
+                {% endif %}
+                {% if recent_permits %}
+                <div class="divider my-1 text-xs opacity-40">Recent Permits</div>
+                <div class="space-y-1.5">
+                    {% for p in recent_permits %}
+                    <div class="flex justify-between text-xs">
+                        <span class="opacity-70 truncate max-w-[75%]">{{ p.owner_name }}</span>
+                        <span class="badge badge-sm
+                            {% if p.status == 'active' %}badge-success
+                            {% elif p.status == 'pending' %}badge-warning
+                            {% else %}badge-ghost{% endif %}">{{ p.get_status_display }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    {# ── Recent Certificates + Activity Feed ────── #}
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+        {# Recent Certificates #}
+        <div class="card bg-base-100 border border-base-200 shadow-sm">
+            <div class="card-body p-4">
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="card-title text-base">Recent Certificates</h2>
+                    <a href="{% url 'certificates:list' %}" class="link link-primary text-xs">View All</a>
+                </div>
+                {% if recent_certs %}
                 <div class="overflow-x-auto">
-                    <table class="table table-sm">
+                    <table class="table table-xs">
                         <thead>
-                            <tr class="text-xs text-base-content/60">
+                            <tr class="text-base-content/50">
                                 <th>Recipient</th>
                                 <th>Type</th>
-                                <th>Date</th>
                                 <th>Status</th>
+                                <th>Date</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for cert in recent_certificates %}
+                            {% for c in recent_certs %}
                             <tr>
-                                <td class="font-medium">{{ cert.recipient }}</td>
-                                <td class="text-sm text-base-content/70">{{ cert.type }}</td>
-                                <td class="text-sm text-base-content/70">{{ cert.date }}</td>
+                                <td class="font-medium max-w-[120px] truncate">{{ c.resident.full_name }}</td>
+                                <td class="text-xs opacity-70 max-w-[100px] truncate">{{ c.certificate_type.name }}</td>
                                 <td>
-                                    <span class="badge badge-success badge-sm">{{ cert.status }}</span>
+                                    <span class="badge badge-xs
+                                        {% if c.status == 'issued' %}badge-success
+                                        {% elif c.status == 'pending' %}badge-warning
+                                        {% else %}badge-ghost{% endif %}">
+                                        {{ c.get_status_display }}
+                                    </span>
                                 </td>
+                                <td class="text-xs opacity-50">{{ c.created_at|date:"M j" }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
                     </table>
                 </div>
-                
-                <div class="card-actions justify-end mt-4">
-                    <a href="{% url 'certificates:list' %}" class="link link-primary text-sm">View All Certificates</a>
-                </div>
+                {% else %}
+                <p class="text-sm opacity-50 text-center py-4">No certificates yet.</p>
+                {% endif %}
             </div>
         </div>
 
-        {# Urgent Blotter Cases #}
-        <div class="card bg-base-100 shadow-sm border border-base-200 static-card">
-            <div class="card-body">
-                <h2 class="card-title text-lg text-error mb-4">Urgent Blotter Cases</h2>
-                
-                <div class="space-y-4">
-                    {% for case in urgent_cases %}
-                    <div class="flex gap-3">
-                        <div class="avatar placeholder">
-                            <div class="bg-{{ case.priority_color }} text-white rounded-full w-10 h-10">
-                                <span class="text-lg font-bold">{{ case.priority_number }}</span>
-                            </div>
+        {# Recent System Activity #}
+        <div class="card bg-base-100 border border-base-200 shadow-sm">
+            <div class="card-body p-4">
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="card-title text-base">Recent Activity</h2>
+                    <a href="{% url 'audit:logs' %}" class="link link-primary text-xs">Audit Logs</a>
+                </div>
+                {% if recent_logs %}
+                <div class="space-y-2 max-h-64 overflow-y-auto">
+                    {% for log in recent_logs %}
+                    <div class="flex gap-3 items-start text-xs">
+                        <div class="shrink-0 mt-0.5">
+                            <span class="badge badge-xs
+                                {% if log.level == 'critical' or log.level == 'error' %}badge-error
+                                {% elif log.level == 'warning' %}badge-warning
+                                {% elif log.level == 'info' %}badge-info
+                                {% else %}badge-ghost{% endif %}">
+                                {{ log.level|upper|default:"LOG" }}
+                            </span>
                         </div>
-                        <div class="flex-1">
-                            <div class="font-semibold text-sm">{{ case.title }}</div>
-                            <div class="text-xs text-base-content/60">{{ case.description }}</div>
-                        </div>
-                        <div class="text-right text-xs text-base-content/60">
-                            {{ case.schedule }}
+                        <div class="flex-1 min-w-0">
+                            <div class="font-medium truncate">{{ log.action }}</div>
+                            <div class="opacity-50">{{ log.user.username|default:"System" }} · {{ log.timestamp|date:"M j, g:i A" }}</div>
                         </div>
                     </div>
                     {% endfor %}
                 </div>
-                
-                <div class="card-actions justify-end mt-4">
-                    <a href="{% url 'blotter:list' %}" class="btn btn-sm btn-outline">Go to Blotter</a>
-                </div>
+                {% else %}
+                <p class="text-sm opacity-50 text-center py-4">No recent activity.</p>
+                {% endif %}
             </div>
         </div>
     </div>
 
-    <div class="card bg-base-100 shadow-sm border border-base-200">
-        <div class="card-body">
-            <h2 class="card-title text-xl mb-4">Recent Activity</h2>
-            <div class="overflow-x-auto">
-                <table class="table table-sm">
-                    <thead>
-                        <tr>
-                            {% for header in activity_headers %}
-                            <th>{{ header }}</th>
-                            {% endfor %}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for row in activity_rows %}
-                        <tr>
-                            {% for cell in row.cells %}
-                            <td>
-                                {% if forloop.last %}
-                                    <span class="badge {{ row.status_class }} badge-sm">{{ cell }}</span>
-                                {% else %}
-                                    {{ cell }}
-                                {% endif %}
-                            </td>
-                            {% endfor %}
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
 </div>
 {% endblock %}
