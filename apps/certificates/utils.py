@@ -5,7 +5,12 @@ import os
 from io import BytesIO
 from django.conf import settings
 from django.template.loader import render_to_string
-import weasyprint
+try:
+    import weasyprint
+    WEASYPRINT_AVAILABLE = True
+except (ImportError, OSError):
+    weasyprint = None
+    WEASYPRINT_AVAILABLE = False
 
 
 def _url_fetcher(url):
@@ -18,7 +23,9 @@ def _url_fetcher(url):
     media_url = settings.MEDIA_URL
 
     if url.startswith("file://"):
-        return weasyprint.default_url_fetcher(url)
+        if WEASYPRINT_AVAILABLE:
+            return weasyprint.default_url_fetcher(url)
+        return {"file_obj": BytesIO(b""), "mime_type": None}
 
     path = None
 
@@ -85,6 +92,9 @@ def generate_pdf(template_name, context):
     base_url = f"file:///{settings.BASE_DIR}/"
 
     # 3. Generate PDF
+    if not WEASYPRINT_AVAILABLE:
+        raise ValueError("PDF rendering engine (WeasyPrint) is not available on this system.")
+
     try:
         pdf_bytes = weasyprint.HTML(
             string=html_string, base_url=base_url, url_fetcher=_url_fetcher

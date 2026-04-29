@@ -18,7 +18,7 @@ import shutil
 import tempfile
 
 from apps.core.mixins import NonBootstrapRequiredMixin
-from apps.core.decorators import tier_required
+
 from .utils import log_system_event
 
 
@@ -119,7 +119,6 @@ def _get_db_info():
 # ─── Main Audit Logs View ─────────────────────────────────────────────────────
 
 
-@method_decorator(tier_required(["pro", "ultra"]), name="dispatch")
 class AuditLogsView(LoginRequiredMixin, NonBootstrapRequiredMixin, View):
     template_name = "pages/audit/logs.html"
     PER_PAGE = 50
@@ -370,7 +369,6 @@ class AuditLogsView(LoginRequiredMixin, NonBootstrapRequiredMixin, View):
 # ─── Database Management View ─────────────────────────────────────────────────
 
 
-@method_decorator(tier_required(["pro", "ultra"]), name="dispatch")
 class DatabaseManagementView(LoginRequiredMixin, NonBootstrapRequiredMixin, View):
     template_name = "pages/audit/database.html"
 
@@ -433,7 +431,6 @@ class DatabaseManagementView(LoginRequiredMixin, NonBootstrapRequiredMixin, View
 # ─── Database Backup View ─────────────────────────────────────────────────────
 
 
-@method_decorator(tier_required(["pro", "ultra"]), name="dispatch")
 class DatabaseBackupView(LoginRequiredMixin, NonBootstrapRequiredMixin, View):
     def post(self, request):
         db = settings.DATABASES.get("default", {})
@@ -511,7 +508,6 @@ class DatabaseBackupView(LoginRequiredMixin, NonBootstrapRequiredMixin, View):
 # ─── Database Export (dumpdata JSON) ─────────────────────────────────────────
 
 
-@method_decorator(tier_required(["pro", "ultra"]), name="dispatch")
 class DatabaseExportView(LoginRequiredMixin, NonBootstrapRequiredMixin, View):
     def post(self, request):
         from django.core.management import call_command
@@ -570,7 +566,6 @@ class DatabaseExportView(LoginRequiredMixin, NonBootstrapRequiredMixin, View):
 # ─── Database Import (loaddata) ───────────────────────────────────────────────
 
 
-@method_decorator(tier_required(["pro", "ultra"]), name="dispatch")
 class DatabaseImportView(LoginRequiredMixin, NonBootstrapRequiredMixin, View):
     def post(self, request):
         from django.core.management import call_command

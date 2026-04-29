@@ -33,46 +33,6 @@ def role_required(allowed_roles=[]):
     return decorator
 
 
-def tier_required(required_tiers):
-    """
-    Decorator to restrict view access based on license tier.
-
-    DEBUG MODE: When DEBUG=True, bypasses tier check for development.
-
-    Usage:
-    @tier_required(['pro', 'ultra'])
-    def my_view(request):
-        ...
-
-    Args:
-        required_tiers: List of tier names that can access this view
-    """
-
-    def decorator(view_func):
-        @wraps(view_func)
-        def _wrapped_view(request, *args, **kwargs):
-            # DEBUG MODE: Bypass tier check for development
-            if settings.DEBUG:
-                return view_func(request, *args, **kwargs)
-
-            # Get current tier from request (set by middleware)
-            current_tier = getattr(request, "license", {}).get("tier", "community")
-
-            if current_tier in required_tiers:
-                return view_func(request, *args, **kwargs)
-
-            # Access denied - show error message
-            tier_names = "/".join([t.upper() for t in required_tiers])
-            messages.error(
-                request,
-                f"This feature requires a {tier_names} license. "
-                f"Your current tier: {current_tier.upper()}",
-            )
-            return redirect("core:dashboard")
-
-        return _wrapped_view
-
-    return decorator
 
 
 def non_bootstrap_required(view_func):

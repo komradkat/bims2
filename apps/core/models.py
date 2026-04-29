@@ -72,56 +72,6 @@ class User(AbstractUser):
         return f"{self.username} - {self.get_role_display()}"
 
 
-class LicenseKey(models.Model):
-    """License key model for tier-based feature access control"""
-
-    TIER_CHOICES = [
-        ("community", "Community"),
-        ("pro", "Pro"),
-        ("ultra", "Ultra"),
-    ]
-
-    key = models.CharField(max_length=255, unique=True, help_text="License key string")
-    tier = models.CharField(
-        max_length=20, choices=TIER_CHOICES, help_text="License tier level"
-    )
-    hardware_id = models.CharField(
-        max_length=255, blank=True, help_text="Hardware ID this license is bound to"
-    )
-    issued_date = models.DateTimeField(
-        auto_now_add=True, help_text="Date license was issued"
-    )
-    expiry_date = models.DateField(
-        null=True,
-        blank=True,
-        help_text="License expiration date (null = never expires)",
-    )
-    is_active = models.BooleanField(default=True, help_text="Whether license is active")
-    max_users = models.IntegerField(
-        default=5, help_text="Maximum number of users allowed"
-    )
-
-    class Meta:
-        verbose_name = "License Key"
-        verbose_name_plural = "License Keys"
-        ordering = ["-issued_date"]
-
-    def is_valid(self):
-        """Check if license is active and not expired"""
-        if not self.is_active:
-            return False
-        if self.expiry_date and self.expiry_date < timezone.now().date():
-            return False
-        return True
-
-    def __str__(self):
-        return (
-            f"{self.tier.upper()} - {self.key[:8]}..."
-            if len(self.key) > 8
-            else f"{self.tier.upper()} - {self.key}"
-        )
-
-
 class BarangayInfo(models.Model):
     """
     Singleton model to store Barangay Configuration.

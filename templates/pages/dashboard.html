@@ -76,7 +76,6 @@
         </div>
 
         {# Business / Revenue #}
-        {% if tier_info.features.business or tier_info.features.finance %}
         <div class="card bg-accent text-accent-content shadow">
             <div class="card-body p-4">
                 <div class="flex items-center justify-between">
@@ -87,16 +86,6 @@
                 <div class="text-xs opacity-70 mt-1">{{ active_permits }} active · {{ pending_permits }} pending</div>
             </div>
         </div>
-        {% else %}
-        <div class="card bg-neutral text-neutral-content shadow">
-            <div class="card-body p-4">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-semibold uppercase tracking-widest opacity-70">Business</span>
-                </div>
-                <div class="text-sm font-medium mt-3 opacity-60">Upgrade to Pro/Ultra to enable</div>
-            </div>
-        </div>
-        {% endif %}
     </div>
 
     {# ── Quick Actions ─────────────────────────── #}
@@ -115,12 +104,10 @@
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                 <span class="text-xs font-semibold">New Blotter</span>
             </a>
-            {% if tier_info.features.business %}
             <a href="{% url 'business:add' %}" class="btn btn-accent h-auto py-3 flex flex-col items-center gap-1.5 border-none shadow hover:scale-105 transition-transform">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 <span class="text-xs font-semibold">New Permit</span>
             </a>
-            {% endif %}
         </div>
     </div>
 
@@ -249,7 +236,6 @@
         </div>
 
         {# Business / Finance #}
-        {% if tier_info.features.business or tier_info.features.finance %}
         <div class="card bg-base-100 border border-base-200 shadow-sm">
             <div class="card-body p-4">
                 <div class="flex justify-between items-center mb-3">
@@ -270,13 +256,11 @@
                         <div class="text-[10px] opacity-50 uppercase tracking-widest">Expired</div>
                     </div>
                 </div>
-                {% if tier_info.features.finance %}
                 <div class="divider my-1 text-xs opacity-40">Revenue</div>
                 <div class="flex justify-between items-center text-sm">
                     <span class="opacity-60">Total Revenue</span>
                     <span class="font-bold text-success">₱{{ total_revenue|floatformat:2 }}</span>
                 </div>
-                {% endif %}
                 {% if recent_permits %}
                 <div class="divider my-1 text-xs opacity-40">Recent Permits</div>
                 <div class="space-y-1.5">
@@ -293,7 +277,6 @@
                 {% endif %}
             </div>
         </div>
-        {% endif %}
     </div>
 
     {# ── Recent Certificates + Activity Feed ────── #}

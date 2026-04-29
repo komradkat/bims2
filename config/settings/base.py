@@ -146,7 +146,6 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "apps.core.middleware.setup.SetupRequiredMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "apps.core.middleware.license.LicenseVerificationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "simple_history.middleware.HistoryRequestMiddleware",  # Audit trail
@@ -168,7 +167,6 @@ TEMPLATES = [
                 # Custom context processors
                 "apps.core.context_processors.barangay_info",
                 "apps.core.context_processors.user_info",
-                "apps.core.context_processors.tier_info",
                 "apps.core.context_processors.system_version",
             ],
         },

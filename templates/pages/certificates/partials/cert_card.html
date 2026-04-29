@@ -1,7 +1,7 @@
 <div class="card bg-base-100 shadow-sm border border-base-200 hover:border-primary transition-all hover:shadow-md group">
     <div class="card-body">
         <div class="flex items-start justify-between">
-            <div class="p-3 rounded-lg {% if type.tier == 'community' %}bg-success/10 text-success group-hover:bg-success group-hover:text-success-content{% elif type.tier == 'pro' %}bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-content{% else %}bg-accent/10 text-accent group-hover:bg-accent group-hover:text-accent-content{% endif %} transition-colors">
+            <div class="p-3 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-content transition-colors">
                 {% if 'Clearance' in type.name %}
                     <i class="fas fa-certificate fa-lg"></i>
                 {% elif 'Indigency' in type.name %}
@@ -41,7 +41,7 @@
             {% endif %}
         </p>
         <div class="card-actions justify-end mt-4">
-            <button type="button" class="btn btn-sm {% if type.tier == 'community' %}btn-success text-white{% elif type.tier == 'pro' %}btn-primary{% else %}btn-accent{% endif %}"
+            <button type="button" class="btn btn-sm btn-primary"
                 @click="activeCertName = '{{ type.name }}'; 
                         activeCertId = '{{ type.id }}'; 
                         priceInput = '{{ type.default_price }}';

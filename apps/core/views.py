@@ -17,7 +17,7 @@ from django.utils import timezone
 from datetime import timedelta
 import json
 from django.utils.decorators import method_decorator
-from .decorators import role_required, tier_required
+from .decorators import role_required
 from .models import Notification, User, BarangayOfficial
 
 # Import models for Dashboard
@@ -287,7 +287,6 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         )
 
         # ── Business ─────────────────────────────────────────────────
-        license_tier = getattr(self.request, "license", {}).get("tier", "community")
         total_permits = BusinessPermit.objects.count()
         active_permits = BusinessPermit.objects.filter(status="active").count()
         pending_permits = BusinessPermit.objects.filter(status="pending").count()
@@ -295,28 +294,25 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         recent_permits = BusinessPermit.objects.order_by("-created_at")[:5]
 
         # ── Finance ──────────────────────────────────────────────────
-        total_revenue = 0
-        ytd_receipts = 0
-        if license_tier in ["pro", "ultra"]:
-            revenue_or = (
-                OfficialReceipt.objects.filter(status="paid").aggregate(
-                    s=Sum("amount")
-                )["s"]
-                or 0
-            )
-            revenue_biz = (
-                BusinessClearance.objects.aggregate(s=Sum("amount_paid"))["s"] or 0
-            )
-            revenue_cert = (
-                Certificate.objects.filter(status="paid").aggregate(
-                    s=Sum("amount_paid")
-                )["s"]
-                or 0
-            )
-            total_revenue = revenue_or + revenue_biz + revenue_cert
-            ytd_receipts = OfficialReceipt.objects.filter(
-                status="paid", date__year=today.year
-            ).count()
+        revenue_or = (
+            OfficialReceipt.objects.filter(status="paid").aggregate(
+                s=Sum("amount")
+            )["s"]
+            or 0
+        )
+        revenue_biz = (
+            BusinessClearance.objects.aggregate(s=Sum("amount_paid"))["s"] or 0
+        )
+        revenue_cert = (
+            Certificate.objects.filter(status="paid").aggregate(
+                s=Sum("amount_paid")
+            )["s"]
+            or 0
+        )
+        total_revenue = revenue_or + revenue_biz + revenue_cert
+        ytd_receipts = OfficialReceipt.objects.filter(
+            status="paid", date__year=today.year
+        ).count()
 
         # ── Recent System Activity ────────────────────────────────────
         from apps.audit.models import SystemLog
@@ -458,101 +454,13 @@ class SettingsView(LoginRequiredMixin, View):
         return redirect("core:settings")
 
 
-@method_decorator(tier_required(["ultra"]), name="dispatch")
+@method_decorator(role_required(["admin"]), name="dispatch")
 class GisMapView(LoginRequiredMixin, TemplateView):
-    """GIS Map view (Ultra only)"""
+    """GIS Map view"""
 
     template_name = "pages/gis/map.html"
 
 
-class LicenseActivationView(LoginRequiredMixin, View):
-    """License activation view for activating license keys"""
-
-    template_name = "auth/license_activation.html"
-
-    def get(self, request):
-        from apps.core.utils.hardware import get_hardware_id
-        from apps.core.models import LicenseKey
-
-        hardware_id = get_hardware_id()
-        current_license = LicenseKey.objects.filter(
-            hardware_id=hardware_id, is_active=True
-        ).first()
-
-        return render(
-            request,
-            self.template_name,
-            {"hardware_id": hardware_id, "current_license": current_license},
-        )
-
-    def post(self, request):
-        from apps.core.utils.hardware import get_hardware_id
-        from apps.core.models import LicenseKey
-
-        license_key = request.POST.get("license_key", "").strip()
-        hardware_id = get_hardware_id()
-
-        if not license_key:
-            messages.error(request, "Please enter a license key.")
-            return redirect("core:license_activation")
-
-        try:
-            # Special Master Bypass Key for Developer Testing (Sanbox/Standalone)
-            if license_key == "BIMS2-ULTRA-MASTER-BYPASS-2026":
-                license_obj, created = LicenseKey.objects.get_or_create(
-                    key=license_key,
-                    defaults={
-                        "tier": "ultra",
-                        "max_users": 999,
-                        "is_active": True,
-                        "hardware_id": hardware_id,
-                    },
-                )
-                if not created:
-                    license_obj.hardware_id = hardware_id
-                    license_obj.is_active = True
-                    license_obj.save()
-            else:
-                license_obj = LicenseKey.objects.get(key=license_key)
-
-            # Check if already activated on another machine
-            if license_obj.hardware_id and license_obj.hardware_id != hardware_id:
-                messages.error(
-                    request,
-                    "This license is already activated on another server. "
-                    "Please contact support to transfer your license.",
-                )
-                return redirect("core:license_activation")
-
-            # Activate license
-            license_obj.hardware_id = hardware_id
-            license_obj.is_active = True
-            license_obj.save()
-
-            # Clear cache to force reload of license data
-            cache.delete("active_license")
-
-            messages.success(
-                request,
-                f"License activated successfully! Tier: {license_obj.tier.upper()} | "
-                f"Max Users: {license_obj.max_users}",
-            )
-            return redirect("core:dashboard")
-
-        except LicenseKey.DoesNotExist:
-            messages.error(request, "Invalid license key. Please check and try again.")
-            return redirect("core:license_activation")
-
-
-class LicenseInfoView(TemplateView):
-    """View to display detailed license and hardware information"""
-
-    template_name = "auth/license_info.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["title"] = "License Information"
-        return context
 
 
 class SetupView(View):

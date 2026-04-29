@@ -44,76 +44,27 @@ def user_info(request):
 
 
 def tier_info(request):
-    """Provide tier/license information to all templates"""
-    # Get license data from middleware (attached to request)
-    license_data = getattr(request, "license", None)
-    from apps.core.utils.hardware import get_hardware_id
-
-    hardware_id = get_hardware_id()
-
-    if not license_data:
-        # Fallback to Community if middleware hasn't run yet
-        tier = "community"
-    else:
-        tier = license_data.get("tier", "community")
-
-    # Map tier to level and features
-    tier_config = {
-        "community": {
-            "name": "Community",
+    """Provide static tier/license information for the Community Edition"""
+    return {
+        "tier_info": {
+            "name": "Community Edition",
             "level": 1,
             "badge_color": "neutral",
             "features": {
                 "residents": True,
                 "certificates": True,
-                "business": False,
+                "business": True,  # Enabled for CE
                 "blotter": True,
-                "finance": False,
-                "audit_logs": False,
-                "gis_map": False,
+                "finance": True,  # Enabled for CE
+                "audit_logs": True,  # Enabled for CE
+                "gis_map": True,  # Enabled for CE
             },
-        },
-        "pro": {
-            "name": "Pro",
-            "level": 2,
-            "badge_color": "primary",
-            "features": {
-                "residents": True,
-                "certificates": True,
-                "business": True,
-                "blotter": True,
-                "finance": True,
-                "audit_logs": True,
-                "gis_map": False,
-            },
-        },
-        "ultra": {
-            "name": "Ultra",
-            "level": 3,
-            "badge_color": "secondary",
-            "features": {
-                "residents": True,
-                "certificates": True,
-                "business": True,
-                "blotter": True,
-                "finance": True,
-                "audit_logs": True,
-                "gis_map": True,
-            },
-        },
+            "expiry_date": None,
+            "max_users": 999,
+            "key_preview": "Community Edition",
+            "hardware_id": "COMMUNITY-EDITION",
+        }
     }
-
-    config = tier_config.get(tier, tier_config["community"])
-
-    # Add license-specific info if available
-    if license_data:
-        config["expiry_date"] = license_data.get("expiry_date")
-        config["max_users"] = license_data.get("max_users", 5)
-        config["key_preview"] = license_data.get("key_preview", "Community (Free)")
-
-    config["hardware_id"] = hardware_id
-
-    return {"tier_info": config}
 
 
 def notifications(request):

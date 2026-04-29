@@ -10,7 +10,7 @@ import threading
 
 from apps.residents.models import Resident
 from apps.core.models import BarangayInfo
-from apps.core.decorators import tier_required
+
 from .models import EmergencyService
 from .forms import EmergencyServiceForm
 
@@ -83,7 +83,6 @@ class ResidentGeoJSONView(LoginRequiredMixin, NonBootstrapRequiredMixin, View):
         return JsonResponse(geojson)
 
 
-@method_decorator(tier_required(["ultra"]), name="dispatch")
 class BlipCreateView(LoginRequiredMixin, NonBootstrapRequiredMixin, CreateView):
     model = EmergencyService
     form_class = EmergencyServiceForm
@@ -105,7 +104,6 @@ class BlipCreateView(LoginRequiredMixin, NonBootstrapRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-@method_decorator(tier_required(["ultra"]), name="dispatch")
 class BlipUpdateView(LoginRequiredMixin, NonBootstrapRequiredMixin, UpdateView):
     model = EmergencyService
     form_class = EmergencyServiceForm
@@ -127,7 +125,6 @@ class BlipUpdateView(LoginRequiredMixin, NonBootstrapRequiredMixin, UpdateView):
         return super().form_valid(form)
 
 
-@method_decorator(tier_required(["ultra"]), name="dispatch")
 class BlipDeleteView(LoginRequiredMixin, NonBootstrapRequiredMixin, DeleteView):
     model = EmergencyService
     template_name = "gis/blip_confirm_delete.html"

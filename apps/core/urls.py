@@ -14,13 +14,6 @@ urlpatterns = [
         "api/initialize/", views.TriggerInitializeAPI.as_view(), name="api_initialize"
     ),
     path("settings/", views.SettingsView.as_view(), name="settings"),
-    # License Management
-    path("license/", views.LicenseInfoView.as_view(), name="license_info"),
-    path(
-        "license/activate/",
-        views.LicenseActivationView.as_view(),
-        name="license_activation",
-    ),
     # User Management
     path("users/", views.UserListView.as_view(), name="user_list"),
     path("users/add/", views.UserCreateView.as_view(), name="user_add"),

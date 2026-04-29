@@ -48,14 +48,12 @@
 
     <div class="space-y-12 mb-12">
 
-        {# ── Tier 1: Community ─────────────────────────────────────────── #}
         <section>
             <div class="flex items-center gap-3 mb-6">
-                <div class="p-2 rounded-lg bg-success/10 text-success">
-                    <i class="fas fa-users-cog"></i>
+                <div class="p-2 rounded-lg bg-primary/10 text-primary">
+                    <i class="fas fa-certificate"></i>
                 </div>
-                <h2 class="text-xl font-bold">Tier 1: Community Edition</h2>
-                <div class="badge badge-success badge-outline">Basic · Free</div>
+                <h2 class="text-xl font-bold">Available Certificates</h2>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
@@ -116,22 +114,7 @@
                     </div>
                 </div>
 
-            </div>
-        </section>
-
-        {# ── Tier 2: Pro ───────────────────────────────────────────────── #}
-        <section>
-            <div class="flex items-center gap-3 mb-6">
-                <div class="p-2 rounded-lg bg-primary/10 text-primary">
-                    <i class="fas fa-briefcase"></i>
-                </div>
-                <h2 class="text-xl font-bold">Tier 2: Pro Edition</h2>
-                <div class="badge badge-primary badge-outline">Standard</div>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
                 {# Barangay Clearance #}
-                {% if tier_info.features.business %}
                 <div class="card bg-base-100 shadow-sm border border-base-200 hover:border-primary transition-all hover:shadow-md group">
                     <div class="card-body">
                         <div class="flex items-start justify-between">
@@ -149,18 +132,8 @@
                         </div>
                     </div>
                 </div>
-                {% else %}
-                <div class="card bg-base-200/50 border-2 border-dashed border-base-300">
-                    <div class="card-body items-center text-center py-8">
-                        <i class="fas fa-lock fa-xl opacity-30 mb-3"></i>
-                        <h2 class="card-title opacity-40 text-base">Barangay Clearance</h2>
-                        <p class="text-xs opacity-40">Requires Pro tier</p>
-                    </div>
-                </div>
-                {% endif %}
 
                 {# Certificate of Good Moral Character #}
-                {% if tier_info.features.business %}
                 <div class="card bg-base-100 shadow-sm border border-base-200 hover:border-primary transition-all hover:shadow-md group">
                     <div class="card-body">
                         <div class="flex items-start justify-between">
@@ -178,18 +151,8 @@
                         </div>
                     </div>
                 </div>
-                {% else %}
-                <div class="card bg-base-200/50 border-2 border-dashed border-base-300">
-                    <div class="card-body items-center text-center py-8">
-                        <i class="fas fa-lock fa-xl opacity-30 mb-3"></i>
-                        <h2 class="card-title opacity-40 text-base">Good Moral Character</h2>
-                        <p class="text-xs opacity-40">Requires Pro tier</p>
-                    </div>
-                </div>
-                {% endif %}
 
                 {# Barangay Business Clearance #}
-                {% if tier_info.features.business %}
                 <div class="card bg-base-100 shadow-sm border border-base-200 hover:border-primary transition-all hover:shadow-md group">
                     <div class="card-body">
                         <div class="flex items-start justify-between">
@@ -207,32 +170,8 @@
                         </div>
                     </div>
                 </div>
-                {% else %}
-                <div class="card bg-base-200/50 border-2 border-dashed border-base-300">
-                    <div class="card-body items-center text-center py-8">
-                        <i class="fas fa-lock fa-xl opacity-30 mb-3"></i>
-                        <h2 class="card-title opacity-40 text-base">Business Clearance</h2>
-                        <p class="text-xs opacity-40">Requires Pro tier</p>
-                    </div>
-                </div>
-                {% endif %}
-
-            </div>
-        </section>
-
-        {# ── Tier 3: Ultra ─────────────────────────────────────────────── #}
-        <section>
-            <div class="flex items-center gap-3 mb-6">
-                <div class="p-2 rounded-lg bg-accent/10 text-accent">
-                    <i class="fas fa-crown"></i>
-                </div>
-                <h2 class="text-xl font-bold">Tier 3: Ultra Edition</h2>
-                <div class="badge badge-accent badge-outline">Premium</div>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
                 {# Special Permit #}
-                {% if tier_info.features.gis_map %}
                 <div class="card bg-base-100 shadow-sm border border-base-200 hover:border-accent transition-all hover:shadow-md group">
                     <div class="card-body">
                         <div class="flex items-start justify-between">
@@ -248,24 +187,6 @@
                         <div class="card-actions justify-end mt-4">
                             <a href="?preselect=special-permit" class="btn btn-sm btn-accent">Issue Now</a>
                         </div>
-                    </div>
-                </div>
-                {% else %}
-                <div class="card bg-base-200/50 border-2 border-dashed border-base-300">
-                    <div class="card-body items-center text-center py-8">
-                        <i class="fas fa-lock fa-xl opacity-30 mb-3"></i>
-                        <h2 class="card-title opacity-40 text-base">Special Permit</h2>
-                        <p class="text-xs opacity-40">Requires Ultra tier</p>
-                    </div>
-                </div>
-                {% endif %}
-
-                {# QR-Verified Certificate (placeholder for Ultra) #}
-                <div class="card bg-base-200/50 border-2 border-dashed border-base-300">
-                    <div class="card-body items-center text-center py-8">
-                        <i class="fas fa-qrcode fa-xl opacity-30 mb-3"></i>
-                        <h2 class="card-title opacity-40 text-base">QR-Verified Docs</h2>
-                        <p class="text-xs opacity-40">Ultra — all certificates include QR authentication codes</p>
                     </div>
                 </div>
 

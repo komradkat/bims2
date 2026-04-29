@@ -4,12 +4,11 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - .:/app
       - bims_data:/app/data
     env_file:
       - .env
-    environment:
-      - DATABASE_NAME=/app/data/db.sqlite3
+      - BIMS_PROFILE=production
+      - PROD_DEBUG=False
     restart: always
 
 volumes:

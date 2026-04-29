@@ -7,11 +7,10 @@ from django.utils import timezone
 from django.utils.decorators import method_decorator
 from datetime import timedelta
 
-from apps.core.decorators import tier_required
+
 from .models import OfficialReceipt
 
 
-@method_decorator(tier_required(["pro", "ultra"]), name="dispatch")
 class FinanceDashboardView(LoginRequiredMixin, NonBootstrapRequiredMixin, TemplateView):
     template_name = "pages/finance/dashboard.html"
 
@@ -50,7 +49,7 @@ class FinanceDashboardView(LoginRequiredMixin, NonBootstrapRequiredMixin, Templa
         return context
 
 
-@method_decorator(tier_required(["ultra"]), name="dispatch")
+
 class RevenueAnalyticsView(LoginRequiredMixin, NonBootstrapRequiredMixin, TemplateView):
     template_name = "pages/finance/analytics.html"
 
@@ -96,7 +95,6 @@ class RevenueAnalyticsView(LoginRequiredMixin, NonBootstrapRequiredMixin, Templa
         return context
 
 
-@method_decorator(tier_required(["pro", "ultra"]), name="dispatch")
 class OfficialReceiptListView(LoginRequiredMixin, NonBootstrapRequiredMixin, ListView):
     model = OfficialReceipt
     template_name = "pages/finance/list.html"
