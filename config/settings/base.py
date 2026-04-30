@@ -181,18 +181,41 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 # Production-Grade System-Integrated Persistence
 # All data is stored in a fixed system location for stability and easy backup
-BIMS_DATA_ROOT = Path(env("BIMS_DATA_ROOT", default="C:/BIMS_Data"))
+BIMS_PORTABLE_MODE = env.bool("BIMS_PORTABLE_MODE", default=False)
+
+if BIMS_PORTABLE_MODE:
+    # In portable mode, data is relative to the project root
+    BIMS_DATA_ROOT_DEFAULT = str(BASE_DIR / "data")
+else:
+    # Standard system-level storage
+    BIMS_DATA_ROOT_DEFAULT = "C:/BIMS_Data" if os.name == "nt" else "/app/data"
+
+BIMS_DATA_ROOT = Path(env("BIMS_DATA_ROOT", default=BIMS_DATA_ROOT_DEFAULT))
+
+# Database configuration
+DATABASE_ENGINE = env("DATABASE_ENGINE", default="django.db.backends.sqlite3")
+DATABASE_NAME = env("DATABASE_NAME", default=str(BIMS_DATA_ROOT / "db.sqlite3"))
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": str(BIMS_DATA_ROOT / "db.sqlite3"),
-        "OPTIONS": {
-            "timeout": 20,
-            "init_command": "PRAGMA journal_mode=WAL; PRAGMA synchronous=NORMAL;",
-        },
+        "ENGINE": DATABASE_ENGINE,
+        "NAME": DATABASE_NAME,
     }
 }
+
+# Optional database credentials
+if "postgresql" in DATABASE_ENGINE:
+    DATABASES["default"].update({
+        "USER": env("DATABASE_USER", default=""),
+        "PASSWORD": env("DATABASE_PASSWORD", default=""),
+        "HOST": env("DATABASE_HOST", default=""),
+        "PORT": env("DATABASE_PORT", default=""),
+    })
+elif "sqlite3" in DATABASE_ENGINE:
+    DATABASES["default"]["OPTIONS"] = {
+        "timeout": 20,
+        "init_command": "PRAGMA journal_mode=WAL; PRAGMA synchronous=NORMAL;",
+    }
 # Ensure the data directory exists
 try:
     BIMS_DATA_ROOT.mkdir(parents=True, exist_ok=True)
@@ -343,7 +366,7 @@ LOGGING = {
 }
 
 # External Storage for Certificates (Safe from project deletion/temp cleanup)
-BIMS_CERTIFICATE_STORAGE_ROOT = BIMS_DATA_ROOT / "certificates"
+BIMS_CERTIFICATE_STORAGE_ROOT = Path(env("BIMS_CERTIFICATE_STORAGE_ROOT", default=str(BIMS_DATA_ROOT / "certificates")))
 BIMS_CERTIFICATE_STORAGE_ROOT.mkdir(parents=True, exist_ok=True)
 
 # Default primary key field type

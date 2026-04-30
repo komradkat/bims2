@@ -45,8 +45,8 @@ def main():
         print(f"[WARNING] Auto-migration failed: {e}")
 
     # Port configuration
-    HOST = "127.0.0.1"
-    PORT = 8000
+    HOST = os.environ.get("BIMS_HOST", "127.0.0.1")
+    PORT = int(os.environ.get("BIMS_PORT", "8000"))
     URL = f"http://{HOST}:{PORT}/"
 
     print("--- BIMS2 Standalone Server ---")

@@ -18,6 +18,7 @@ BIMS2 is a comprehensive information management system designed for local govern
 - **Backend**: Django (Python)
 - **Frontend**: HTMX, Alpine.js, Vanilla CSS
 - **Database**: SQLite (Development) / PostgreSQL (Production)
+- **Server**: Waitress (Python) / Nginx (Reverse Proxy)
 - **Mapping**: Leaflet.js
 - **Package Management**: [uv](https://github.com/astral-sh/uv)
 
@@ -59,13 +60,18 @@ uv run python manage.py createsuperuser
 uv run python manage.py runserver
 ```
 
-### 6. Run with Docker (Alternative)
+### 6. Run with Docker (Production-Level Setup)
 
-If you prefer using Docker, you can start the system with:
+BIMS2 includes a production-ready `docker-compose.yml` that orchestrates:
+- **Web**: The Django application compiled into a standalone binary via Nuitka.
+- **Database**: A PostgreSQL 15 instance.
+- **Nginx**: A high-performance reverse proxy for SSL and static file serving.
 
+To launch the entire stack:
 ```bash
-docker compose up --build
+docker-compose up --build
 ```
+The application will be available at `http://localhost`.
 
 ## Quick Start (PowerShell / Windows)
 
@@ -99,6 +105,9 @@ Uses `.env.prod` and production security settings.
 ```powershell
 ./run.ps1 prod 9002
 ```
+
+> [!TIP]
+> **Portable Mode**: Set `BIMS_PORTABLE_MODE=True` in `.env` to store all data (sqlite, logs, media) within a `data/` folder inside the project directory, making the installation fully portable.
 
 > [!TIP]
 > **Protip**: Use port `9002` or `9003` for production tests to avoid "Sticky" HTTPS redirections your browser might have cached for port 8000/8001.
@@ -143,9 +152,12 @@ bims2/
 │   ├── gis/            # GIS Mapping Engine
 │   └── ...             # Other modules
 ├── config/             # Django Settings & URLs
+├── nginx/              # Nginx Configuration
 ├── templates/          # HTML Templates (Jinja2-style)
 ├── static/             # Static Assets (JS/CSS)
 ├── manage.py           # Django Management Tool
+├── run.ps1             # Windows Automation Script
+├── docker-compose.yml  # Multi-service Orchestration
 └── pyproject.toml      # Project Metadata & Deps
 ```
 
